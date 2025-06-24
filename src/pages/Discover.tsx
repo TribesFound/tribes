@@ -54,7 +54,7 @@ const Discover = () => {
 
   if (!currentProfile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-orange-500 flex items-center justify-center">
+      <div className="min-h-screen earthy-gradient flex items-center justify-center">
         <div className="text-white text-center">
           <h2 className="text-2xl font-bold mb-2">No more profiles</h2>
           <p>Check back later for new connections!</p>
@@ -64,7 +64,7 @@ const Discover = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-orange-500 p-4">
+    <div className="min-h-screen earthy-gradient p-4">
       <div className="max-w-sm mx-auto pt-8 space-y-6">
         <div className="text-center text-white">
           <h1 className="text-2xl font-bold">Discover</h1>
@@ -77,7 +77,7 @@ const Discover = () => {
               <div className="h-96 bg-gradient-to-b from-transparent to-black/50 flex items-end p-6">
                 <Avatar className="w-full h-full absolute inset-0 rounded-none">
                   <AvatarImage src={currentProfile.avatar} />
-                  <AvatarFallback className="text-6xl bg-gradient-to-br from-purple-400 to-pink-400 rounded-none">
+                  <AvatarFallback className="text-6xl earthy-gradient-warm rounded-none">
                     {currentProfile.name.split(' ').map(n => n[0]).join('')}
                   </AvatarFallback>
                 </Avatar>
@@ -105,7 +105,7 @@ const Discover = () => {
                   {currentProfile.hobbies.map((hobby) => (
                     <Badge
                       key={hobby}
-                      className="bg-white/20 text-white border-white/20"
+                      className="bg-orange-600/80 text-white border-orange-500/30 hover:bg-orange-600"
                     >
                       {hobby}
                     </Badge>
@@ -119,7 +119,7 @@ const Discover = () => {
                   {currentProfile.interests.map((interest) => (
                     <Badge
                       key={interest}
-                      className="bg-white/10 text-white border-white/20"
+                      className="bg-green-600/80 text-white border-green-500/30 hover:bg-green-600"
                     >
                       {interest}
                     </Badge>
@@ -134,7 +134,7 @@ const Discover = () => {
           <Button
             onClick={() => handleSwipe('left')}
             size="lg"
-            className="w-16 h-16 rounded-full bg-white/20 hover:bg-white/30 border-2 border-white/30"
+            className="w-16 h-16 rounded-full bg-white/20 hover:bg-red-500/80 border-2 border-white/30 transition-colors"
           >
             <X className="w-8 h-8 text-white" />
           </Button>
@@ -142,7 +142,7 @@ const Discover = () => {
           <Button
             onClick={() => handleSwipe('right')}
             size="lg"
-            className="w-16 h-16 rounded-full bg-white hover:bg-white/90 text-purple-600"
+            className="w-16 h-16 rounded-full bg-green-600 hover:bg-green-700 text-white border-2 border-green-500"
           >
             <Heart className="w-8 h-8" />
           </Button>
@@ -150,7 +150,7 @@ const Discover = () => {
 
         {matches.length > 0 && (
           <div className="text-center">
-            <Badge className="bg-white text-purple-600">
+            <Badge className="bg-yellow-600 text-white border-yellow-500">
               <MessageCircle className="w-4 h-4 mr-2" />
               {matches.length} new matches!
             </Badge>

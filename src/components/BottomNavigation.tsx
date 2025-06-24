@@ -21,7 +21,7 @@ const BottomNavigation = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/20">
+    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-green-800/90 to-orange-800/90 backdrop-blur-lg border-t border-yellow-600/30">
       <div className="max-w-md mx-auto px-4 py-2">
         <div className="flex justify-around">
           {navItems.map(({ path, icon: Icon, label }) => (
@@ -31,8 +31,8 @@ const BottomNavigation = () => {
               variant="ghost"
               className={`flex-col h-16 w-16 ${
                 isActive(path)
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
+                  ? 'bg-yellow-600/30 text-yellow-100'
+                  : 'text-yellow-200/70 hover:text-yellow-100 hover:bg-yellow-600/20'
               }`}
             >
               <Icon className="w-6 h-6 mb-1" />
