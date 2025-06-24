@@ -30,10 +30,17 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen tribal-gradient flex items-center justify-center">
-      <div className="text-center text-white">
-        <h1 className="text-4xl font-bold tribal-font mb-4">Welcome to Your Tribe!</h1>
-        <p className="text-lg">Setting up your experience...</p>
+    <div className="min-h-screen cave-gradient flex items-center justify-center">
+      <div className="text-center text-amber-900">
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
+            alt="Tribes Hand Logo" 
+            className="w-20 h-20"
+          />
+        </div>
+        <h1 className="text-4xl font-bold cave-font mb-4">Welcome to Your Tribe!</h1>
+        <p className="text-lg cave-text">Setting up your experience...</p>
       </div>
     </div>
   );

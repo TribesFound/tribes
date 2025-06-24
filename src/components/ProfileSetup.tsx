@@ -141,16 +141,23 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
   };
 
   return (
-    <div className="min-h-screen tribal-gradient p-4">
+    <div className="min-h-screen cave-gradient p-4">
       <div className="max-w-2xl mx-auto pt-8">
-        <div className="text-center text-white mb-8">
-          <h1 className="text-4xl font-bold tribal-font mb-2">Build Your Tribe Profile</h1>
-          <p className="text-lg opacity-90">Step {step} of 2</p>
+        <div className="text-center text-amber-900 mb-8">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
+              alt="Tribes Hand Logo" 
+              className="w-16 h-16"
+            />
+          </div>
+          <h1 className="text-4xl font-bold cave-font mb-2">Build Your Tribe Profile</h1>
+          <p className="text-lg cave-text">Step {step} of 2</p>
         </div>
 
-        <Card className="tribal-card">
+        <Card className="cave-card">
           <CardHeader>
-            <CardTitle className="text-2xl tribal-font text-center">
+            <CardTitle className="text-2xl cave-font text-center text-amber-900">
               {step === 1 ? 'Basic Information' : 'Your Interests & Hobbies'}
             </CardTitle>
           </CardHeader>
@@ -159,18 +166,18 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
               <div className="space-y-6">
                 {/* Profile Photo */}
                 <div className="text-center">
-                  <Label className="text-lg font-semibold mb-4 block">Profile Photo *</Label>
+                  <Label className="text-lg font-semibold mb-4 block cave-text">Profile Photo *</Label>
                   <div className="flex justify-center mb-4">
                     <div className="relative">
-                      <Avatar className="w-32 h-32">
+                      <Avatar className="w-32 h-32 ring-4 ring-orange-200">
                         <AvatarImage src={profilePhoto || undefined} />
-                        <AvatarFallback className="bg-gradient-to-br from-orange-400 to-yellow-400 text-white text-3xl">
+                        <AvatarFallback className="bg-gradient-to-br from-orange-400 to-yellow-400 text-white text-3xl cave-font">
                           {name ? name[0]?.toUpperCase() : <Camera className="w-12 h-12" />}
                         </AvatarFallback>
                       </Avatar>
                       <Button
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute bottom-0 right-0 rounded-full w-10 h-10 tribal-button p-0"
+                        className="absolute bottom-0 right-0 rounded-full w-10 h-10 cave-button p-0"
                       >
                         <Camera className="w-5 h-5" />
                       </Button>
@@ -187,31 +194,33 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
 
                 {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="name" className="cave-text">Name *</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="tribal-input"
+                    className="cave-input"
                     placeholder="Your name"
                   />
                 </div>
 
                 {/* Location Display */}
                 <div className="space-y-2">
-                  <Label>Location</Label>
-                  <div className="tribal-input p-3 bg-gray-50">
-                    {userVerificationData.location?.city}, {userVerificationData.location?.country}
+                  <Label className="cave-text">Location</Label>
+                  <div className="cave-input p-3 bg-orange-50">
+                    <span className="cave-text">
+                      {userVerificationData.location?.city}, {userVerificationData.location?.country}
+                    </span>
                   </div>
                 </div>
 
                 {/* Additional Photos */}
                 <div className="space-y-4">
-                  <Label className="text-lg font-semibold">Additional Photos (Optional - up to 5)</Label>
+                  <Label className="text-lg font-semibold cave-text">Additional Photos (Optional - up to 5)</Label>
                   <div className="grid grid-cols-3 gap-4">
                     {additionalPhotos.map((photo, index) => (
                       <div key={index} className="relative">
-                        <img src={photo} alt={`Additional ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                        <img src={photo} alt={`Additional ${index + 1}`} className="w-full h-24 object-cover rounded-lg ring-2 ring-orange-200" />
                         <Button
                           onClick={() => setAdditionalPhotos(additionalPhotos.filter((_, i) => i !== index))}
                           className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 p-0"
@@ -223,10 +232,10 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                     {additionalPhotos.length < 5 && (
                       <Button
                         onClick={() => additionalPhotosRef.current?.click()}
-                        className="h-24 border-2 border-dashed border-gray-300 hover:border-orange-400 bg-transparent hover:bg-orange-50"
+                        className="h-24 border-2 border-dashed border-orange-300 hover:border-orange-400 bg-transparent hover:bg-orange-50 cave-button-outline"
                         variant="outline"
                       >
-                        <Upload className="w-6 h-6 text-gray-400" />
+                        <Upload className="w-6 h-6 text-orange-400" />
                       </Button>
                     )}
                   </div>
@@ -241,15 +250,15 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
 
                 {/* Bio */}
                 <div className="space-y-2">
-                  <Label htmlFor="bio">Bio (Optional - max 500 characters)</Label>
+                  <Label htmlFor="bio" className="cave-text">Bio (Optional - max 500 characters)</Label>
                   <Textarea
                     id="bio"
                     value={bio}
                     onChange={(e) => handleBioChange(e.target.value)}
-                    className="tribal-input min-h-24"
+                    className="cave-input min-h-24"
                     placeholder="Tell your tribe about yourself..."
                   />
-                  <div className="text-right text-sm text-gray-500">
+                  <div className="text-right text-sm cave-text">
                     {bio.length}/500
                   </div>
                 </div>
@@ -264,7 +273,7 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                 <Button
                   onClick={() => setStep(2)}
                   disabled={!canProceedStep1}
-                  className="w-full tribal-button"
+                  className="w-full cave-button"
                 >
                   Continue to Interests
                 </Button>
@@ -275,7 +284,7 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
               <div className="space-y-6">
                 {/* Hobbies */}
                 <div>
-                  <Label className="text-lg font-semibold mb-4 block">
+                  <Label className="text-lg font-semibold mb-4 block cave-text">
                     Hobbies * (Select 1-10: {selectedHobbies.length}/10)
                   </Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -285,8 +294,8 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                         variant={selectedHobbies.includes(hobby) ? "default" : "outline"}
                         className={`cursor-pointer p-3 text-center justify-center transition-all hover:scale-105 ${
                           selectedHobbies.includes(hobby)
-                            ? 'bg-orange-500 text-white hover:bg-orange-600'
-                            : 'tribal-input hover:bg-orange-50 hover:border-orange-300'
+                            ? 'cave-badge'
+                            : 'cave-badge-outline'
                         }`}
                         onClick={() => toggleHobby(hobby)}
                       >
@@ -299,7 +308,7 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
 
                 {/* Interests */}
                 <div>
-                  <Label className="text-lg font-semibold mb-4 block">
+                  <Label className="text-lg font-semibold mb-4 block cave-text">
                     Interests * (Select 1-10: {selectedInterests.length}/10)
                   </Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -309,8 +318,8 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                         variant={selectedInterests.includes(interest) ? "default" : "outline"}
                         className={`cursor-pointer p-3 text-center justify-center transition-all hover:scale-105 ${
                           selectedInterests.includes(interest)
-                            ? 'bg-green-600 text-white hover:bg-green-700'
-                            : 'tribal-input hover:bg-green-50 hover:border-green-300'
+                            ? 'cave-badge'
+                            : 'cave-badge-outline'
                         }`}
                         onClick={() => toggleInterest(interest)}
                       >
@@ -325,14 +334,14 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                   <Button
                     onClick={() => setStep(1)}
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 cave-button-outline"
                   >
                     Back
                   </Button>
                   <Button
                     onClick={handleComplete}
                     disabled={!canProceedStep2}
-                    className="flex-1 tribal-button"
+                    className="flex-1 cave-button"
                   >
                     Complete Profile
                   </Button>

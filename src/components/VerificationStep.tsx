@@ -47,7 +47,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const handleAgeVerification = () => {
     const birthDate = new Date(dateOfBirth);
     const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
+    let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
@@ -94,16 +94,23 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   };
 
   return (
-    <div className="min-h-screen tribal-gradient flex items-center justify-center p-4">
+    <div className="min-h-screen cave-gradient flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="text-center text-white mb-8">
-          <h1 className="text-4xl font-bold tribal-font mb-2">Tribes</h1>
-          <p className="text-lg opacity-90">Verify your identity</p>
+        <div className="text-center text-amber-900 mb-8">
+          <div className="flex justify-center mb-4">
+            <img 
+              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
+              alt="Tribes Hand Logo" 
+              className="w-16 h-16"
+            />
+          </div>
+          <h1 className="text-4xl font-bold cave-font mb-2">Tribes</h1>
+          <p className="text-lg opacity-90 cave-text">Verify your identity</p>
         </div>
 
-        <Card className="tribal-card">
+        <Card className="cave-card">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl tribal-font">
+            <CardTitle className="text-2xl cave-font text-amber-900">
               {step === 'contact' && 'Contact Information'}
               {step === 'verify' && 'Verify Your Account'}
               {step === 'age' && 'Age Verification'}
@@ -117,7 +124,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                   <Button
                     onClick={() => setContactMethod('email')}
                     variant={contactMethod === 'email' ? 'default' : 'outline'}
-                    className={contactMethod === 'email' ? 'tribal-button' : ''}
+                    className={contactMethod === 'email' ? 'cave-button' : 'cave-button-outline'}
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     Email
@@ -125,7 +132,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                   <Button
                     onClick={() => setContactMethod('phone')}
                     variant={contactMethod === 'phone' ? 'default' : 'outline'}
-                    className={contactMethod === 'phone' ? 'tribal-button' : ''}
+                    className={contactMethod === 'phone' ? 'cave-button' : 'cave-button-outline'}
                   >
                     <Phone className="w-4 h-4 mr-2" />
                     Phone
@@ -134,25 +141,25 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
 
                 {contactMethod === 'email' ? (
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="email" className="cave-text">Email Address</Label>
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="tribal-input"
+                      className="cave-input"
                       placeholder="your@email.com"
                     />
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone" className="cave-text">Phone Number</Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="tribal-input"
+                      className="cave-input"
                       placeholder="+1 (555) 000-0000"
                     />
                   </div>
@@ -161,7 +168,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                 <Button
                   onClick={handleSendVerification}
                   disabled={isVerifying || (!email && !phone)}
-                  className="w-full tribal-button"
+                  className="w-full cave-button"
                 >
                   {isVerifying ? 'Sending...' : 'Send Verification Code'}
                 </Button>
@@ -172,7 +179,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
               <>
                 <div className="text-center">
                   <Shield className="w-12 h-12 mx-auto mb-4 text-orange-600" />
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm cave-text mb-4">
                     Enter the 6-digit code sent to {contactMethod === 'email' ? email : phone}
                   </p>
                 </div>
@@ -190,7 +197,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                   >
                     <InputOTPGroup>
                       {[...Array(6)].map((_, i) => (
-                        <InputOTPSlot key={i} index={i} className="tribal-input" />
+                        <InputOTPSlot key={i} index={i} className="cave-input" />
                       ))}
                     </InputOTPGroup>
                   </InputOTP>
@@ -199,7 +206,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                 <Button
                   onClick={() => handleSendVerification()}
                   variant="ghost"
-                  className="w-full"
+                  className="w-full cave-button-ghost"
                 >
                   Resend Code
                 </Button>
@@ -210,26 +217,26 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
               <>
                 <div className="text-center">
                   <Calendar className="w-12 h-12 mx-auto mb-4 text-orange-600" />
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm cave-text mb-4">
                     You must be 18 or older to use Tribes
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Label htmlFor="dateOfBirth" className="cave-text">Date of Birth</Label>
                   <Input
                     id="dateOfBirth"
                     type="date"
                     value={dateOfBirth}
                     onChange={(e) => setDateOfBirth(e.target.value)}
-                    className="tribal-input"
+                    className="cave-input"
                   />
                 </div>
 
                 <Button
                   onClick={handleAgeVerification}
                   disabled={!dateOfBirth}
-                  className="w-full tribal-button"
+                  className="w-full cave-button"
                 >
                   Verify Age
                 </Button>
@@ -240,7 +247,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
               <>
                 <div className="text-center">
                   <MapPin className="w-12 h-12 mx-auto mb-4 text-orange-600" />
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm cave-text mb-4">
                     We need your location to show you nearby tribe members
                   </p>
                 </div>
@@ -248,7 +255,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                 {!isLocationGranted ? (
                   <Button
                     onClick={requestLocation}
-                    className="w-full tribal-button"
+                    className="w-full cave-button"
                   >
                     <MapPin className="w-4 h-4 mr-2" />
                     Allow Location Access
@@ -256,7 +263,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                 ) : (
                   <div className="text-center">
                     <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm cave-text">
                       Location access granted! Setting up your profile...
                     </p>
                   </div>
