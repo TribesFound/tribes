@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Settings, Crown, Shield, Heart, MessageCircle, Calendar } from 'lucide-react';
+import { Settings, Crown, Shield, Heart, MessageCircle, Calendar, Camera, MapPin } from 'lucide-react';
 
 const Profile = () => {
   const [user] = useState({
@@ -13,65 +13,95 @@ const Profile = () => {
     location: 'San Francisco, CA',
     hobbies: ['Photography', 'Hiking', 'Cooking', 'Reading'],
     interests: ['Technology', 'Travel', 'Art', 'Science'],
-    bio: 'Adventure seeker and tech enthusiast. Love capturing moments through photography and exploring new places.',
+    bio: 'Adventure seeker and tech enthusiast. Love capturing moments through photography and exploring new places. Always looking for new trails to hike and people to share experiences with.',
     avatar: '/placeholder.svg',
+    additionalPhotos: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
     isPro: false,
     matchCount: 12,
-    friendCount: 8
+    friendCount: 8,
+    verifiedEmail: 'jordan@example.com'
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-orange-500 p-4">
+    <div className="min-h-screen tribal-gradient p-4">
       <div className="max-w-md mx-auto pt-8 space-y-6">
         <div className="text-center text-white mb-8">
-          <h1 className="text-2xl font-bold">Your Profile</h1>
+          <h1 className="text-3xl font-bold tribal-font">Your Tribe Profile</h1>
         </div>
 
-        <Card className="backdrop-blur-lg bg-white/10 border-white/20">
+        <Card className="tribal-card">
           <CardContent className="p-6">
             <div className="text-center mb-6">
-              <Avatar className="w-32 h-32 mx-auto mb-4">
+              <Avatar className="w-32 h-32 mx-auto mb-4 border-4 border-orange-200">
                 <AvatarImage src={user.avatar} />
-                <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white text-3xl">
+                <AvatarFallback className="bg-gradient-to-br from-orange-400 to-yellow-400 text-white text-3xl tribal-font">
                   {user.name.split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex items-center justify-center space-x-2 mb-2">
-                <h2 className="text-white text-2xl font-bold">
+                <h2 className="text-2xl font-bold tribal-font">
                   {user.name}, {user.age}
                 </h2>
-                {user.isPro && <Crown className="w-6 h-6 text-yellow-400" />}
+                {user.isPro && <Crown className="w-6 h-6 text-yellow-500" />}
               </div>
               
-              <p className="text-white/70">{user.location}</p>
+              <div className="flex items-center justify-center text-gray-600 mb-2">
+                <MapPin className="w-4 h-4 mr-1" />
+                <span>{user.location}</span>
+              </div>
+
+              <Badge className="bg-green-100 text-green-800 border-green-200">
+                <Shield className="w-3 h-3 mr-1" />
+                Verified
+              </Badge>
             </div>
+
+            {/* Photo Gallery */}
+            {user.additionalPhotos.length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-bold tribal-font text-lg mb-3">Photos</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {user.additionalPhotos.map((photo, index) => (
+                    <img
+                      key={index}
+                      src={photo}
+                      alt={`Photo ${index + 1}`}
+                      className="w-full h-20 object-cover rounded-lg border-2 border-orange-100"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-white text-2xl font-bold">{user.matchCount}</div>
-                  <div className="text-white/70 text-sm">Matches</div>
+                <div className="text-center tribal-card p-4">
+                  <div className="text-2xl font-bold tribal-font text-orange-600">{user.matchCount}</div>
+                  <div className="text-sm text-gray-600">Connections</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-white text-2xl font-bold">{user.friendCount}</div>
-                  <div className="text-white/70 text-sm">Friends</div>
+                <div className="text-center tribal-card p-4">
+                  <div className="text-2xl font-bold tribal-font text-green-600">{user.friendCount}</div>
+                  <div className="text-sm text-gray-600">Friends</div>
                 </div>
               </div>
 
-              <div className="text-center">
-                <p className="text-white/90 text-sm leading-relaxed">
-                  {user.bio}
-                </p>
-              </div>
+              {user.bio && (
+                <div>
+                  <h3 className="font-bold tribal-font text-lg mb-2">About Me</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {user.bio}
+                  </p>
+                </div>
+              )}
 
               <div>
-                <h3 className="text-white font-semibold mb-2">Hobbies</h3>
+                <h3 className="font-bold tribal-font text-lg mb-3 text-orange-700">Hobbies</h3>
                 <div className="flex flex-wrap gap-2">
                   {user.hobbies.map((hobby) => (
                     <Badge
                       key={hobby}
-                      className="bg-white/20 text-white border-white/20"
+                      className="bg-orange-100 text-orange-800 border-orange-200"
                     >
                       {hobby}
                     </Badge>
@@ -80,12 +110,12 @@ const Profile = () => {
               </div>
 
               <div>
-                <h3 className="text-white font-semibold mb-2">Interests</h3>
+                <h3 className="font-bold tribal-font text-lg mb-3 text-green-700">Interests</h3>
                 <div className="flex flex-wrap gap-2">
                   {user.interests.map((interest) => (
                     <Badge
                       key={interest}
-                      className="bg-white/10 text-white border-white/20"
+                      className="bg-green-100 text-green-800 border-green-200"
                     >
                       {interest}
                     </Badge>
@@ -98,19 +128,19 @@ const Profile = () => {
 
         <div className="space-y-4">
           {!user.isPro && (
-            <Card className="backdrop-blur-lg bg-gradient-to-r from-orange-500/20 to-pink-500/20 border-orange-300/30">
+            <Card className="tribal-card border-2 border-yellow-200">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-white font-semibold flex items-center">
-                      <Crown className="w-5 h-5 mr-2 text-yellow-400" />
+                    <h3 className="font-bold tribal-font flex items-center text-orange-700">
+                      <Crown className="w-5 h-5 mr-2 text-yellow-500" />
                       Upgrade to Pro
                     </h3>
-                    <p className="text-white/70 text-sm">
+                    <p className="text-sm text-gray-600">
                       Access events and premium features
                     </p>
                   </div>
-                  <Button className="bg-gradient-to-r from-orange-400 to-pink-400 text-white hover:from-orange-500 hover:to-pink-500">
+                  <Button className="tribal-button">
                     Upgrade
                   </Button>
                 </div>
@@ -119,36 +149,30 @@ const Profile = () => {
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <Button
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-16 flex-col"
-            >
-              <MessageCircle className="w-6 h-6 mb-1" />
-              <span className="text-sm">Messages</span>
+            <Button className="tribal-card h-16 flex-col border-2 border-orange-200 hover:border-orange-300 hover:bg-orange-50" variant="outline">
+              <MessageCircle className="w-6 h-6 mb-1 text-orange-600" />
+              <span className="text-sm font-medium">Messages</span>
             </Button>
             
-            <Button
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-16 flex-col"
-            >
-              <Heart className="w-6 h-6 mb-1" />
-              <span className="text-sm">Favorites</span>
+            <Button className="tribal-card h-16 flex-col border-2 border-green-200 hover:border-green-300 hover:bg-green-50" variant="outline">
+              <Heart className="w-6 h-6 mb-1 text-green-600" />
+              <span className="text-sm font-medium">Favorites</span>
             </Button>
           </div>
 
-          <Button
-            className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
-          >
+          <Button className="w-full tribal-card border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50" variant="outline">
             <Settings className="w-5 h-5 mr-2" />
             Account Settings
           </Button>
 
-          <Card className="backdrop-blur-lg bg-white/10 border-white/20">
+          <Card className="tribal-card border-2 border-green-200">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <Shield className="w-6 h-6 text-green-400" />
+                  <Shield className="w-6 h-6 text-green-600" />
                   <div>
-                    <h3 className="text-white font-semibold">Community Standing</h3>
-                    <p className="text-white/70 text-sm">Good member • 0 strikes</p>
+                    <h3 className="font-bold tribal-font">Community Standing</h3>
+                    <p className="text-sm text-gray-600">Good member • 0 strikes</p>
                   </div>
                 </div>
               </div>
