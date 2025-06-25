@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Compass, MessageCircle, User } from 'lucide-react';
+import { Compass, MessageCircle, User, Users, Calendar } from 'lucide-react';
 
 const BottomNavigation = () => {
   const location = useLocation();
@@ -10,18 +10,22 @@ const BottomNavigation = () => {
 
   const navItems = [
     { path: '/discover', icon: Compass, label: 'Discover' },
-    { path: '/matches', icon: MessageCircle, label: 'Matches' },
+    { path: '/friends', icon: Users, label: 'Friends' },
+    { path: '/events', icon: Calendar, label: 'Events' },
+    { path: '/matches', icon: MessageCircle, label: 'Messages' },
     { path: '/profile', icon: User, label: 'Profile' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
-  if (location.pathname === '/auth' || location.pathname === '/onboarding') {
+  const hiddenPaths = ['/auth', '/welcome', '/signup-method', '/settings', '/splash'];
+  
+  if (hiddenPaths.some(path => location.pathname.startsWith(path))) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 cave-nav">
+    <div className="fixed bottom-0 left-0 right-0 tribal-nav">
       <div className="max-w-md mx-auto px-4 py-2">
         <div className="flex justify-around">
           {navItems.map(({ path, icon: Icon, label }) => (
@@ -29,14 +33,14 @@ const BottomNavigation = () => {
               key={path}
               onClick={() => navigate(path)}
               variant="ghost"
-              className={`flex-col h-16 w-16 transition-all cave-icon ${
+              className={`flex-col h-16 w-16 transition-all tribal-icon ${
                 isActive(path)
                   ? 'bg-orange-100 text-orange-700 transform scale-105'
                   : 'text-amber-700 hover:text-orange-600 hover:bg-orange-50'
               }`}
             >
-              <Icon className="w-6 h-6 mb-1" strokeWidth={2.5} />
-              <span className="text-xs font-medium cave-text">{label}</span>
+              <Icon className="w-5 h-5 mb-1" strokeWidth={2.5} />
+              <span className="text-xs font-medium tribal-text">{label}</span>
             </Button>
           ))}
         </div>
