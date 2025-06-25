@@ -9,11 +9,11 @@ const BottomNavigation = () => {
   const navigate = useNavigate();
 
   const navItems = [
+    { path: '/profile', icon: User, label: 'Profile' },
     { path: '/discover', icon: Compass, label: 'Discover' },
     { path: '/friends', icon: Users, label: 'Bonds' },
-    { path: '/events', icon: Calendar, label: 'Gather' },
     { path: '/matches', icon: MessageCircle, label: 'Messages' },
-    { path: '/profile', icon: User, label: 'Profile' },
+    { path: '/events', icon: Calendar, label: 'Gather' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
