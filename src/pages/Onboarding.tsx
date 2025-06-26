@@ -9,14 +9,18 @@ const hobbies = [
   'Photography', 'Hiking', 'Cooking', 'Reading', 'Gaming', 'Painting',
   'Music', 'Dancing', 'Cycling', 'Yoga', 'Gardening', 'Writing',
   'Traveling', 'Fitness', 'Meditation', 'Crafting', 'Chess', 'Board Games',
-  'Rock Climbing', 'Swimming', 'Running', 'Skiing', 'Surfing', 'Fishing'
+  'Rock Climbing', 'Swimming', 'Running', 'Skiing', 'Surfing', 'Fishing',
+  'Musician', 'Music Production', 'VJ', 'DJ', 'Fire Performer', 'Theater',
+  'Performing Arts', 'Scuba Diving', 'Free Diving', 'Foraging'
 ];
 
 const interests = [
   'Technology', 'Science', 'History', 'Philosophy', 'Psychology', 'Politics',
   'Environment', 'Health', 'Business', 'Art', 'Literature', 'Movies',
   'TV Shows', 'Podcasts', 'Fashion', 'Food', 'Travel', 'Sports',
-  'Spirituality', 'Personal Development', 'Languages', 'Culture', 'Nature', 'Space'
+  'Spirituality', 'Personal Development', 'Languages', 'Culture', 'Nature', 'Space',
+  'Van Life', 'Sustainable Living', 'Festivals', 'Community', 'Permaculture',
+  'Animals', 'Off Grid Living'
 ];
 
 const Onboarding = () => {
@@ -45,7 +49,8 @@ const Onboarding = () => {
       setStep(2);
     } else if (step === 2 && selectedInterests.length >= 1) {
       console.log('Onboarding complete:', { selectedHobbies, selectedInterests });
-      // Navigate to main app
+      // Navigate to passcode setup or main app
+      window.location.href = '/passcode-setup';
     }
   };
 
@@ -64,11 +69,11 @@ const Onboarding = () => {
         <Card className="cave-card mb-8">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl cave-font text-amber-900">
-              {step === 1 ? 'Choose Your Passions' : 'Select Your Interests'}
+              {step === 1 ? 'Choose Your Hobbies' : 'Select Your Interests'}
             </CardTitle>
             <p className="text-amber-800">
               {step === 1 
-                ? `Select 1-10 passions that drive you (${selectedHobbies.length}/10)`
+                ? `Select 1-10 hobbies that you enjoy (${selectedHobbies.length}/10)`
                 : `Select 1-10 interests that fascinate you (${selectedInterests.length}/10)`
               }
             </p>
