@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import {
   Plus, 
   MoreVertical,
   UserMinus,
-  Block,
+  Blocks,
   Flag
 } from 'lucide-react';
 import {
@@ -319,7 +318,7 @@ const Friends = () => {
                                 onClick={() => handleBlock(friend.id, friend.name)}
                                 className="text-red-600 hover:bg-red-50"
                               >
-                                <Block className="mr-2 h-4 w-4" />
+                                <Blocks className="mr-2 h-4 w-4" />
                                 Block
                               </DropdownMenuItem>
                               <DropdownMenuItem
@@ -336,7 +335,7 @@ const Friends = () => {
                                 onClick={() => handleRestrict(friend.id, friend.name)}
                                 className="text-amber-800 hover:bg-orange-100"
                               >
-                                <Block className="mr-2 h-4 w-4" />
+                                <Blocks className="mr-2 h-4 w-4" />
                                 Restrict
                               </DropdownMenuItem>
                               <DropdownMenuItem
