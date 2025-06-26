@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, MapPin, Calendar, Shield, CheckCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
+import { requestSecureLocation, LocationError } from '@/utils/geolocation';
+import { verifyAge } from '@/utils/ageVerification';
+import GoogleSignInButton from './GoogleSignInButton';
 
 interface VerificationStepProps {
   onComplete: (data: {
@@ -18,7 +20,8 @@ interface VerificationStepProps {
 }
 
 const VerificationStep = ({ onComplete }: VerificationStepProps) => {
-  const [step, setStep] = useState<'contact' | 'verify' | 'age' | 'location'>('contact');
+  const [step, setStep] = useState<'method' | 'contact' | 'verify' | 'age' | 'location'>('method');
+  const [authMethod, setAuthMethod] = useState<'email' | 'phone' | 'google'>('email');
   const [contactMethod, setContactMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -27,15 +30,31 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const [location, setLocation] = useState<any>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isLocationGranted, setIsLocationGranted] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleGoogleSuccess = () => {
+    setStep('age');
+  };
+
+  const handleGoogleError = (errorMessage: string) => {
+    setError(errorMessage);
+  };
 
   const handleSendVerification = async () => {
     setIsVerifying(true);
-    // Simulate sending verification code
-    setTimeout(() => {
+    setError('');
+    
+    try {
+      // Simulate sending verification code
+      setTimeout(() => {
+        setIsVerifying(false);
+        setStep('verify');
+        console.log(`Verification code sent to ${contactMethod === 'email' ? email : phone}`);
+      }, 1500);
+    } catch (error) {
+      setError('Failed to send verification code');
       setIsVerifying(false);
-      setStep('verify');
-      console.log(`Verification code sent to ${contactMethod === 'email' ? email : phone}`);
-    }, 1500);
+    }
   };
 
   const handleVerifyCode = () => {
@@ -45,51 +64,48 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   };
 
   const handleAgeVerification = () => {
-    const birthDate = new Date(dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const verification = verifyAge(dateOfBirth);
     
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+    if (!verification.isValid) {
+      setError(verification.error || 'Age verification failed');
+      return;
     }
 
-    if (age >= 18) {
-      setStep('location');
-    } else {
-      alert('You must be 18 or older to use Tribes.');
-    }
+    setError('');
+    setStep('location');
   };
 
-  const requestLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          // Simulate reverse geocoding
-          setTimeout(() => {
-            const mockLocation = {
-              lat: latitude,
-              lng: longitude,
-              city: 'San Francisco',
-              country: 'United States'
-            };
-            setLocation(mockLocation);
-            setIsLocationGranted(true);
-            
-            onComplete({
-              [contactMethod]: contactMethod === 'email' ? email : phone,
-              dateOfBirth,
-              location: mockLocation
-            });
-          }, 1000);
-        },
-        (error) => {
-          console.error('Location access denied:', error);
-          alert('Location access is required to use Tribes.');
-        }
-      );
+  const requestLocation = async () => {
+    setError('');
+    
+    try {
+      const locationData = await requestSecureLocation();
+      
+      setLocation({
+        lat: locationData.lat,
+        lng: locationData.lng,
+        city: locationData.city,
+        country: locationData.country
+      });
+      
+      setIsLocationGranted(true);
+      
+      // Complete verification
+      setTimeout(() => {
+        onComplete({
+          [contactMethod]: contactMethod === 'email' ? email : phone,
+          dateOfBirth,
+          location: {
+            lat: locationData.lat,
+            lng: locationData.lng,
+            city: locationData.city,
+            country: locationData.country
+          }
+        });
+      }, 1000);
+    } catch (locationError) {
+      const error = locationError as LocationError;
+      setError(`Location access failed: ${error.message}`);
     }
   };
 
@@ -111,6 +127,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
         <Card className="cave-card">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl cave-font text-amber-900">
+              {step === 'method' && 'Choose Sign-up Method'}
               {step === 'contact' && 'Contact Information'}
               {step === 'verify' && 'Verify Your Account'}
               {step === 'age' && 'Age Verification'}
@@ -118,27 +135,53 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {step === 'contact' && (
-              <>
+            {error && (
+              <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+                <AlertTriangle className="w-5 h-5" />
+                <span className="text-sm">{error}</span>
+              </div>
+            )}
+
+            {step === 'method' && (
+              <div className="space-y-4">
+                <GoogleSignInButton
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                />
+                
+                <div className="text-center">
+                  <span className="text-amber-700 cave-text">or</span>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <Button
-                    onClick={() => setContactMethod('email')}
-                    variant={contactMethod === 'email' ? 'default' : 'outline'}
-                    className={contactMethod === 'email' ? 'cave-button' : 'cave-button-outline'}
+                    onClick={() => {
+                      setContactMethod('email');
+                      setStep('contact');
+                    }}
+                    className="cave-button-outline"
+                    variant="outline"
                   >
                     <Mail className="w-4 h-4 mr-2" />
                     Email
                   </Button>
                   <Button
-                    onClick={() => setContactMethod('phone')}
-                    variant={contactMethod === 'phone' ? 'default' : 'outline'}
-                    className={contactMethod === 'phone' ? 'cave-button' : 'cave-button-outline'}
+                    onClick={() => {
+                      setContactMethod('phone');
+                      setStep('contact');
+                    }}
+                    className="cave-button-outline"
+                    variant="outline"
                   >
                     <Phone className="w-4 h-4 mr-2" />
                     Phone
                   </Button>
                 </div>
+              </div>
+            )}
 
+            {step === 'contact' && (
+              <>
                 {contactMethod === 'email' ? (
                   <div className="space-y-2">
                     <Label htmlFor="email" className="cave-text">Email Address</Label>
@@ -165,13 +208,22 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                   </div>
                 )}
 
-                <Button
-                  onClick={handleSendVerification}
-                  disabled={isVerifying || (!email && !phone)}
-                  className="w-full cave-button"
-                >
-                  {isVerifying ? 'Sending...' : 'Send Verification Code'}
-                </Button>
+                <div className="flex space-x-4">
+                  <Button
+                    onClick={() => setStep('method')}
+                    variant="outline"
+                    className="flex-1 cave-button-outline"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleSendVerification}
+                    disabled={isVerifying || (!email && !phone)}
+                    className="flex-1 cave-button"
+                  >
+                    {isVerifying ? 'Sending...' : 'Send Code'}
+                  </Button>
+                </div>
               </>
             )}
 
@@ -230,6 +282,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     value={dateOfBirth}
                     onChange={(e) => setDateOfBirth(e.target.value)}
                     className="cave-input"
+                    max={new Date().toISOString().split('T')[0]}
                   />
                 </div>
 
@@ -248,7 +301,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                 <div className="text-center">
                   <MapPin className="w-12 h-12 mx-auto mb-4 text-orange-600" />
                   <p className="text-sm cave-text mb-4">
-                    We need your location to show you nearby tribe members
+                    We need your location to show you nearby tribe members. Your precise location is kept secure and private.
                   </p>
                 </div>
 
@@ -258,13 +311,16 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     className="w-full cave-button"
                   >
                     <MapPin className="w-4 h-4 mr-2" />
-                    Allow Location Access
+                    Allow Secure Location Access
                   </Button>
                 ) : (
                   <div className="text-center">
                     <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
-                    <p className="text-sm cave-text">
-                      Location access granted! Setting up your profile...
+                    <p className="text-sm cave-text mb-2">
+                      Location verified: {location?.city}, {location?.country}
+                    </p>
+                    <p className="text-xs text-amber-600">
+                      Setting up your profile...
                     </p>
                   </div>
                 )}
