@@ -50,22 +50,31 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-orange-500 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <Card className="backdrop-blur-lg bg-white/10 border-white/20">
+    <div className="min-h-screen cave-gradient p-4">
+      <div className="max-w-md mx-auto pt-8">
+        <div className="text-center mb-8">
+          <img 
+            src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
+            alt="Tribes Hand Logo" 
+            className="w-16 h-16 mx-auto mb-4"
+          />
+          <h1 className="text-3xl font-bold cave-font text-white">Join Your Tribe</h1>
+        </div>
+
+        <Card className="cave-card mb-8">
           <CardHeader className="text-center">
-            <CardTitle className="text-white text-2xl">
-              {step === 1 ? 'Choose Your Hobbies' : 'Select Your Interests'}
+            <CardTitle className="text-2xl cave-font text-amber-900">
+              {step === 1 ? 'Choose Your Passions' : 'Select Your Interests'}
             </CardTitle>
-            <p className="text-white/80">
+            <p className="text-amber-800">
               {step === 1 
-                ? `Select 1-10 hobbies that you enjoy (${selectedHobbies.length}/10)`
+                ? `Select 1-10 passions that drive you (${selectedHobbies.length}/10)`
                 : `Select 1-10 interests that fascinate you (${selectedInterests.length}/10)`
               }
             </p>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+            <div className="grid grid-cols-2 gap-3 mb-8">
               {(step === 1 ? hobbies : interests).map((item) => {
                 const isSelected = step === 1 
                   ? selectedHobbies.includes(item)
@@ -75,10 +84,10 @@ const Onboarding = () => {
                   <Badge
                     key={item}
                     variant={isSelected ? "default" : "outline"}
-                    className={`cursor-pointer p-3 text-center justify-center transition-all hover:scale-105 ${
+                    className={`cursor-pointer p-3 text-center justify-center transition-all hover:scale-105 cave-font ${
                       isSelected 
-                        ? 'bg-white text-purple-600 hover:bg-white/90' 
-                        : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                        ? 'cave-badge' 
+                        : 'cave-badge-outline'
                     }`}
                     onClick={() => step === 1 ? toggleHobby(item) : toggleInterest(item)}
                   >
@@ -93,8 +102,8 @@ const Onboarding = () => {
               <Button
                 onClick={() => setStep(1)}
                 disabled={step === 1}
-                variant="outline"
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                variant="ghost"
+                className="cave-button-ghost"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
@@ -106,7 +115,7 @@ const Onboarding = () => {
                   (step === 1 && selectedHobbies.length === 0) ||
                   (step === 2 && selectedInterests.length === 0)
                 }
-                className="bg-white text-purple-600 hover:bg-white/90"
+                className="cave-button"
               >
                 {step === 2 ? 'Complete Setup' : 'Next'}
                 <ArrowRight className="w-4 h-4 ml-2" />

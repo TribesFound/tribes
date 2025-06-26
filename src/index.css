@@ -124,8 +124,28 @@
     );
   }
 
+  .tribal-gradient {
+    background: linear-gradient(135deg, 
+      hsl(25, 65%, 75%) 0%, 
+      hsl(30, 60%, 70%) 25%, 
+      hsl(35, 55%, 65%) 50%, 
+      hsl(25, 50%, 60%) 75%, 
+      hsl(30, 45%, 55%) 100%
+    );
+  }
+
   .cave-card {
     background: rgba(250, 240, 230, 0.95);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(139, 115, 85, 0.3);
+    border-radius: 20px;
+    box-shadow: 
+      0 8px 32px rgba(139, 115, 85, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .tribal-card {
+    background: rgba(245, 235, 220, 0.95);
     backdrop-filter: blur(20px);
     border: 2px solid rgba(139, 115, 85, 0.3);
     border-radius: 20px;
@@ -173,6 +193,45 @@
     color: hsl(25, 70%, 35%);
   }
 
+  .tribal-button {
+    background: linear-gradient(135deg, 
+      hsl(30, 75%, 50%) 0%, 
+      hsl(35, 70%, 45%) 100%
+    );
+    border: 2px solid hsl(30, 55%, 35%);
+    border-radius: 16px;
+    color: white;
+    font-family: 'Kalam', cursive;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(180, 95, 25, 0.3);
+  }
+
+  .tribal-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(180, 95, 25, 0.4);
+    background: linear-gradient(135deg, 
+      hsl(30, 80%, 55%) 0%, 
+      hsl(35, 75%, 50%) 100%
+    );
+  }
+
+  .tribal-button-outline {
+    background: transparent;
+    border: 2px solid hsl(30, 55%, 45%);
+    border-radius: 16px;
+    color: hsl(30, 55%, 40%);
+    font-family: 'Kalam', cursive;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .tribal-button-outline:hover {
+    background: rgba(180, 95, 25, 0.1);
+    border-color: hsl(30, 65%, 40%);
+    color: hsl(30, 65%, 35%);
+  }
+
   .cave-button-ghost {
     background: transparent;
     color: hsl(25, 60%, 50%);
@@ -199,6 +258,21 @@
   .cave-input:focus {
     border-color: hsl(25, 70%, 50%);
     box-shadow: 0 0 0 3px rgba(210, 105, 30, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .tribal-input {
+    background: rgba(250, 245, 235, 0.9);
+    border: 2px solid hsl(30, 35%, 70%);
+    border-radius: 12px;
+    font-family: 'Kalam', cursive;
+    color: hsl(var(--cave-brown));
+    transition: all 0.3s ease;
+  }
+
+  .tribal-input:focus {
+    border-color: hsl(30, 65%, 45%);
+    box-shadow: 0 0 0 3px rgba(180, 95, 25, 0.1);
     background: rgba(255, 255, 255, 0.95);
   }
 
@@ -257,6 +331,19 @@
     font-family: 'Kalam', cursive;
     font-weight: 500;
     box-shadow: 0 2px 8px rgba(210, 105, 30, 0.2);
+  }
+
+  .tribal-badge {
+    background: linear-gradient(135deg, 
+      hsl(30, 65%, 45%) 0%, 
+      hsl(35, 60%, 40%) 100%
+    );
+    color: white;
+    border: 1px solid hsl(30, 45%, 35%);
+    border-radius: 12px;
+    font-family: 'Kalam', cursive;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(180, 95, 25, 0.2);
   }
 
   .cave-badge-outline {
