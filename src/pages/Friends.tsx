@@ -5,7 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Search, MessageCircle, Filter, Users, Plus } from 'lucide-react';
+import { 
+  Search, 
+  MessageCircle, 
+  Users, 
+  Plus, 
+  MoreVertical,
+  UserMinus,
+  Block,
+  Flag
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import SubscriptionBadge, { SubscriptionTier } from '@/components/SubscriptionBadge';
 
 const Friends = () => {
@@ -18,25 +33,29 @@ const Friends = () => {
       id: 1,
       name: 'Maya',
       avatar: '/placeholder.svg',
-      tier: 'Oracle' as SubscriptionTier
+      tier: 'Oracle' as SubscriptionTier,
+      isProfessional: false
     },
     {
       id: 2,
       name: 'Jordan',
       avatar: '/placeholder.svg',
-      tier: 'Bloodline' as SubscriptionTier
+      tier: 'Bloodline' as SubscriptionTier,
+      isProfessional: false
     },
     {
       id: 3,
       name: 'Riley',
       avatar: '/placeholder.svg',
-      tier: 'Inner Circle' as SubscriptionTier
+      tier: 'Inner Circle' as SubscriptionTier,
+      isProfessional: false
     },
     {
       id: 4,
       name: 'Casey',
       avatar: '/placeholder.svg',
-      tier: 'Trade Guild' as SubscriptionTier
+      tier: 'Trade Guild' as SubscriptionTier,
+      isProfessional: true
     }
   ];
 
@@ -49,7 +68,8 @@ const Friends = () => {
       lastActive: '2 min ago',
       distance: '1.2 km',
       mutualInterests: 3,
-      tier: 'Oracle' as SubscriptionTier
+      tier: 'Oracle' as SubscriptionTier,
+      isProfessional: false
     },
     {
       id: 2,
@@ -59,7 +79,8 @@ const Friends = () => {
       lastActive: '1 hour ago',
       distance: '3.5 km',
       mutualInterests: 5,
-      tier: 'Inner Circle' as SubscriptionTier
+      tier: 'Inner Circle' as SubscriptionTier,
+      isProfessional: false
     },
     {
       id: 3,
@@ -69,7 +90,19 @@ const Friends = () => {
       lastActive: 'Active now',
       distance: '0.8 km',
       mutualInterests: 2,
-      tier: 'Bloodline' as SubscriptionTier
+      tier: 'Bloodline' as SubscriptionTier,
+      isProfessional: false
+    },
+    {
+      id: 4,
+      name: 'Tech Solutions Co.',
+      avatar: '/placeholder.svg',
+      isOnline: false,
+      lastActive: '30 min ago',
+      distance: '2.1 km',
+      mutualInterests: 1,
+      tier: 'Trade Council' as SubscriptionTier,
+      isProfessional: true
     }
   ];
 
@@ -93,6 +126,26 @@ const Friends = () => {
   const handleBondClick = (bondId: number) => {
     console.log(`Opening chat with bond ${bondId}`);
     // Navigate to chat page with this person
+  };
+
+  const handleUnfriend = (friendId: number, friendName: string) => {
+    console.log(`Unfriending ${friendName}`);
+    // Implement unfriend logic
+  };
+
+  const handleBlock = (friendId: number, friendName: string) => {
+    console.log(`Blocking ${friendName}`);
+    // Implement block logic
+  };
+
+  const handleReport = (friendId: number, friendName: string) => {
+    console.log(`Reporting ${friendName}`);
+    // Implement report logic
+  };
+
+  const handleRestrict = (friendId: number, friendName: string) => {
+    console.log(`Restricting ${friendName}`);
+    // Implement restrict logic for professional accounts
   };
 
   return (
@@ -207,7 +260,7 @@ const Friends = () => {
                             {friend.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
-                        {friend.isOnline && (
+                        {friend.isOnline && !friend.isProfessional && (
                           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                         )}
                       </div>
@@ -220,25 +273,84 @@ const Friends = () => {
                           <SubscriptionBadge tier={friend.tier} size="sm" showLabel={false} />
                         </div>
                         <p className="text-sm text-amber-700">
-                          {friend.isOnline ? 'Online' : friend.lastActive}
+                          {friend.isProfessional 
+                            ? 'Professional Account' 
+                            : friend.isOnline ? 'Online' : friend.lastActive
+                          }
                         </p>
                         <div className="flex items-center space-x-3 mt-1">
                           <span className="text-xs text-amber-600">
                             {friend.distance} away
                           </span>
-                          <span className="text-xs text-amber-600">
-                            {friend.mutualInterests} shared interests
-                          </span>
+                          {!friend.isProfessional && (
+                            <span className="text-xs text-amber-600">
+                              {friend.mutualInterests} shared interests
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    <Button
-                      className="cave-button p-2"
-                      onClick={() => console.log(`Opening chat with ${friend.name}`)}
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        className="cave-button p-2"
+                        onClick={() => console.log(`Opening chat with ${friend.name}`)}
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </Button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4 text-amber-700" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="cave-card">
+                          {!friend.isProfessional ? (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => handleUnfriend(friend.id, friend.name)}
+                                className="text-amber-800 hover:bg-orange-100"
+                              >
+                                <UserMinus className="mr-2 h-4 w-4" />
+                                Unfriend
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleBlock(friend.id, friend.name)}
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <Block className="mr-2 h-4 w-4" />
+                                Block
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleReport(friend.id, friend.name)}
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <Flag className="mr-2 h-4 w-4" />
+                                Report
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => handleRestrict(friend.id, friend.name)}
+                                className="text-amber-800 hover:bg-orange-100"
+                              >
+                                <Block className="mr-2 h-4 w-4" />
+                                Restrict
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleReport(friend.id, friend.name)}
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <Flag className="mr-2 h-4 w-4" />
+                                Report
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

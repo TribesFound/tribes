@@ -14,7 +14,7 @@ const hobbies = [
   'Performing Arts', 'Scuba Diving', 'Free Diving', 'Foraging'
 ];
 
-const interests = [
+const passions = [
   'Technology', 'Science', 'History', 'Philosophy', 'Psychology', 'Politics',
   'Environment', 'Health', 'Business', 'Art', 'Literature', 'Movies',
   'TV Shows', 'Podcasts', 'Fashion', 'Food', 'Travel', 'Sports',
@@ -26,7 +26,7 @@ const interests = [
 const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedPassions, setSelectedPassions] = useState<string[]>([]);
 
   const toggleHobby = (hobby: string) => {
     if (selectedHobbies.includes(hobby)) {
@@ -36,19 +36,19 @@ const Onboarding = () => {
     }
   };
 
-  const toggleInterest = (interest: string) => {
-    if (selectedInterests.includes(interest)) {
-      setSelectedInterests(selectedInterests.filter(i => i !== interest));
-    } else if (selectedInterests.length < 10) {
-      setSelectedInterests([...selectedInterests, interest]);
+  const togglePassion = (passion: string) => {
+    if (selectedPassions.includes(passion)) {
+      setSelectedPassions(selectedPassions.filter(i => i !== passion));
+    } else if (selectedPassions.length < 10) {
+      setSelectedPassions([...selectedPassions, passion]);
     }
   };
 
   const handleNext = () => {
     if (step === 1 && selectedHobbies.length >= 1) {
       setStep(2);
-    } else if (step === 2 && selectedInterests.length >= 1) {
-      console.log('Onboarding complete:', { selectedHobbies, selectedInterests });
+    } else if (step === 2 && selectedPassions.length >= 1) {
+      console.log('Onboarding complete:', { selectedHobbies, selectedPassions });
       // Navigate to passcode setup or main app
       window.location.href = '/passcode-setup';
     }
@@ -69,21 +69,21 @@ const Onboarding = () => {
         <Card className="cave-card mb-8">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl cave-font text-amber-900">
-              {step === 1 ? 'Choose Your Hobbies' : 'Select Your Interests'}
+              {step === 1 ? 'Choose Your Hobbies' : 'Select Your Passions'}
             </CardTitle>
             <p className="text-amber-800">
               {step === 1 
                 ? `Select 1-10 hobbies that you enjoy (${selectedHobbies.length}/10)`
-                : `Select 1-10 interests that fascinate you (${selectedInterests.length}/10)`
+                : `Select 1-10 passions that fascinate you (${selectedPassions.length}/10)`
               }
             </p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3 mb-8">
-              {(step === 1 ? hobbies : interests).map((item) => {
+              {(step === 1 ? hobbies : passions).map((item) => {
                 const isSelected = step === 1 
                   ? selectedHobbies.includes(item)
-                  : selectedInterests.includes(item);
+                  : selectedPassions.includes(item);
                 
                 return (
                   <Badge
@@ -94,7 +94,7 @@ const Onboarding = () => {
                         ? 'cave-badge' 
                         : 'cave-badge-outline'
                     }`}
-                    onClick={() => step === 1 ? toggleHobby(item) : toggleInterest(item)}
+                    onClick={() => step === 1 ? toggleHobby(item) : togglePassion(item)}
                   >
                     {isSelected && <Check className="w-4 h-4 mr-2" />}
                     {item}
@@ -118,7 +118,7 @@ const Onboarding = () => {
                 onClick={handleNext}
                 disabled={
                   (step === 1 && selectedHobbies.length === 0) ||
-                  (step === 2 && selectedInterests.length === 0)
+                  (step === 2 && selectedPassions.length === 0)
                 }
                 className="cave-button"
               >
