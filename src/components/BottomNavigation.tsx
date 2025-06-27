@@ -59,13 +59,13 @@ const BottomNavigation = () => {
     { path: '/profile', icon: ProfileGlyph, label: 'Profile' },
     { path: '/discover', icon: DiscoverGlyph, label: 'Discover' },
     { path: '/friends', icon: BondsGlyph, label: 'Bonds' },
-    { path: '/matches', icon: MessagesGlyph, label: 'Messages' },
+    { path: '/bonds', icon: MessagesGlyph, label: 'Messages' },
     { path: '/events', icon: GatherGlyph, label: 'Gather' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
-  const hiddenPaths = ['/auth', '/welcome', '/signup-method', '/settings', '/splash'];
+  const hiddenPaths = ['/auth', '/welcome', '/signup-method', '/settings', '/splash', '/profile-setup', '/passcode-setup', '/passcode-entry', '/onboarding'];
   
   if (hiddenPaths.some(path => location.pathname.startsWith(path))) {
     return null;

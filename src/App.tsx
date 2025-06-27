@@ -46,7 +46,7 @@ const App = () => (
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/passcode-setup" element={<PasscodeSetup />} />
                   <Route path="/passcode-entry" element={<PasscodeEntry 
-                    onSuccess={() => window.location.href = '/discover'} 
+                    onSuccess={() => window.location.href = '/profile-setup'} 
                     onForgotPasscode={() => console.log('Forgot passcode clicked')} 
                   />} />
                   <Route path="/profile-setup" element={<ProfileSetup onComplete={(data) => {
@@ -56,7 +56,7 @@ const App = () => (
                   <Route path="/discover" element={<Discover />} />
                   <Route path="/friends" element={<Friends />} />
                   <Route path="/events" element={<Events />} />
-                  <Route path="/matches" element={<Matches />} />
+                  <Route path="/bonds" element={<Matches />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/admin" element={<Admin userEmail="tribes.found@gmail.com" userRole="Chief" />} />
