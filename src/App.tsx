@@ -45,7 +45,10 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/passcode-setup" element={<PasscodeSetup />} />
-                  <Route path="/passcode-entry" element={<PasscodeEntry />} />
+                  <Route path="/passcode-entry" element={<PasscodeEntry 
+                    onSuccess={() => window.location.href = '/discover'} 
+                    onForgotPasscode={() => console.log('Forgot passcode clicked')} 
+                  />} />
                   <Route path="/profile-setup" element={<ProfileSetup onComplete={(data) => {
                     console.log('Profile setup complete:', data);
                     window.location.href = '/discover';
