@@ -4,17 +4,57 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MapPin, Heart, X, Filter, Search } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { MapPin, Heart, X, Filter, Search, Settings } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+
+const hobbies = [
+  'Photography', 'Hiking', 'Cooking', 'Reading', 'Gaming', 'Painting',
+  'Music', 'Dancing', 'Cycling', 'Yoga', 'Gardening', 'Writing',
+  'Traveling', 'Fitness', 'Meditation', 'Crafting', 'Chess', 'Board Games',
+  'Rock Climbing', 'Swimming', 'Running', 'Skiing', 'Surfing', 'Fishing',
+  'Musician', 'Music Production', 'VJ', 'DJ', 'Fire Performer', 'Theater',
+  'Performing Arts', 'Scuba Diving', 'Free Diving', 'Foraging'
+];
+
+const passions = [
+  'Technology', 'Science', 'History', 'Philosophy', 'Psychology', 'Politics',
+  'Environment', 'Health', 'Business', 'Art', 'Literature', 'Movies',
+  'TV Shows', 'Podcasts', 'Fashion', 'Food', 'Travel', 'Sports',
+  'Spirituality', 'Personal Development', 'Languages', 'Culture', 'Nature', 'Space',
+  'Van Life', 'Sustainable Living', 'Festivals', 'Community', 'Permaculture',
+  'Animals', 'Off Grid Living'
+];
+
+const languages = [
+  'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Russian',
+  'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Dutch', 'Swedish',
+  'Norwegian', 'Danish', 'Finnish', 'Greek', 'Turkish', 'Polish'
+];
+
+const dietaryPreferences = [
+  'Omnivore', 'Vegetarian', 'Vegan', 'Pescatarian', 'Keto', 'Paleo',
+  'Gluten-Free', 'Dairy-Free', 'Raw Food', 'Mediterranean'
+];
 
 const mockUsers = [
   {
     id: 1,
     name: 'Sarah',
     age: 28,
-    distance: '2 km away',
+    distance: 2,
     bio: 'Love hiking and photography. Always looking for new adventures!',
     hobbies: ['Photography', 'Hiking', 'Cooking'],
-    interests: ['Travel', 'Nature', 'Art'],
+    passions: ['Travel', 'Nature', 'Art'],
+    languages: ['English', 'Spanish'],
+    dietaryPreference: 'vegetarian',
     avatar: '/placeholder.svg',
     photos: ['/placeholder.svg', '/placeholder.svg']
   },
@@ -22,10 +62,12 @@ const mockUsers = [
     id: 2,
     name: 'Marcus',
     age: 32,
-    distance: '5 km away',
+    distance: 5,
     bio: 'Tech enthusiast and weekend warrior. Coffee lover ☕',
     hobbies: ['Gaming', 'Cycling', 'Reading'],
-    interests: ['Technology', 'Business', 'Science'],
+    passions: ['Technology', 'Business', 'Science'],
+    languages: ['English'],
+    dietaryPreference: 'omnivore',
     avatar: '/placeholder.svg',
     photos: ['/placeholder.svg']
   }
@@ -34,6 +76,13 @@ const mockUsers = [
 const Discover = () => {
   const [currentUserIndex, setCurrentUserIndex] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
+  const [distanceRange, setDistanceRange] = useState([100]);
+  const [ageRange, setAgeRange] = useState([18, 100]);
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
+  const [selectedPassions, setSelectedPassions] = useState<string[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
+  const [showNoMatches, setShowNoMatches] = useState(false);
 
   const currentUser = mockUsers[currentUserIndex];
 
@@ -46,7 +95,60 @@ const Discover = () => {
     setCurrentUserIndex((prev) => (prev + 1) % mockUsers.length);
   };
 
-  if (!currentUser) {
+  const toggleHobby = (hobby: string) => {
+    if (selectedHobbies.includes(hobby)) {
+      setSelectedHobbies(selectedHobbies.filter(h => h !== hobby));
+    } else if (selectedHobbies.length < 5) {
+      setSelectedHobbies([...selectedHobbies, hobby]);
+    }
+  };
+
+  const togglePassion = (passion: string) => {
+    if (selectedPassions.includes(passion)) {
+      setSelectedPassions(selectedPassions.filter(p => p !== passion));
+    } else if (selectedPassions.length < 5) {
+      setSelectedPassions([...selectedPassions, passion]);
+    }
+  };
+
+  const toggleLanguage = (language: string) => {
+    if (selectedLanguages.includes(language)) {
+      setSelectedLanguages(selectedLanguages.filter(l => l !== language));
+    } else {
+      setSelectedLanguages([...selectedLanguages, language]);
+    }
+  };
+
+  const toggleDietary = (dietary: string) => {
+    if (selectedDietary.includes(dietary)) {
+      setSelectedDietary(selectedDietary.filter(d => d !== dietary));
+    } else {
+      setSelectedDietary([...selectedDietary, dietary]);
+    }
+  };
+
+  const applyFilters = () => {
+    console.log('Applying filters:', {
+      distance: distanceRange[0],
+      ageRange,
+      hobbies: selectedHobbies,
+      passions: selectedPassions,
+      languages: selectedLanguages,
+      dietary: selectedDietary
+    });
+    setShowFilters(false);
+  };
+
+  const clearFilters = () => {
+    setDistanceRange([100]);
+    setAgeRange([18, 100]);
+    setSelectedHobbies([]);
+    setSelectedPassions([]);
+    setSelectedLanguages([]);
+    setSelectedDietary([]);
+  };
+
+  if (!currentUser && !showNoMatches) {
     return (
       <div className="min-h-screen cave-gradient flex items-center justify-center pb-20">
         <div className="text-center text-amber-900">
@@ -58,7 +160,20 @@ const Discover = () => {
             />
           </div>
           <h2 className="text-2xl font-bold cave-font mb-2">No More Profiles</h2>
-          <p className="cave-text">Check back later for new tribe members!</p>
+          <p className="cave-text mb-4">No one matches your current filters.</p>
+          <Button
+            onClick={() => setShowNoMatches(true)}
+            className="cave-button mb-2"
+          >
+            Show people with different interests
+          </Button>
+          <Button
+            onClick={() => setShowFilters(true)}
+            variant="outline"
+            className="cave-button-outline"
+          >
+            Adjust Filters
+          </Button>
         </div>
       </div>
     );
@@ -78,103 +193,265 @@ const Discover = () => {
             <h1 className="text-2xl font-bold cave-font text-amber-900">Discover</h1>
           </div>
           <div className="flex space-x-2">
-            <Button
-              onClick={() => setShowFilters(!showFilters)}
-              variant="ghost"
-              className="cave-button-ghost p-2"
-            >
-              <Filter className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" className="cave-button-ghost p-2">
-              <Search className="w-5 h-5" />
-            </Button>
+            <Sheet open={showFilters} onOpenChange={setShowFilters}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" className="cave-button-ghost p-2">
+                  <Filter className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="cave-card w-full max-w-md">
+                <SheetHeader>
+                  <SheetTitle className="cave-font text-amber-900">Discovery Filters</SheetTitle>
+                  <SheetDescription className="cave-text">
+                    Customize your tribe discovery preferences
+                  </SheetDescription>
+                </SheetHeader>
+                
+                <div className="space-y-6 mt-6">
+                  {/* Distance Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium cave-text">
+                      Distance: {distanceRange[0]} km
+                    </label>
+                    <Slider
+                      value={distanceRange}
+                      onValueChange={setDistanceRange}
+                      max={100}
+                      min={1}
+                      step={1}
+                      className="cave-slider"
+                    />
+                  </div>
+
+                  {/* Age Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium cave-text">
+                      Age: {ageRange[0]} - {ageRange[1]} years
+                    </label>
+                    <Slider
+                      value={ageRange}
+                      onValueChange={setAgeRange}
+                      max={100}
+                      min={18}
+                      step={1}
+                      className="cave-slider"
+                    />
+                  </div>
+
+                  {/* Hobbies Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium cave-text">
+                      Hobbies (max 5): {selectedHobbies.length}/5
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                      {hobbies.slice(0, 12).map((hobby) => (
+                        <Badge
+                          key={hobby}
+                          variant={selectedHobbies.includes(hobby) ? "default" : "outline"}
+                          className={`cursor-pointer text-xs p-2 transition-all ${
+                            selectedHobbies.includes(hobby)
+                              ? 'cave-badge'
+                              : 'cave-badge-outline'
+                          } ${selectedHobbies.length >= 5 && !selectedHobbies.includes(hobby) ? 'opacity-50' : ''}`}
+                          onClick={() => toggleHobby(hobby)}
+                        >
+                          {hobby}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Passions Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium cave-text">
+                      Passions (max 5): {selectedPassions.length}/5
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                      {passions.slice(0, 12).map((passion) => (
+                        <Badge
+                          key={passion}
+                          variant={selectedPassions.includes(passion) ? "default" : "outline"}
+                          className={`cursor-pointer text-xs p-2 transition-all ${
+                            selectedPassions.includes(passion)
+                              ? 'cave-badge'
+                              : 'cave-badge-outline'
+                          } ${selectedPassions.length >= 5 && !selectedPassions.includes(passion) ? 'opacity-50' : ''}`}
+                          onClick={() => togglePassion(passion)}
+                        >
+                          {passion}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Languages Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium cave-text">
+                      Languages: {selectedLanguages.length} selected
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 max-h-24 overflow-y-auto">
+                      {languages.slice(0, 10).map((language) => (
+                        <Badge
+                          key={language}
+                          variant={selectedLanguages.includes(language) ? "default" : "outline"}
+                          className={`cursor-pointer text-xs p-2 transition-all ${
+                            selectedLanguages.includes(language)
+                              ? 'cave-badge'
+                              : 'cave-badge-outline'
+                          }`}
+                          onClick={() => toggleLanguage(language)}
+                        >
+                          {language}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dietary Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium cave-text">
+                      Dietary: {selectedDietary.length} selected
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {dietaryPreferences.map((dietary) => (
+                        <Badge
+                          key={dietary}
+                          variant={selectedDietary.includes(dietary) ? "default" : "outline"}
+                          className={`cursor-pointer text-xs p-2 transition-all ${
+                            selectedDietary.includes(dietary)
+                              ? 'cave-badge'
+                              : 'cave-badge-outline'
+                          }`}
+                          onClick={() => toggleDietary(dietary)}
+                        >
+                          {dietary}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-3 pt-4">
+                    <Button
+                      onClick={clearFilters}
+                      variant="outline"
+                      className="flex-1 cave-button-outline"
+                    >
+                      Clear All
+                    </Button>
+                    <Button
+                      onClick={applyFilters}
+                      className="flex-1 cave-button"
+                    >
+                      Apply Filters
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
         {/* User Card */}
-        <Card className="cave-card mb-6 overflow-hidden">
-          <div className="relative">
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-full h-96 object-cover"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
-              <div className="flex items-end justify-between text-white">
-                <div>
-                  <h2 className="text-3xl font-bold cave-font">
-                    {currentUser.name}, {currentUser.age}
-                  </h2>
-                  <div className="flex items-center mt-1">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    <span className="text-sm cave-text text-white">{currentUser.distance}</span>
+        {currentUser && (
+          <Card className="cave-card mb-6 overflow-hidden">
+            <div className="relative">
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="w-full h-96 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                <div className="flex items-end justify-between text-white">
+                  <div>
+                    <h2 className="text-3xl font-bold cave-font">
+                      {currentUser.name}, {currentUser.age}
+                    </h2>
+                    <div className="flex items-center mt-1">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span className="text-sm cave-text text-white">{currentUser.distance} km away</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <CardContent className="p-6 space-y-4">
-            {currentUser.bio && (
-              <p className="cave-text text-amber-800">{currentUser.bio}</p>
-            )}
+            <CardContent className="p-6 space-y-4">
+              {currentUser.bio && (
+                <p className="cave-text text-amber-800">{currentUser.bio}</p>
+              )}
 
-            <div>
-              <h3 className="font-bold cave-font text-amber-900 mb-2">Hobbies</h3>
-              <div className="flex flex-wrap gap-2">
-                {currentUser.hobbies.map((hobby) => (
-                  <Badge key={hobby} className="cave-badge">
-                    {hobby}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-bold cave-font text-amber-900 mb-2">Interests</h3>
-              <div className="flex flex-wrap gap-2">
-                {currentUser.interests.map((interest) => (
-                  <Badge key={interest} className="cave-badge">
-                    {interest}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {currentUser.photos.length > 0 && (
               <div>
-                <h3 className="font-bold cave-font text-amber-900 mb-2">More Photos</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {currentUser.photos.map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo}
-                      alt={`Photo ${index + 1}`}
-                      className="w-full h-20 object-cover rounded-lg ring-2 ring-orange-200"
-                    />
+                <h3 className="font-bold cave-font text-amber-900 mb-2">Hobbies</h3>
+                <div className="flex flex-wrap gap-2">
+                  {currentUser.hobbies.map((hobby) => (
+                    <Badge key={hobby} className="cave-badge">
+                      {hobby}
+                    </Badge>
                   ))}
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              <div>
+                <h3 className="font-bold cave-font text-amber-900 mb-2">Passions</h3>
+                <div className="flex flex-wrap gap-2">
+                  {currentUser.passions.map((passion) => (
+                    <Badge key={passion} className="cave-badge">
+                      {passion}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {currentUser.languages.length > 0 && (
+                <div>
+                  <h3 className="font-bold cave-font text-amber-900 mb-2">Languages</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {currentUser.languages.map((language) => (
+                      <Badge key={language} className="cave-badge-outline">
+                        {language}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentUser.photos.length > 0 && (
+                <div>
+                  <h3 className="font-bold cave-font text-amber-900 mb-2">More Photos</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {currentUser.photos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={`Photo ${index + 1}`}
+                        className="w-full h-20 object-cover rounded-lg ring-2 ring-orange-200"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action Buttons */}
-        <div className="flex justify-center space-x-8">
-          <Button
-            onClick={handlePass}
-            className="w-16 h-16 rounded-full bg-gray-100 hover:bg-gray-200 border-2 border-gray-300"
-            variant="outline"
-          >
-            <X className="w-8 h-8 text-gray-600" strokeWidth={2.5} />
-          </Button>
-          <Button
-            onClick={handleLike}
-            className="w-16 h-16 rounded-full cave-button"
-          >
-            <Heart className="w-8 h-8" strokeWidth={2.5} />
-          </Button>
-        </div>
+        {currentUser && (
+          <div className="flex justify-center space-x-8">
+            <Button
+              onClick={handlePass}
+              className="w-16 h-16 rounded-full bg-gray-100 hover:bg-gray-200 border-2 border-gray-300"
+              variant="outline"
+            >
+              <X className="w-8 h-8 text-gray-600" strokeWidth={2.5} />
+            </Button>
+            <Button
+              onClick={handleLike}
+              className="w-16 h-16 rounded-full cave-button"
+            >
+              <Heart className="w-8 h-8" strokeWidth={2.5} />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

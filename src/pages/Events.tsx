@@ -4,11 +4,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Calendar, MapPin, Users, Search, Plus, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users, Search, Plus, Clock, Filter } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+
+const hobbies = [
+  'Photography', 'Hiking', 'Cooking', 'Reading', 'Gaming', 'Painting',
+  'Music', 'Dancing', 'Cycling', 'Yoga', 'Gardening', 'Writing',
+  'Traveling', 'Fitness', 'Meditation', 'Crafting', 'Chess', 'Board Games',
+  'Rock Climbing', 'Swimming', 'Running', 'Skiing', 'Surfing', 'Fishing',
+  'Musician', 'Music Production', 'VJ', 'DJ', 'Fire Performer', 'Theater',
+  'Performing Arts', 'Scuba Diving', 'Free Diving', 'Foraging'
+];
+
+const passions = [
+  'Technology', 'Science', 'History', 'Philosophy', 'Psychology', 'Politics',
+  'Environment', 'Health', 'Business', 'Art', 'Literature', 'Movies',
+  'TV Shows', 'Podcasts', 'Fashion', 'Food', 'Travel', 'Sports',
+  'Spirituality', 'Personal Development', 'Languages', 'Culture', 'Nature', 'Space',
+  'Van Life', 'Sustainable Living', 'Festivals', 'Community', 'Permaculture',
+  'Animals', 'Off Grid Living'
+];
 
 const Events = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
+  const [selectedPassions, setSelectedPassions] = useState<string[]>([]);
 
   const mockEvents = [
     {
@@ -19,6 +47,8 @@ const Events = () => {
       time: '10:00 AM',
       location: 'Santa Monica Beach',
       tags: ['Sports', 'Outdoor', 'Competition'],
+      hobbies: ['Sports', 'Fitness'],
+      passions: ['Health', 'Community'],
       attendees: 24,
       maxAttendees: 30,
       isRSVPed: false
@@ -31,6 +61,8 @@ const Events = () => {
       time: '2:00 PM',
       location: 'Downtown LA',
       tags: ['Photography', 'Art', 'Walking'],
+      hobbies: ['Photography', 'Walking'],
+      passions: ['Art', 'Culture'],
       attendees: 12,
       maxAttendees: 15,
       isRSVPed: true
@@ -43,21 +75,65 @@ const Events = () => {
       time: '9:00 AM',
       location: 'Venice Community Garden',
       tags: ['Volunteering', 'Environment', 'Community'],
+      hobbies: ['Gardening'],
+      passions: ['Environment', 'Community', 'Sustainable Living'],
       attendees: 8,
       maxAttendees: 20,
+      isRSVPed: false
+    },
+    {
+      id: 4,
+      title: 'Van Life Meetup',
+      organizer: 'Nomad Collective',
+      date: '2024-01-28',
+      time: '6:00 PM',
+      location: 'Malibu Beach Parking',
+      tags: ['Van Life', 'Travel', 'Community'],
+      hobbies: ['Traveling'],
+      passions: ['Van Life', 'Community', 'Off Grid Living'],
+      attendees: 18,
+      maxAttendees: 25,
       isRSVPed: false
     }
   ];
 
-  const categories = ['all', 'Sports', 'Art', 'Volunteering', 'Community', 'Outdoor'];
+  const toggleHobby = (hobby: string) => {
+    if (selectedHobbies.includes(hobby)) {
+      setSelectedHobbies(selectedHobbies.filter(h => h !== hobby));
+    } else {
+      setSelectedHobbies([...selectedHobbies, hobby]);
+    }
+  };
+
+  const togglePassion = (passion: string) => {
+    if (selectedPassions.includes(passion)) {
+      setSelectedPassions(selectedPassions.filter(p => p !== passion));
+    } else {
+      setSelectedPassions([...selectedPassions, passion]);
+    }
+  };
 
   const filteredEvents = mockEvents.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.organizer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || 
-                           event.tags.some(tag => tag.toLowerCase() === filterCategory.toLowerCase());
-    return matchesSearch && matchesCategory;
+    
+    const matchesHobbies = selectedHobbies.length === 0 || 
+                          selectedHobbies.some(hobby => event.hobbies.includes(hobby));
+    
+    const matchesPassions = selectedPassions.length === 0 || 
+                           selectedPassions.some(passion => event.passions.includes(passion));
+    
+    return matchesSearch && matchesHobbies && matchesPassions;
   });
+
+  const clearFilters = () => {
+    setSelectedHobbies([]);
+    setSelectedPassions([]);
+  };
+
+  const applyFilters = () => {
+    setShowFilters(false);
+  };
 
   const handleRSVP = (eventId: number) => {
     console.log(`RSVP for event ${eventId}`);
@@ -73,11 +149,92 @@ const Events = () => {
               alt="Tribes Hand Logo" 
               className="w-10 h-10"
             />
-            <h1 className="text-2xl font-bold tribal-font text-white">Events</h1>
+            <h1 className="text-2xl font-bold tribal-font text-white">Gather</h1>
           </div>
-          <Button className="tribal-button p-2">
-            <Plus className="w-5 h-5" />
-          </Button>
+          <div className="flex space-x-2">
+            <Sheet open={showFilters} onOpenChange={setShowFilters}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" className="tribal-button-ghost p-2">
+                  <Filter className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="tribal-card w-full max-w-md">
+                <SheetHeader>
+                  <SheetTitle className="tribal-font text-amber-900">Event Filters</SheetTitle>
+                  <SheetDescription className="tribal-text">
+                    Find events matching your interests
+                  </SheetDescription>
+                </SheetHeader>
+                
+                <div className="space-y-6 mt-6">
+                  {/* Hobbies Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium tribal-text">
+                      Hobbies: {selectedHobbies.length} selected
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                      {hobbies.map((hobby) => (
+                        <Badge
+                          key={hobby}
+                          variant={selectedHobbies.includes(hobby) ? "default" : "outline"}
+                          className={`cursor-pointer text-xs p-2 transition-all ${
+                            selectedHobbies.includes(hobby)
+                              ? 'tribal-badge'
+                              : 'tribal-badge-outline'
+                          }`}
+                          onClick={() => toggleHobby(hobby)}
+                        >
+                          {hobby}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Passions Filter */}
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium tribal-text">
+                      Passions: {selectedPassions.length} selected
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                      {passions.map((passion) => (
+                        <Badge
+                          key={passion}
+                          variant={selectedPassions.includes(passion) ? "default" : "outline"}
+                          className={`cursor-pointer text-xs p-2 transition-all ${
+                            selectedPassions.includes(passion)
+                              ? 'tribal-badge'
+                              : 'tribal-badge-outline'
+                          }`}
+                          onClick={() => togglePassion(passion)}
+                        >
+                          {passion}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-3 pt-4">
+                    <Button
+                      onClick={clearFilters}
+                      variant="outline"
+                      className="flex-1 tribal-button-outline"
+                    >
+                      Clear All
+                    </Button>
+                    <Button
+                      onClick={applyFilters}
+                      className="flex-1 tribal-button"
+                    >
+                      Apply Filters
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+            <Button className="tribal-button p-2">
+              <Plus className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-4 mb-6">
@@ -89,20 +246,6 @@ const Events = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="tribal-input pl-10"
             />
-          </div>
-
-          <div className="flex space-x-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <Button
-                key={category}
-                onClick={() => setFilterCategory(category)}
-                variant={filterCategory === category ? 'default' : 'outline'}
-                className={filterCategory === category ? 'tribal-button' : 'tribal-button-outline'}
-                size="sm"
-              >
-                {category === 'all' ? 'All' : category}
-              </Button>
-            ))}
           </div>
         </div>
 
@@ -180,7 +323,7 @@ const Events = () => {
               No events found
             </h3>
             <p className="text-orange-200">
-              {searchTerm || filterCategory !== 'all' 
+              {searchTerm || selectedHobbies.length > 0 || selectedPassions.length > 0
                 ? 'Try adjusting your search or filters' 
                 : 'Check back soon for upcoming events!'}
             </p>

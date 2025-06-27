@@ -10,12 +10,15 @@ import SignUpMethod from "./pages/SignUpMethod";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import PasscodeSetup from "./pages/PasscodeSetup";
+import PasscodeEntry from "./pages/PasscodeEntry";
+import ProfileSetup from "./components/ProfileSetup";
 import Discover from "./pages/Discover";
 import Friends from "./pages/Friends";
 import Events from "./pages/Events";
 import Matches from "./pages/Matches";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Admin from "./pages/Admin";
 import BottomNavigation from "./components/BottomNavigation";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -42,12 +45,18 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/passcode-setup" element={<PasscodeSetup />} />
+                  <Route path="/passcode-entry" element={<PasscodeEntry />} />
+                  <Route path="/profile-setup" element={<ProfileSetup onComplete={(data) => {
+                    console.log('Profile setup complete:', data);
+                    window.location.href = '/discover';
+                  }} userVerificationData={{}} />} />
                   <Route path="/discover" element={<Discover />} />
                   <Route path="/friends" element={<Friends />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/matches" element={<Matches />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/admin" element={<Admin userEmail="tribes.found@gmail.com" userRole="Chief" />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <BottomNavigation />

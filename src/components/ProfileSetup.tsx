@@ -7,22 +7,57 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Camera, Upload, X, Check, AlertTriangle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Camera, Upload, X, Check, AlertTriangle, MapPin } from 'lucide-react';
 
 const hobbies = [
   'Photography', 'Hiking', 'Cooking', 'Reading', 'Gaming', 'Painting',
   'Music', 'Dancing', 'Cycling', 'Yoga', 'Gardening', 'Writing',
   'Traveling', 'Fitness', 'Meditation', 'Crafting', 'Chess', 'Board Games',
   'Rock Climbing', 'Swimming', 'Running', 'Skiing', 'Surfing', 'Fishing',
-  'Astronomy', 'Volunteering', 'Languages', 'Martial Arts', 'Pottery', 'Knitting'
+  'Musician', 'Music Production', 'VJ', 'DJ', 'Fire Performer', 'Theater',
+  'Performing Arts', 'Scuba Diving', 'Free Diving', 'Foraging'
 ];
 
-const interests = [
+const passions = [
   'Technology', 'Science', 'History', 'Philosophy', 'Psychology', 'Politics',
   'Environment', 'Health', 'Business', 'Art', 'Literature', 'Movies',
   'TV Shows', 'Podcasts', 'Fashion', 'Food', 'Travel', 'Sports',
   'Spirituality', 'Personal Development', 'Languages', 'Culture', 'Nature', 'Space',
-  'Entrepreneurship', 'Social Justice', 'Mental Health', 'Sustainability', 'Innovation', 'Education'
+  'Van Life', 'Sustainable Living', 'Festivals', 'Community', 'Permaculture',
+  'Animals', 'Off Grid Living'
+];
+
+const languages = [
+  'English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Russian',
+  'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Dutch', 'Swedish',
+  'Norwegian', 'Danish', 'Finnish', 'Greek', 'Turkish', 'Polish'
+];
+
+const pets = [
+  'Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Hamster', 'Guinea Pig',
+  'Turtle', 'Snake', 'Lizard', 'Horse', 'Goat', 'Chicken', 'Pig'
+];
+
+const dietaryPreferences = [
+  'Omnivore', 'Vegetarian', 'Vegan', 'Pescatarian', 'Keto', 'Paleo',
+  'Gluten-Free', 'Dairy-Free', 'Raw Food', 'Mediterranean'
+];
+
+const zodiacSigns = [
+  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+];
+
+const humanDesigns = [
+  'Manifestor', 'Generator', 'Manifesting Generator', 'Projector', 'Reflector'
+];
+
+const mayanDreamspells = [
+  'Red Dragon', 'White Wind', 'Blue Night', 'Yellow Seed', 'Red Serpent',
+  'White Worldbridger', 'Blue Hand', 'Yellow Star', 'Red Moon', 'White Dog',
+  'Blue Monkey', 'Yellow Human', 'Red Skywalker', 'White Wizard', 'Blue Eagle',
+  'Yellow Warrior', 'Red Earth', 'White Mirror', 'Blue Storm', 'Yellow Sun'
 ];
 
 const bannedKeywords = [
@@ -38,22 +73,29 @@ interface ProfileSetupProps {
 const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) => {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
+  const [age, setAge] = useState('');
   const [bio, setBio] = useState('');
+  const [lookingFor, setLookingFor] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
-  const [additionalPhotos, setAdditionalPhotos] = useState<string[]>([]);
   const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedPassions, setSelectedPassions] = useState<string[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedPets, setSelectedPets] = useState<string[]>([]);
+  const [hasPets, setHasPets] = useState<boolean | null>(null);
+  const [drinkPreference, setDrinkPreference] = useState('');
+  const [smokePreference, setSmokePreference] = useState('');
+  const [dietaryPreference, setDietaryPreference] = useState('');
+  const [zodiacSign, setZodiacSign] = useState('');
+  const [humanDesign, setHumanDesign] = useState('');
+  const [mayanDreamspell, setMayanDreamspell] = useState('');
   const [uploadError, setUploadError] = useState('');
+  const [locationShared, setLocationShared] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const additionalPhotosRef = useRef<HTMLInputElement>(null);
 
-  // Simulated nudity detection
   const detectNudity = async (imageData: string): Promise<boolean> => {
-    // In a real app, this would use NSFW.js or a similar library
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Simulate random nudity detection for demo
-        resolve(Math.random() < 0.1); // 10% chance of "detecting" nudity
+        resolve(Math.random() < 0.1);
       }, 1000);
     });
   };
@@ -63,7 +105,7 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
     return bannedKeywords.some(keyword => lowerText.includes(keyword));
   };
 
-  const handlePhotoUpload = async (file: File, isProfile = true) => {
+  const handlePhotoUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       setUploadError('Please upload an image file');
       return;
@@ -81,13 +123,7 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
         }
 
         setUploadError('');
-        if (isProfile) {
-          setProfilePhoto(imageData);
-        } else {
-          if (additionalPhotos.length < 5) {
-            setAdditionalPhotos([...additionalPhotos, imageData]);
-          }
-        }
+        setProfilePhoto(imageData);
       } catch (error) {
         setUploadError('Error processing image');
       }
@@ -106,36 +142,78 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
     }
   };
 
+  const handleLocationShare = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocationShared(true);
+          console.log('Location shared:', position.coords);
+        },
+        (error) => {
+          console.error('Location sharing failed:', error);
+          setUploadError('Location sharing failed. Please enable location access.');
+        }
+      );
+    } else {
+      setUploadError('Geolocation is not supported by this browser.');
+    }
+  };
+
   const toggleHobby = (hobby: string) => {
     if (selectedHobbies.includes(hobby)) {
       setSelectedHobbies(selectedHobbies.filter(h => h !== hobby));
-    } else if (selectedHobbies.length < 10) {
+    } else {
       setSelectedHobbies([...selectedHobbies, hobby]);
     }
   };
 
-  const toggleInterest = (interest: string) => {
-    if (selectedInterests.includes(interest)) {
-      setSelectedInterests(selectedInterests.filter(i => i !== interest));
-    } else if (selectedInterests.length < 10) {
-      setSelectedInterests([...selectedInterests, interest]);
+  const togglePassion = (passion: string) => {
+    if (selectedPassions.includes(passion)) {
+      setSelectedPassions(selectedPassions.filter(p => p !== passion));
+    } else {
+      setSelectedPassions([...selectedPassions, passion]);
     }
   };
 
-  const canProceedStep1 = name.trim() && profilePhoto;
-  const canProceedStep2 = selectedHobbies.length >= 1 && selectedInterests.length >= 1;
+  const toggleLanguage = (language: string) => {
+    if (selectedLanguages.includes(language)) {
+      setSelectedLanguages(selectedLanguages.filter(l => l !== language));
+    } else {
+      setSelectedLanguages([...selectedLanguages, language]);
+    }
+  };
+
+  const togglePet = (pet: string) => {
+    if (selectedPets.includes(pet)) {
+      setSelectedPets(selectedPets.filter(p => p !== pet));
+    } else if (selectedPets.length < 3) {
+      setSelectedPets([...selectedPets, pet]);
+    }
+  };
+
+  const canProceedStep1 = name.trim() && age && profilePhoto && locationShared && selectedHobbies.length >= 1 && selectedPassions.length >= 1;
 
   const handleComplete = () => {
     const profileData = {
       name,
+      age: parseInt(age),
       bio,
+      lookingFor,
       profilePhoto,
-      additionalPhotos,
       hobbies: selectedHobbies,
-      interests: selectedInterests,
+      passions: selectedPassions,
+      languages: selectedLanguages,
+      pets: hasPets ? selectedPets : [],
+      drinkPreference,
+      smokePreference,
+      dietaryPreference,
+      zodiacSign,
+      humanDesign,
+      mayanDreamspell,
       location: userVerificationData.location,
       verifiedContact: userVerificationData.email || userVerificationData.phone,
-      dateOfBirth: userVerificationData.dateOfBirth
+      dateOfBirth: userVerificationData.dateOfBirth,
+      locationShared
     };
     onComplete(profileData);
   };
@@ -151,14 +229,14 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
               className="w-16 h-16"
             />
           </div>
-          <h1 className="text-4xl font-bold cave-font mb-2">Build Your Tribe Profile</h1>
+          <h1 className="text-4xl font-bold cave-font mb-2">Complete Your Tribe Profile</h1>
           <p className="text-lg cave-text">Step {step} of 2</p>
         </div>
 
         <Card className="cave-card">
           <CardHeader>
             <CardTitle className="text-2xl cave-font text-center text-amber-900">
-              {step === 1 ? 'Basic Information' : 'Your Interests & Hobbies'}
+              {step === 1 ? 'Required Information' : 'Optional Information'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -187,7 +265,7 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
-                    onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0], true)}
+                    onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0])}
                     className="hidden"
                   />
                 </div>
@@ -204,90 +282,40 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                   />
                 </div>
 
-                {/* Location Display */}
+                {/* Age */}
                 <div className="space-y-2">
-                  <Label className="cave-text">Location</Label>
-                  <div className="cave-input p-3 bg-orange-50">
-                    <span className="cave-text">
-                      {userVerificationData.location?.city}, {userVerificationData.location?.country}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Additional Photos */}
-                <div className="space-y-4">
-                  <Label className="text-lg font-semibold cave-text">Additional Photos (Optional - up to 5)</Label>
-                  <div className="grid grid-cols-3 gap-4">
-                    {additionalPhotos.map((photo, index) => (
-                      <div key={index} className="relative">
-                        <img src={photo} alt={`Additional ${index + 1}`} className="w-full h-24 object-cover rounded-lg ring-2 ring-orange-200" />
-                        <Button
-                          onClick={() => setAdditionalPhotos(additionalPhotos.filter((_, i) => i !== index))}
-                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 p-0"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    {additionalPhotos.length < 5 && (
-                      <Button
-                        onClick={() => additionalPhotosRef.current?.click()}
-                        className="h-24 border-2 border-dashed border-orange-300 hover:border-orange-400 bg-transparent hover:bg-orange-50 cave-button-outline"
-                        variant="outline"
-                      >
-                        <Upload className="w-6 h-6 text-orange-400" />
-                      </Button>
-                    )}
-                  </div>
-                  <input
-                    ref={additionalPhotosRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0], false)}
-                    className="hidden"
+                  <Label htmlFor="age" className="cave-text">Age *</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    min="18"
+                    max="100"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="cave-input"
+                    placeholder="Your age"
                   />
                 </div>
 
-                {/* Bio */}
+                {/* Location */}
                 <div className="space-y-2">
-                  <Label htmlFor="bio" className="cave-text">Bio (Optional - max 500 characters)</Label>
-                  <Textarea
-                    id="bio"
-                    value={bio}
-                    onChange={(e) => handleBioChange(e.target.value)}
-                    className="cave-input min-h-24"
-                    placeholder="Tell your tribe about yourself..."
-                  />
-                  <div className="text-right text-sm cave-text">
-                    {bio.length}/500
-                  </div>
+                  <Label className="cave-text">Location Access *</Label>
+                  <Button
+                    onClick={handleLocationShare}
+                    disabled={locationShared}
+                    className={locationShared ? 'cave-button bg-green-600' : 'cave-button'}
+                  >
+                    <MapPin className="w-4 h-4 mr-2" />
+                    {locationShared ? 'Location Shared' : 'Share Location'}
+                  </Button>
                 </div>
 
-                {uploadError && (
-                  <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
-                    <AlertTriangle className="w-5 h-5" />
-                    <span className="text-sm">{uploadError}</span>
-                  </div>
-                )}
-
-                <Button
-                  onClick={() => setStep(2)}
-                  disabled={!canProceedStep1}
-                  className="w-full cave-button"
-                >
-                  Continue to Interests
-                </Button>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-6">
                 {/* Hobbies */}
                 <div>
                   <Label className="text-lg font-semibold mb-4 block cave-text">
-                    Hobbies * (Select 1-10: {selectedHobbies.length}/10)
+                    Select at least 1 Hobby * ({selectedHobbies.length} selected)
                   </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-48 overflow-y-auto">
                     {hobbies.map((hobby) => (
                       <Badge
                         key={hobby}
@@ -306,28 +334,233 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                   </div>
                 </div>
 
-                {/* Interests */}
+                {/* Passions */}
                 <div>
                   <Label className="text-lg font-semibold mb-4 block cave-text">
-                    Interests * (Select 1-10: {selectedInterests.length}/10)
+                    Select at least 1 Passion * ({selectedPassions.length} selected)
                   </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {interests.map((interest) => (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-48 overflow-y-auto">
+                    {passions.map((passion) => (
                       <Badge
-                        key={interest}
-                        variant={selectedInterests.includes(interest) ? "default" : "outline"}
+                        key={passion}
+                        variant={selectedPassions.includes(passion) ? "default" : "outline"}
                         className={`cursor-pointer p-3 text-center justify-center transition-all hover:scale-105 ${
-                          selectedInterests.includes(interest)
+                          selectedPassions.includes(passion)
                             ? 'cave-badge'
                             : 'cave-badge-outline'
                         }`}
-                        onClick={() => toggleInterest(interest)}
+                        onClick={() => togglePassion(passion)}
                       >
-                        {selectedInterests.includes(interest) && <Check className="w-4 h-4 mr-2" />}
-                        {interest}
+                        {selectedPassions.includes(passion) && <Check className="w-4 h-4 mr-2" />}
+                        {passion}
                       </Badge>
                     ))}
                   </div>
+                </div>
+
+                {uploadError && (
+                  <div className="flex items-center space-x-2 text-red-600 bg-red-50 p-3 rounded-lg">
+                    <AlertTriangle className="w-5 h-5" />
+                    <span className="text-sm">{uploadError}</span>
+                  </div>
+                )}
+
+                <Button
+                  onClick={() => setStep(2)}
+                  disabled={!canProceedStep1}
+                  className="w-full cave-button"
+                >
+                  Continue to Optional Information
+                </Button>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6">
+                {/* Bio */}
+                <div className="space-y-2">
+                  <Label htmlFor="bio" className="cave-text">Bio (Optional - max 500 characters)</Label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => handleBioChange(e.target.value)}
+                    className="cave-input min-h-24"
+                    placeholder="Tell your tribe about yourself..."
+                  />
+                  <div className="text-right text-sm cave-text">
+                    {bio.length}/500
+                  </div>
+                </div>
+
+                {/* Looking For */}
+                <div className="space-y-2">
+                  <Label htmlFor="lookingFor" className="cave-text">Looking For (Optional)</Label>
+                  <Input
+                    id="lookingFor"
+                    value={lookingFor}
+                    onChange={(e) => setLookingFor(e.target.value)}
+                    className="cave-input"
+                    placeholder="What are you looking for in your tribe?"
+                  />
+                </div>
+
+                {/* Languages */}
+                <div>
+                  <Label className="text-lg font-semibold mb-4 block cave-text">
+                    Languages (Optional - {selectedLanguages.length} selected)
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-32 overflow-y-auto">
+                    {languages.map((language) => (
+                      <Badge
+                        key={language}
+                        variant={selectedLanguages.includes(language) ? "default" : "outline"}
+                        className={`cursor-pointer p-2 text-center justify-center transition-all hover:scale-105 ${
+                          selectedLanguages.includes(language)
+                            ? 'cave-badge'
+                            : 'cave-badge-outline'
+                        }`}
+                        onClick={() => toggleLanguage(language)}
+                      >
+                        {language}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Pets */}
+                <div className="space-y-4">
+                  <Label className="text-lg font-semibold cave-text">Do you have pets? (Optional)</Label>
+                  <div className="flex space-x-4">
+                    <Button
+                      onClick={() => setHasPets(true)}
+                      variant={hasPets === true ? "default" : "outline"}
+                      className={hasPets === true ? 'cave-button' : 'cave-button-outline'}
+                    >
+                      Yes
+                    </Button>
+                    <Button
+                      onClick={() => setHasPets(false)}
+                      variant={hasPets === false ? "default" : "outline"}
+                      className={hasPets === false ? 'cave-button' : 'cave-button-outline'}
+                    >
+                      No
+                    </Button>
+                  </div>
+                  
+                  {hasPets && (
+                    <div>
+                      <Label className="text-sm cave-text mb-2 block">Select up to 3 pets:</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {pets.map((pet) => (
+                          <Badge
+                            key={pet}
+                            variant={selectedPets.includes(pet) ? "default" : "outline"}
+                            className={`cursor-pointer p-2 text-center justify-center transition-all hover:scale-105 ${
+                              selectedPets.includes(pet)
+                                ? 'cave-badge'
+                                : 'cave-badge-outline'
+                            } ${selectedPets.length >= 3 && !selectedPets.includes(pet) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={() => togglePet(pet)}
+                          >
+                            {pet}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Drink Preference */}
+                <div className="space-y-2">
+                  <Label className="cave-text">Drink? (Optional)</Label>
+                  <Select value={drinkPreference} onValueChange={setDrinkPreference}>
+                    <SelectTrigger className="cave-input">
+                      <SelectValue placeholder="Select drinking preference" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                      <SelectItem value="socially">Socially</SelectItem>
+                      <SelectItem value="rarely">Rarely</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Smoke Preference */}
+                <div className="space-y-2">
+                  <Label className="cave-text">Smoke? (Optional)</Label>
+                  <Select value={smokePreference} onValueChange={setSmokePreference}>
+                    <SelectTrigger className="cave-input">
+                      <SelectValue placeholder="Select smoking preference" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                      <SelectItem value="socially">Socially</SelectItem>
+                      <SelectItem value="rarely">Rarely</SelectItem>
+                      <SelectItem value="natural">Natural only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Dietary Preferences */}
+                <div className="space-y-2">
+                  <Label className="cave-text">Dietary Preferences (Optional)</Label>
+                  <Select value={dietaryPreference} onValueChange={setDietaryPreference}>
+                    <SelectTrigger className="cave-input">
+                      <SelectValue placeholder="Select dietary preference" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {dietaryPreferences.map((diet) => (
+                        <SelectItem key={diet} value={diet.toLowerCase()}>{diet}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Zodiac Sign */}
+                <div className="space-y-2">
+                  <Label className="cave-text">Zodiac Sign (Optional)</Label>
+                  <Select value={zodiacSign} onValueChange={setZodiacSign}>
+                    <SelectTrigger className="cave-input">
+                      <SelectValue placeholder="Select zodiac sign" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {zodiacSigns.map((sign) => (
+                        <SelectItem key={sign} value={sign.toLowerCase()}>{sign}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Human Design */}
+                <div className="space-y-2">
+                  <Label className="cave-text">Human Design (Optional)</Label>
+                  <Select value={humanDesign} onValueChange={setHumanDesign}>
+                    <SelectTrigger className="cave-input">
+                      <SelectValue placeholder="Select human design" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {humanDesigns.map((design) => (
+                        <SelectItem key={design} value={design.toLowerCase()}>{design}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Mayan Dreamspell */}
+                <div className="space-y-2">
+                  <Label className="cave-text">Mayan Dreamspell (Optional)</Label>
+                  <Select value={mayanDreamspell} onValueChange={setMayanDreamspell}>
+                    <SelectTrigger className="cave-input">
+                      <SelectValue placeholder="Select Mayan dreamspell" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mayanDreamspells.map((dreamspell) => (
+                        <SelectItem key={dreamspell} value={dreamspell.toLowerCase()}>{dreamspell}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="flex space-x-4">
@@ -340,7 +573,6 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                   </Button>
                   <Button
                     onClick={handleComplete}
-                    disabled={!canProceedStep2}
                     className="flex-1 cave-button"
                   >
                     Complete Profile
