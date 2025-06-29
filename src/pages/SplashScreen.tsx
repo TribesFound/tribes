@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,7 +6,16 @@ const SplashScreen = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/welcome');
+      // Check if user has already completed profile setup (returning user)
+      const hasProfile = localStorage.getItem('tribes_profile_complete');
+      
+      if (hasProfile) {
+        // Returning user - go straight to discover
+        navigate('/discover');
+      } else {
+        // New user - show welcome flow
+        navigate('/welcome');
+      }
     }, 2500);
 
     return () => clearTimeout(timer);
