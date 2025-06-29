@@ -93,6 +93,8 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
   const [instagramConnected, setInstagramConnected] = useState(false);
   const [instagramUsername, setInstagramUsername] = useState('');
   const [spotifyConnected, setSpotifyConnected] = useState(false);
+  const [connectingInstagram, setConnectingInstagram] = useState(false);
+  const [connectingSpotify, setConnectingSpotify] = useState(false);
   const [isBusinessProfile, setIsBusinessProfile] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [allowDiscussionChat, setAllowDiscussionChat] = useState(true);
