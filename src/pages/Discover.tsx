@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -83,6 +83,33 @@ const Discover = () => {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
   const [showNoMatches, setShowNoMatches] = useState(false);
+
+  // Load saved filters on component mount
+  useEffect(() => {
+    const savedFilters = localStorage.getItem('tribes_discovery_filters');
+    if (savedFilters) {
+      const filters = JSON.parse(savedFilters);
+      setDistanceRange(filters.distance || [100]);
+      setAgeRange(filters.ageRange || [18, 100]);
+      setSelectedHobbies(filters.hobbies || []);
+      setSelectedPassions(filters.passions || []);
+      setSelectedLanguages(filters.languages || []);
+      setSelectedDietary(filters.dietary || []);
+    }
+  }, []);
+
+  // Save filters whenever they change
+  useEffect(() => {
+    const filters = {
+      distance: distanceRange,
+      ageRange,
+      hobbies: selectedHobbies,
+      passions: selectedPassions,
+      languages: selectedLanguages,
+      dietary: selectedDietary
+    };
+    localStorage.setItem('tribes_discovery_filters', JSON.stringify(filters));
+  }, [distanceRange, ageRange, selectedHobbies, selectedPassions, selectedLanguages, selectedDietary]);
 
   const currentUser = mockUsers[currentUserIndex];
 

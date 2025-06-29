@@ -46,11 +46,20 @@ const App = () => (
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/passcode-setup" element={<PasscodeSetup />} />
                   <Route path="/passcode-entry" element={<PasscodeEntry 
-                    onSuccess={() => window.location.href = '/profile-setup'} 
+                    onSuccess={() => {
+                      // Check if user has completed profile setup
+                      const hasProfile = localStorage.getItem('tribes_profile_complete');
+                      if (hasProfile) {
+                        window.location.href = '/discover';
+                      } else {
+                        window.location.href = '/profile-setup';
+                      }
+                    }} 
                     onForgotPasscode={() => console.log('Forgot passcode clicked')} 
                   />} />
                   <Route path="/profile-setup" element={<ProfileSetup onComplete={(data) => {
                     console.log('Profile setup complete:', data);
+                    localStorage.setItem('tribes_profile_complete', 'true');
                     window.location.href = '/discover';
                   }} userVerificationData={{}} />} />
                   <Route path="/discover" element={<Discover />} />

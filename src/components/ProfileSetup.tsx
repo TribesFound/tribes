@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Upload, X, Check, AlertTriangle, MapPin } from 'lucide-react';
+import { Camera, Upload, X, Check, AlertTriangle, MapPin, Instagram, Music } from 'lucide-react';
 
 const hobbies = [
   'Photography', 'Hiking', 'Cooking', 'Reading', 'Gaming', 'Painting',
@@ -88,6 +88,8 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
   const [zodiacSign, setZodiacSign] = useState('');
   const [humanDesign, setHumanDesign] = useState('');
   const [mayanDreamspell, setMayanDreamspell] = useState('');
+  const [instagramConnected, setInstagramConnected] = useState(false);
+  const [spotifyConnected, setSpotifyConnected] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [locationShared, setLocationShared] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -159,6 +161,16 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
     }
   };
 
+  const handleInstagramConnect = () => {
+    setInstagramConnected(!instagramConnected);
+    console.log('Instagram connection toggled:', !instagramConnected);
+  };
+
+  const handleSpotifyConnect = () => {
+    setSpotifyConnected(!spotifyConnected);
+    console.log('Spotify connection toggled:', !spotifyConnected);
+  };
+
   const toggleHobby = (hobby: string) => {
     if (selectedHobbies.includes(hobby)) {
       setSelectedHobbies(selectedHobbies.filter(h => h !== hobby));
@@ -210,6 +222,8 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
       zodiacSign,
       humanDesign,
       mayanDreamspell,
+      instagramConnected,
+      spotifyConnected,
       location: userVerificationData.location,
       verifiedContact: userVerificationData.email || userVerificationData.phone,
       dateOfBirth: userVerificationData.dateOfBirth,
@@ -402,6 +416,29 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
                     className="cave-input"
                     placeholder="What are you looking for in your tribe?"
                   />
+                </div>
+
+                {/* Social Media Connections */}
+                <div className="space-y-4">
+                  <Label className="text-lg font-semibold cave-text">Social Media (Optional)</Label>
+                  <div className="flex space-x-4">
+                    <Button
+                      onClick={handleInstagramConnect}
+                      variant={instagramConnected ? "default" : "outline"}
+                      className={instagramConnected ? 'cave-button' : 'cave-button-outline'}
+                    >
+                      <Instagram className="w-4 h-4 mr-2" />
+                      {instagramConnected ? 'Connected' : 'Connect Instagram'}
+                    </Button>
+                    <Button
+                      onClick={handleSpotifyConnect}
+                      variant={spotifyConnected ? "default" : "outline"}
+                      className={spotifyConnected ? 'cave-button' : 'cave-button-outline'}
+                    >
+                      <Music className="w-4 h-4 mr-2" />
+                      {spotifyConnected ? 'Connected' : 'Connect Spotify'}
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Languages */}

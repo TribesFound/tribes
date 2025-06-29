@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,7 +46,7 @@ const Events = () => {
       time: '10:00 AM',
       location: 'Santa Monica Beach',
       tags: ['Sports', 'Outdoor', 'Competition'],
-      hobbies: ['Sports', 'Fitness'],
+      hobbies: ['Swimming', 'Fitness'],
       passions: ['Health', 'Community'],
       attendees: 24,
       maxAttendees: 30,
@@ -61,7 +60,7 @@ const Events = () => {
       time: '2:00 PM',
       location: 'Downtown LA',
       tags: ['Photography', 'Art', 'Walking'],
-      hobbies: ['Photography', 'Walking'],
+      hobbies: ['Photography', 'Traveling'],
       passions: ['Art', 'Culture'],
       attendees: 12,
       maxAttendees: 15,
@@ -100,7 +99,7 @@ const Events = () => {
   const toggleHobby = (hobby: string) => {
     if (selectedHobbies.includes(hobby)) {
       setSelectedHobbies(selectedHobbies.filter(h => h !== hobby));
-    } else {
+    } else if (selectedHobbies.length < 5) {
       setSelectedHobbies([...selectedHobbies, hobby]);
     }
   };
@@ -108,7 +107,7 @@ const Events = () => {
   const togglePassion = (passion: string) => {
     if (selectedPassions.includes(passion)) {
       setSelectedPassions(selectedPassions.filter(p => p !== passion));
-    } else {
+    } else if (selectedPassions.length < 5) {
       setSelectedPassions([...selectedPassions, passion]);
     }
   };
@@ -140,7 +139,7 @@ const Events = () => {
   };
 
   return (
-    <div className="min-h-screen tribal-gradient p-4 pb-20">
+    <div className="min-h-screen cave-gradient p-4 pb-20">
       <div className="max-w-md mx-auto pt-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
@@ -149,19 +148,19 @@ const Events = () => {
               alt="Tribes Hand Logo" 
               className="w-10 h-10"
             />
-            <h1 className="text-2xl font-bold tribal-font text-white">Gather</h1>
+            <h1 className="text-2xl font-bold cave-font text-amber-900">Gather</h1>
           </div>
           <div className="flex space-x-2">
             <Sheet open={showFilters} onOpenChange={setShowFilters}>
               <SheetTrigger asChild>
-                <Button variant="ghost" className="tribal-button-ghost p-2">
+                <Button variant="ghost" className="cave-button-ghost p-2">
                   <Filter className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="tribal-card w-full max-w-md">
+              <SheetContent side="right" className="cave-card w-full max-w-md">
                 <SheetHeader>
-                  <SheetTitle className="tribal-font text-amber-900">Event Filters</SheetTitle>
-                  <SheetDescription className="tribal-text">
+                  <SheetTitle className="cave-font text-amber-900">Event Filters</SheetTitle>
+                  <SheetDescription className="cave-text">
                     Find events matching your interests
                   </SheetDescription>
                 </SheetHeader>
@@ -169,8 +168,8 @@ const Events = () => {
                 <div className="space-y-6 mt-6">
                   {/* Hobbies Filter */}
                   <div className="space-y-3">
-                    <label className="text-sm font-medium tribal-text">
-                      Hobbies: {selectedHobbies.length} selected
+                    <label className="text-sm font-medium cave-text">
+                      Hobbies (max 5): {selectedHobbies.length}/5
                     </label>
                     <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                       {hobbies.map((hobby) => (
@@ -179,9 +178,9 @@ const Events = () => {
                           variant={selectedHobbies.includes(hobby) ? "default" : "outline"}
                           className={`cursor-pointer text-xs p-2 transition-all ${
                             selectedHobbies.includes(hobby)
-                              ? 'tribal-badge'
-                              : 'tribal-badge-outline'
-                          }`}
+                              ? 'cave-badge'
+                              : 'cave-badge-outline'
+                          } ${selectedHobbies.length >= 5 && !selectedHobbies.includes(hobby) ? 'opacity-50' : ''}`}
                           onClick={() => toggleHobby(hobby)}
                         >
                           {hobby}
@@ -192,8 +191,8 @@ const Events = () => {
 
                   {/* Passions Filter */}
                   <div className="space-y-3">
-                    <label className="text-sm font-medium tribal-text">
-                      Passions: {selectedPassions.length} selected
+                    <label className="text-sm font-medium cave-text">
+                      Passions (max 5): {selectedPassions.length}/5
                     </label>
                     <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                       {passions.map((passion) => (
@@ -202,9 +201,9 @@ const Events = () => {
                           variant={selectedPassions.includes(passion) ? "default" : "outline"}
                           className={`cursor-pointer text-xs p-2 transition-all ${
                             selectedPassions.includes(passion)
-                              ? 'tribal-badge'
-                              : 'tribal-badge-outline'
-                          }`}
+                              ? 'cave-badge'
+                              : 'cave-badge-outline'
+                          } ${selectedPassions.length >= 5 && !selectedPassions.includes(passion) ? 'opacity-50' : ''}`}
                           onClick={() => togglePassion(passion)}
                         >
                           {passion}
@@ -217,13 +216,13 @@ const Events = () => {
                     <Button
                       onClick={clearFilters}
                       variant="outline"
-                      className="flex-1 tribal-button-outline"
+                      className="flex-1 cave-button-outline"
                     >
                       Clear All
                     </Button>
                     <Button
                       onClick={applyFilters}
-                      className="flex-1 tribal-button"
+                      className="flex-1 cave-button"
                     >
                       Apply Filters
                     </Button>
@@ -231,7 +230,7 @@ const Events = () => {
                 </div>
               </SheetContent>
             </Sheet>
-            <Button className="tribal-button p-2">
+            <Button className="cave-button p-2">
               <Plus className="w-5 h-5" />
             </Button>
           </div>
@@ -244,18 +243,18 @@ const Events = () => {
               placeholder="Search events..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="tribal-input pl-10"
+              className="cave-input pl-10"
             />
           </div>
         </div>
 
         <div className="space-y-4">
           {filteredEvents.map((event) => (
-            <Card key={event.id} className="tribal-card">
+            <Card key={event.id} className="cave-card">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg tribal-font text-amber-900 mb-2">
+                    <CardTitle className="text-lg cave-font text-amber-900 mb-2">
                       {event.title}
                     </CardTitle>
                     <p className="text-sm text-amber-700 mb-3">
@@ -271,7 +270,7 @@ const Events = () => {
                 
                 <div className="flex flex-wrap gap-2">
                   {event.tags.map((tag) => (
-                    <Badge key={tag} className="tribal-badge-outline text-xs">
+                    <Badge key={tag} className="cave-badge-outline text-xs">
                       {tag}
                     </Badge>
                   ))}
@@ -304,7 +303,7 @@ const Events = () => {
                     
                     <Button
                       onClick={() => handleRSVP(event.id)}
-                      className={event.isRSVPed ? 'tribal-button-outline' : 'tribal-button'}
+                      className={event.isRSVPed ? 'cave-button-outline' : 'cave-button'}
                       size="sm"
                     >
                       {event.isRSVPed ? 'Cancel RSVP' : 'RSVP'}
@@ -319,10 +318,10 @@ const Events = () => {
         {filteredEvents.length === 0 && (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 mx-auto text-orange-300 mb-4" />
-            <h3 className="text-xl font-bold tribal-font text-white mb-2">
+            <h3 className="text-xl font-bold cave-font text-amber-900 mb-2">
               No events found
             </h3>
-            <p className="text-orange-200">
+            <p className="text-amber-700">
               {searchTerm || selectedHobbies.length > 0 || selectedPassions.length > 0
                 ? 'Try adjusting your search or filters' 
                 : 'Check back soon for upcoming events!'}
