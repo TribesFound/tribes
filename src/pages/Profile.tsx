@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Settings, Crown, Shield, Heart, MessageCircle, Calendar, Camera, MapPin } from 'lucide-react';
+import { Settings, Crown, Shield, Heart, MessageCircle, Calendar, Camera, MapPin, Instagram, Music, Languages, Users, Wine, Cigarette, UtensilsCrossed, Star, Eye, Sparkles } from 'lucide-react';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -12,15 +13,28 @@ const Profile = () => {
     name: 'Jordan Smith',
     age: 26,
     location: 'San Francisco, CA',
-    hobbies: ['Photography', 'Hiking', 'Cooking', 'Reading'],
-    interests: ['Technology', 'Travel', 'Art', 'Science'],
     bio: 'Adventure seeker and tech enthusiast. Love capturing moments through photography and exploring new places. Always looking for new trails to hike and people to share experiences with.',
+    lookingFor: 'Meaningful connections and outdoor adventure partners',
+    hobbies: ['Photography', 'Hiking', 'Cooking', 'Reading', 'Yoga'],
+    passions: ['Technology', 'Travel', 'Art', 'Science', 'Environment'],
+    languages: ['English', 'Spanish', 'French'],
+    pets: ['Dog', 'Cat'],
+    hasPets: true,
+    drinkPreference: 'Socially',
+    smokePreference: 'No',
+    dietaryPreference: 'Vegetarian',
+    zodiacSign: 'Leo',
+    humanDesign: 'Generator',
+    mayanDreamspell: 'Blue Night',
+    instagramConnected: true,
+    spotifyConnected: true,
     avatar: '/placeholder.svg',
     additionalPhotos: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
     isPro: false,
     matchCount: 12,
     friendCount: 8,
-    verifiedEmail: 'jordan@example.com'
+    verifiedEmail: 'jordan@example.com',
+    locationShared: true
   });
 
   return (
@@ -59,10 +73,34 @@ const Profile = () => {
                 <span>{user.location}</span>
               </div>
 
-              <Badge className="bg-green-100 text-green-800 border-green-200">
-                <Shield className="w-3 h-3 mr-1" />
-                Verified
-              </Badge>
+              <div className="flex justify-center space-x-2 mb-4">
+                <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <Shield className="w-3 h-3 mr-1" />
+                  Verified
+                </Badge>
+                {user.locationShared && (
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                    <MapPin className="w-3 h-3 mr-1" />
+                    Location Shared
+                  </Badge>
+                )}
+              </div>
+
+              {/* Social Media Connections */}
+              <div className="flex justify-center space-x-2 mb-4">
+                {user.instagramConnected && (
+                  <Badge className="bg-pink-100 text-pink-800 border-pink-200">
+                    <Instagram className="w-3 h-3 mr-1" />
+                    Instagram
+                  </Badge>
+                )}
+                {user.spotifyConnected && (
+                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                    <Music className="w-3 h-3 mr-1" />
+                    Spotify
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {/* Photo Gallery */}
@@ -82,18 +120,20 @@ const Profile = () => {
               </div>
             )}
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center tribal-card p-4">
-                  <div className="text-2xl font-bold tribal-font text-orange-600">{user.matchCount}</div>
-                  <div className="text-sm tribal-text">Connections</div>
-                </div>
-                <div className="text-center tribal-card p-4">
-                  <div className="text-2xl font-bold tribal-font text-green-600">{user.friendCount}</div>
-                  <div className="text-sm tribal-text">Friends</div>
-                </div>
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="text-center tribal-card p-4">
+                <div className="text-2xl font-bold tribal-font text-orange-600">{user.matchCount}</div>
+                <div className="text-sm tribal-text">Connections</div>
               </div>
+              <div className="text-center tribal-card p-4">
+                <div className="text-2xl font-bold tribal-font text-green-600">{user.friendCount}</div>
+                <div className="text-sm tribal-text">Friends</div>
+              </div>
+            </div>
 
+            <div className="space-y-6">
+              {/* Bio */}
               {user.bio && (
                 <div>
                   <h3 className="font-bold tribal-font text-lg mb-2 text-amber-900">About Me</h3>
@@ -103,6 +143,17 @@ const Profile = () => {
                 </div>
               )}
 
+              {/* Looking For */}
+              {user.lookingFor && (
+                <div>
+                  <h3 className="font-bold tribal-font text-lg mb-2 text-amber-900">Looking For</h3>
+                  <p className="tribal-text text-sm leading-relaxed">
+                    {user.lookingFor}
+                  </p>
+                </div>
+              )}
+
+              {/* Hobbies */}
               <div>
                 <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Hobbies</h3>
                 <div className="flex flex-wrap gap-2">
@@ -114,20 +165,122 @@ const Profile = () => {
                 </div>
               </div>
 
+              {/* Passions */}
               <div>
-                <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Interests</h3>
+                <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Passions</h3>
                 <div className="flex flex-wrap gap-2">
-                  {user.interests.map((interest) => (
-                    <Badge key={interest} className="tribal-badge">
-                      {interest}
+                  {user.passions.map((passion) => (
+                    <Badge key={passion} className="tribal-badge">
+                      {passion}
                     </Badge>
                   ))}
+                </div>
+              </div>
+
+              {/* Languages */}
+              {user.languages.length > 0 && (
+                <div>
+                  <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900 flex items-center">
+                    <Languages className="w-5 h-5 mr-2" />
+                    Languages
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {user.languages.map((language) => (
+                      <Badge key={language} className="tribal-badge bg-blue-100 text-blue-800 border-blue-200">
+                        {language}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Pets */}
+              {user.hasPets && user.pets.length > 0 && (
+                <div>
+                  <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900 flex items-center">
+                    <Heart className="w-5 h-5 mr-2" />
+                    Pets
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {user.pets.map((pet) => (
+                      <Badge key={pet} className="tribal-badge bg-green-100 text-green-800 border-green-200">
+                        {pet}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Lifestyle Preferences */}
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex items-center justify-between p-3 tribal-card">
+                  <div className="flex items-center space-x-2">
+                    <Wine className="w-5 h-5 text-purple-600" />
+                    <span className="tribal-text font-medium">Drinking</span>
+                  </div>
+                  <Badge className="tribal-badge bg-purple-100 text-purple-800 border-purple-200">
+                    {user.drinkPreference}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-3 tribal-card">
+                  <div className="flex items-center space-x-2">
+                    <Cigarette className="w-5 h-5 text-gray-600" />
+                    <span className="tribal-text font-medium">Smoking</span>
+                  </div>
+                  <Badge className="tribal-badge bg-gray-100 text-gray-800 border-gray-200">
+                    {user.smokePreference}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-3 tribal-card">
+                  <div className="flex items-center space-x-2">
+                    <UtensilsCrossed className="w-5 h-5 text-green-600" />
+                    <span className="tribal-text font-medium">Diet</span>
+                  </div>
+                  <Badge className="tribal-badge bg-green-100 text-green-800 border-green-200">
+                    {user.dietaryPreference}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Spiritual & Personality */}
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex items-center justify-between p-3 tribal-card">
+                  <div className="flex items-center space-x-2">
+                    <Star className="w-5 h-5 text-yellow-600" />
+                    <span className="tribal-text font-medium">Zodiac</span>
+                  </div>
+                  <Badge className="tribal-badge bg-yellow-100 text-yellow-800 border-yellow-200">
+                    {user.zodiacSign}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-3 tribal-card">
+                  <div className="flex items-center space-x-2">
+                    <Eye className="w-5 h-5 text-indigo-600" />
+                    <span className="tribal-text font-medium">Human Design</span>
+                  </div>
+                  <Badge className="tribal-badge bg-indigo-100 text-indigo-800 border-indigo-200">
+                    {user.humanDesign}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-3 tribal-card">
+                  <div className="flex items-center space-x-2">
+                    <Sparkles className="w-5 h-5 text-cyan-600" />
+                    <span className="tribal-text font-medium">Mayan Dreamspell</span>
+                  </div>
+                  <Badge className="tribal-badge bg-cyan-100 text-cyan-800 border-cyan-200">
+                    {user.mayanDreamspell}
+                  </Badge>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Action Cards */}
         <div className="space-y-4">
           {!user.isPro && (
             <Card className="tribal-card border-2 border-yellow-200">
