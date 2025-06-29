@@ -5,10 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Settings, Crown, Shield, Heart, MessageCircle, Calendar, Camera, MapPin, Instagram, Music, Languages, Users, Wine, Cigarette, UtensilsCrossed, Star, Eye, Sparkles } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Settings, Crown, Shield, Heart, MessageCircle, Calendar, Camera, MapPin, Instagram, Music, Languages, Users, Wine, Cigarette, UtensilsCrossed, Star, Eye, Sparkles, Link, Upload, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [user] = useState({
     name: 'Jordan Smith',
     age: 26,
@@ -27,15 +32,85 @@ const Profile = () => {
     humanDesign: 'Generator',
     mayanDreamspell: 'Blue Night',
     instagramConnected: true,
+    instagramUsername: '@jordan_adventures',
     spotifyConnected: true,
+    websiteUrl: 'https://jordansmith.com',
     avatar: '/placeholder.svg',
     additionalPhotos: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
-    isPro: false,
+    isPro: true,
+    isBusinessProfile: true,
+    allowDiscussionChat: true,
     matchCount: 12,
     friendCount: 8,
     verifiedEmail: 'jordan@example.com',
     locationShared: true
   });
+
+  const [uploading, setUploading] = useState(false);
+  const [connectingInstagram, setConnectingInstagram] = useState(false);
+  const [connectingSpotify, setConnectingSpotify] = useState(false);
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      // Simulate upload process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast({
+        title: "Photo uploaded successfully!",
+        description: "Your profile photo has been updated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleInstagramConnect = async () => {
+    setConnectingInstagram(true);
+    try {
+      // Simulate Instagram connection
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast({
+        title: "Instagram connected!",
+        description: "Your Instagram account is now linked to your profile.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection failed",
+        description: "Unable to connect to Instagram. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConnectingInstagram(false);
+    }
+  };
+
+  const handleSpotifyConnect = async () => {
+    setConnectingSpotify(true);
+    try {
+      // Simulate Spotify connection
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast({
+        title: "Spotify connected!",
+        description: "Your music preferences are now synced.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection failed",
+        description: "Unable to connect to Spotify. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConnectingSpotify(false);
+    }
+  };
 
   return (
     <div className="min-h-screen tribal-gradient p-4 pb-20">
@@ -54,18 +129,41 @@ const Profile = () => {
         <Card className="tribal-card">
           <CardContent className="p-6">
             <div className="text-center mb-6">
-              <Avatar className="w-32 h-32 mx-auto mb-4 ring-4 ring-orange-200">
-                <AvatarImage src={user.avatar} />
-                <AvatarFallback className="bg-gradient-to-br from-orange-400 to-yellow-400 text-white text-3xl tribal-font">
-                  {user.name.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative inline-block">
+                <Avatar className="w-32 h-32 mx-auto mb-4 ring-4 ring-orange-200">
+                  <AvatarImage src={user.avatar} />
+                  <AvatarFallback className="bg-gradient-to-br from-orange-400 to-yellow-400 text-white text-3xl tribal-font">
+                    {user.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <Button
+                  onClick={() => document.getElementById('photo-upload')?.click()}
+                  className="absolute bottom-2 right-2 rounded-full w-10 h-10 p-0 tribal-button"
+                  disabled={uploading}
+                >
+                  {uploading ? <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : <Camera className="w-5 h-5" />}
+                </Button>
+                
+                <input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0])}
+                  className="hidden"
+                />
+              </div>
               
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <h2 className="text-2xl font-bold tribal-font text-amber-900">
                   {user.name}, {user.age}
                 </h2>
                 {user.isPro && <Crown className="w-6 h-6 text-yellow-500" />}
+                {user.isBusinessProfile && (
+                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                    Professional
+                  </Badge>
+                )}
               </div>
               
               <div className="flex items-center justify-center tribal-text mb-2">
@@ -86,22 +184,80 @@ const Profile = () => {
                 )}
               </div>
 
-              {/* Social Media Connections */}
-              <div className="flex justify-center space-x-2 mb-4">
-                {user.instagramConnected && (
-                  <Badge className="bg-pink-100 text-pink-800 border-pink-200">
-                    <Instagram className="w-3 h-3 mr-1" />
-                    Instagram
-                  </Badge>
-                )}
-                {user.spotifyConnected && (
-                  <Badge className="bg-green-100 text-green-800 border-green-200">
-                    <Music className="w-3 h-3 mr-1" />
-                    Spotify
-                  </Badge>
+              {/* Social Media & Professional Connections */}
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-center space-x-2">
+                  <Button
+                    onClick={handleInstagramConnect}
+                    disabled={connectingInstagram}
+                    className={user.instagramConnected ? 'tribal-button' : 'tribal-button-outline'}
+                    size="sm"
+                  >
+                    {connectingInstagram ? (
+                      <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+                    ) : (
+                      <Instagram className="w-4 h-4 mr-2" />
+                    )}
+                    {user.instagramConnected ? user.instagramUsername : 'Connect Instagram'}
+                  </Button>
+                  
+                  <Button
+                    onClick={handleSpotifyConnect}
+                    disabled={connectingSpotify}
+                    className={user.spotifyConnected ? 'tribal-button' : 'tribal-button-outline'}
+                    size="sm"
+                  >
+                    {connectingSpotify ? (
+                      <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+                    ) : (
+                      <Music className="w-4 h-4 mr-2" />
+                    )}
+                    {user.spotifyConnected ? 'Spotify Connected' : 'Connect Spotify'}
+                  </Button>
+                </div>
+
+                {user.isBusinessProfile && user.websiteUrl && (
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={() => window.open(user.websiteUrl, '_blank')}
+                      className="tribal-button-outline"
+                      size="sm"
+                    >
+                      <Link className="w-4 h-4 mr-2" />
+                      Visit Website
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
+
+            {/* Business Profile Settings */}
+            {user.isBusinessProfile && (
+              <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <h3 className="font-bold tribal-font text-lg mb-3 text-purple-800">Professional Settings</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm font-medium text-purple-700">Allow Discussion Chat</Label>
+                      <p className="text-xs text-purple-600">Let people chat about your events</p>
+                    </div>
+                    <Switch 
+                      checked={user.allowDiscussionChat}
+                      className="data-[state=checked]:bg-purple-600"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-purple-700">Website URL</Label>
+                    <Input
+                      defaultValue={user.websiteUrl}
+                      placeholder="https://your-website.com"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Photo Gallery */}
             {user.additionalPhotos.length > 0 && (
@@ -304,14 +460,22 @@ const Profile = () => {
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <Button className="tribal-card h-16 flex-col border-2 border-orange-200 hover:border-orange-300 hover:bg-orange-50" variant="outline">
+            <Button 
+              onClick={() => navigate('/bonds')}
+              className="tribal-card h-16 flex-col border-2 border-orange-200 hover:border-orange-300 hover:bg-orange-50" 
+              variant="outline"
+            >
               <MessageCircle className="w-6 h-6 mb-1 text-orange-600" />
               <span className="text-sm font-medium tribal-text">Messages</span>
             </Button>
             
-            <Button className="tribal-card h-16 flex-col border-2 border-green-200 hover:border-green-300 hover:bg-green-50" variant="outline">
+            <Button 
+              onClick={() => navigate('/friends')}
+              className="tribal-card h-16 flex-col border-2 border-green-200 hover:border-green-300 hover:bg-green-50" 
+              variant="outline"
+            >
               <Heart className="w-6 h-6 mb-1 text-green-600" />
-              <span className="text-sm font-medium tribal-text">Favorites</span>
+              <span className="text-sm font-medium tribal-text">Friends</span>
             </Button>
           </div>
 

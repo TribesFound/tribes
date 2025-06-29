@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Upload, X, Check, AlertTriangle, MapPin, Instagram, Music } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Camera, Upload, X, Check, AlertTriangle, MapPin, Instagram, Music, Link, Briefcase } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const hobbies = [
   'Photography', 'Hiking', 'Cooking', 'Reading', 'Gaming', 'Painting',
@@ -71,6 +72,7 @@ interface ProfileSetupProps {
 }
 
 const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) => {
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
@@ -89,7 +91,11 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
   const [humanDesign, setHumanDesign] = useState('');
   const [mayanDreamspell, setMayanDreamspell] = useState('');
   const [instagramConnected, setInstagramConnected] = useState(false);
+  const [instagramUsername, setInstagramUsername] = useState('');
   const [spotifyConnected, setSpotifyConnected] = useState(false);
+  const [isBusinessProfile, setIsBusinessProfile] = useState(false);
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [allowDiscussionChat, setAllowDiscussionChat] = useState(true);
   const [uploadError, setUploadError] = useState('');
   const [locationShared, setLocationShared] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -161,14 +167,47 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
     }
   };
 
-  const handleInstagramConnect = () => {
-    setInstagramConnected(!instagramConnected);
-    console.log('Instagram connection toggled:', !instagramConnected);
+  const handleInstagramConnect = async () => {
+    setConnectingInstagram(true);
+    try {
+      // Simulate Instagram OAuth flow
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setInstagramConnected(true);
+      setInstagramUsername('@' + name.toLowerCase().replace(' ', '_'));
+      toast({
+        title: "Instagram connected!",
+        description: "Your Instagram account has been linked successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection failed",
+        description: "Unable to connect to Instagram. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConnectingInstagram(false);
+    }
   };
 
-  const handleSpotifyConnect = () => {
-    setSpotifyConnected(!spotifyConnected);
-    console.log('Spotify connection toggled:', !spotifyConnected);
+  const handleSpotifyConnect = async () => {
+    setConnectingSpotify(true);
+    try {
+      // Simulate Spotify OAuth flow
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setSpotifyConnected(true);
+      toast({
+        title: "Spotify connected!",
+        description: "Your music preferences will be synced to your profile.",
+      });
+    } catch (error) {
+      toast({
+        title: "Connection failed",
+        description: "Unable to connect to Spotify. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConnectingSpotify(false);
+    }
   };
 
   const toggleHobby = (hobby: string) => {
@@ -223,7 +262,11 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
       humanDesign,
       mayanDreamspell,
       instagramConnected,
+      instagramUsername: instagramConnected ? instagramUsername : '',
       spotifyConnected,
+      isBusinessProfile,
+      websiteUrl: isBusinessProfile ? websiteUrl : '',
+      allowDiscussionChat: isBusinessProfile ? allowDiscussionChat : false,
       location: userVerificationData.location,
       verifiedContact: userVerificationData.email || userVerificationData.phone,
       dateOfBirth: userVerificationData.dateOfBirth,
@@ -391,6 +434,50 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
 
             {step === 2 && (
               <div className="space-y-6">
+                {/* Business Profile Toggle */}
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <Label className="text-lg font-semibold text-purple-800 flex items-center">
+                        <Briefcase className="w-5 h-5 mr-2" />
+                        Professional Profile
+                      </Label>
+                      <p className="text-sm text-purple-600">Enable professional features for business accounts</p>
+                    </div>
+                    <Switch 
+                      checked={isBusinessProfile}
+                      onCheckedChange={setIsBusinessProfile}
+                      className="data-[state=checked]:bg-purple-600"
+                    />
+                  </div>
+
+                  {isBusinessProfile && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium text-purple-700">Website URL</Label>
+                        <Input
+                          value={websiteUrl}
+                          onChange={(e) => setWebsiteUrl(e.target.value)}
+                          placeholder="https://your-business.com"
+                          className="cave-input"
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label className="text-sm font-medium text-purple-700">Allow Event Discussions</Label>
+                          <p className="text-xs text-purple-600">Enable chat for your events</p>
+                        </div>
+                        <Switch 
+                          checked={allowDiscussionChat}
+                          onCheckedChange={setAllowDiscussionChat}
+                          className="data-[state=checked]:bg-purple-600"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Bio */}
                 <div className="space-y-2">
                   <Label htmlFor="bio" className="cave-text">Bio (Optional - max 500 characters)</Label>
@@ -420,24 +507,59 @@ const ProfileSetup = ({ onComplete, userVerificationData }: ProfileSetupProps) =
 
                 {/* Social Media Connections */}
                 <div className="space-y-4">
-                  <Label className="text-lg font-semibold cave-text">Social Media (Optional)</Label>
-                  <div className="flex space-x-4">
-                    <Button
-                      onClick={handleInstagramConnect}
-                      variant={instagramConnected ? "default" : "outline"}
-                      className={instagramConnected ? 'cave-button' : 'cave-button-outline'}
-                    >
-                      <Instagram className="w-4 h-4 mr-2" />
-                      {instagramConnected ? 'Connected' : 'Connect Instagram'}
-                    </Button>
-                    <Button
-                      onClick={handleSpotifyConnect}
-                      variant={spotifyConnected ? "default" : "outline"}
-                      className={spotifyConnected ? 'cave-button' : 'cave-button-outline'}
-                    >
-                      <Music className="w-4 h-4 mr-2" />
-                      {spotifyConnected ? 'Connected' : 'Connect Spotify'}
-                    </Button>
+                  <Label className="text-lg font-semibold cave-text">Social Media Connections (Optional)</Label>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-pink-50 rounded-lg border border-pink-200">
+                      <div className="flex items-center space-x-3">
+                        <Instagram className="w-6 h-6 text-pink-600" />
+                        <div>
+                          <span className="font-medium text-pink-800">Instagram</span>
+                          {instagramConnected && (
+                            <p className="text-sm text-pink-600">{instagramUsername}</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleInstagramConnect}
+                        disabled={connectingInstagram}
+                        className={instagramConnected ? 'cave-button' : 'cave-button-outline'}
+                        size="sm"
+                      >
+                        {connectingInstagram ? (
+                          <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                        ) : instagramConnected ? (
+                          'Connected'
+                        ) : (
+                          'Connect'
+                        )}
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center space-x-3">
+                        <Music className="w-6 h-6 text-green-600" />
+                        <div>
+                          <span className="font-medium text-green-800">Spotify</span>
+                          {spotifyConnected && (
+                            <p className="text-sm text-green-600">Music preferences synced</p>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleSpotifyConnect}
+                        disabled={connectingSpotify}
+                        className={spotifyConnected ? 'cave-button' : 'cave-button-outline'}
+                        size="sm"
+                      >
+                        {connectingSpotify ? (
+                          <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+                        ) : spotifyConnected ? (
+                          'Connected'
+                        ) : (
+                          'Connect'
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
