@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,7 @@ import {
 import SubscriptionBadge, { SubscriptionTier } from '@/components/SubscriptionBadge';
 
 const Friends = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'active' | 'distance'>('name');
 
@@ -124,7 +126,17 @@ const Friends = () => {
 
   const handleBondClick = (bondId: number) => {
     console.log(`Opening chat with bond ${bondId}`);
-    // Navigate to chat page with this person
+    navigate(`/chat/${bondId}`);
+  };
+
+  const handleMessageClick = (friendId: number) => {
+    console.log(`Opening chat with friend ${friendId}`);
+    navigate(`/chat/${friendId}`);
+  };
+
+  const handleProfileClick = (friendId: number) => {
+    console.log(`Opening profile for friend ${friendId}`);
+    navigate(`/profile/${friendId}`);
   };
 
   const handleUnfriend = (friendId: number, friendName: string) => {
@@ -148,7 +160,7 @@ const Friends = () => {
   };
 
   return (
-    <div className="min-h-screen cave-gradient p-4 pb-20">
+    <div className="min-h-screen cave-gradient p-4 pb-20 overflow-y-auto">
       <div className="max-w-md mx-auto pt-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
@@ -253,7 +265,10 @@ const Friends = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="relative">
-                        <Avatar className="w-12 h-12 ring-2 ring-orange-200">
+                        <Avatar 
+                          className="w-12 h-12 ring-2 ring-orange-200 cursor-pointer"
+                          onClick={() => handleProfileClick(friend.id)}
+                        >
                           <AvatarImage src={friend.avatar} />
                           <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white cave-font">
                             {friend.name.split(' ').map(n => n[0]).join('')}
@@ -266,7 +281,10 @@ const Friends = () => {
                       
                       <div className="flex-1">
                         <div className="flex items-center space-x-2">
-                          <h3 className="font-bold cave-font text-amber-900">
+                          <h3 
+                            className="font-bold cave-font text-amber-900 cursor-pointer hover:text-orange-600"
+                            onClick={() => handleProfileClick(friend.id)}
+                          >
                             {friend.name}
                           </h3>
                           <SubscriptionBadge tier={friend.tier} size="sm" showLabel={false} />
@@ -293,7 +311,7 @@ const Friends = () => {
                     <div className="flex items-center space-x-2">
                       <Button
                         className="cave-button p-2"
-                        onClick={() => console.log(`Opening chat with ${friend.name}`)}
+                        onClick={() => handleMessageClick(friend.id)}
                       >
                         <MessageCircle className="w-4 h-4" />
                       </Button>

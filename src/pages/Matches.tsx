@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,8 +25,18 @@ const bonds = [
 ];
 
 const Matches = () => {
+  const navigate = useNavigate();
+
+  const handleChatClick = (bondId: number) => {
+    navigate(`/chat/${bondId}`);
+  };
+
+  const handleExploreEvents = () => {
+    navigate('/events');
+  };
+
   return (
-    <div className="min-h-screen cave-gradient p-4 pb-20">
+    <div className="min-h-screen cave-gradient p-4 pb-20 overflow-y-auto">
       <div className="max-w-md mx-auto pt-8">
         <div className="text-center mb-8">
           <img 
@@ -43,6 +53,7 @@ const Matches = () => {
             <Card
               key={bond.id}
               className="cave-card hover:bg-orange-50/10 transition-all cursor-pointer"
+              onClick={() => handleChatClick(bond.id)}
             >
               <CardContent className="p-4">
                 <div className="flex items-center space-x-4">
@@ -74,6 +85,10 @@ const Matches = () => {
                     <Button
                       size="sm"
                       className="cave-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChatClick(bond.id);
+                      }}
                     >
                       <MessageCircle className="w-4 h-4 mr-2" />
                       Chat
@@ -82,6 +97,10 @@ const Matches = () => {
                       size="sm"
                       variant="outline"
                       className="cave-button-outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Adding friend:', bond.name);
+                      }}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
                       Add Friend
@@ -114,7 +133,7 @@ const Matches = () => {
                 <h3 className="text-amber-900 font-semibold cave-font">Community Events</h3>
                 <p className="text-amber-700 text-sm">Discover local meetups</p>
               </div>
-              <Button className="cave-button">
+              <Button className="cave-button" onClick={handleExploreEvents}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Explore
               </Button>
