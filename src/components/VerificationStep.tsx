@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Mail, Phone, MapPin, Calendar, Shield, CheckCircle, AlertTriangle } fro
 import { requestSecureLocation, LocationError } from '@/utils/geolocation';
 import { verifyAge } from '@/utils/ageVerification';
 import GoogleSignInButton from './GoogleSignInButton';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface VerificationStepProps {
   onComplete: (data: {
@@ -21,7 +21,6 @@ interface VerificationStepProps {
 
 const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const [step, setStep] = useState<'method' | 'contact' | 'verify' | 'age' | 'location'>('method');
-  const [authMethod, setAuthMethod] = useState<'email' | 'phone' | 'google'>('email');
   const [contactMethod, setContactMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -31,6 +30,8 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isLocationGranted, setIsLocationGranted] = useState(false);
   const [error, setError] = useState('');
+  
+  const { sendVerificationCode, verifyCode } = useAuth();
 
   const handleGoogleSuccess = () => {
     setStep('age');
@@ -45,21 +46,32 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
     setError('');
     
     try {
-      // Simulate sending verification code
-      setTimeout(() => {
-        setIsVerifying(false);
-        setStep('verify');
-        console.log(`Verification code sent to ${contactMethod === 'email' ? email : phone}`);
-      }, 1500);
+      const contact = contactMethod === 'email' ? email : phone;
+      await sendVerificationCode(contact, contactMethod);
+      setStep('verify');
+      console.log(`Verification code sent to ${contact} via ${contactMethod}`);
     } catch (error) {
       setError('Failed to send verification code');
+      console.error('Verification send error:', error);
+    } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     if (verificationCode.length === 6) {
-      setStep('age');
+      try {
+        const isValid = await verifyCode(verificationCode);
+        if (isValid) {
+          setStep('age');
+          setError('');
+        } else {
+          setError('Invalid verification code. Please try again.');
+        }
+      } catch (error) {
+        setError('Verification failed. Please try again.');
+        console.error('Code verification error:', error);
+      }
     }
   };
 
@@ -90,7 +102,6 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       
       setIsLocationGranted(true);
       
-      // Complete verification
       setTimeout(() => {
         onComplete({
           [contactMethod]: contactMethod === 'email' ? email : phone,
@@ -243,7 +254,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     onChange={(value) => {
                       setVerificationCode(value);
                       if (value.length === 6) {
-                        setTimeout(handleVerifyCode, 500);
+                        setTimeout(() => handleVerifyCode(), 500);
                       }
                     }}
                   >

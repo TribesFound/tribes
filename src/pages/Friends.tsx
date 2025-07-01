@@ -141,22 +141,18 @@ const Friends = () => {
 
   const handleUnfriend = (friendId: number, friendName: string) => {
     console.log(`Unfriending ${friendName}`);
-    // Implement unfriend logic
   };
 
   const handleBlock = (friendId: number, friendName: string) => {
     console.log(`Blocking ${friendName}`);
-    // Implement block logic
   };
 
   const handleReport = (friendId: number, friendName: string) => {
     console.log(`Reporting ${friendName}`);
-    // Implement report logic
   };
 
   const handleRestrict = (friendId: number, friendName: string) => {
     console.log(`Restricting ${friendName}`);
-    // Implement restrict logic for professional accounts
   };
 
   return (
@@ -177,39 +173,41 @@ const Friends = () => {
           </Badge>
         </div>
 
-        {/* Bonds Section */}
+        {/* Bonds Section - Now Horizontally Scrollable */}
         <div className="mb-6">
           <h2 className="text-lg font-bold cave-font text-white mb-3">Your Bonds</h2>
-          <div className="flex space-x-3 overflow-x-auto pb-2">
-            {mockBonds.map((bond) => (
-              <div
-                key={bond.id}
-                className="flex-shrink-0 cursor-pointer"
-                onClick={() => handleBondClick(bond.id)}
-              >
-                <div className="text-center">
-                  <div className="relative">
-                    <Avatar className="w-16 h-16 ring-2 ring-orange-300 hover:ring-orange-400 transition-all">
-                      <AvatarImage src={bond.avatar} />
-                      <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white cave-font">
-                        {bond.name[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1">
-                      <SubscriptionBadge tier={bond.tier} size="sm" showLabel={false} />
+          <div className="overflow-x-auto">
+            <div className="flex space-x-3 pb-2 min-w-max">
+              {mockBonds.map((bond) => (
+                <div
+                  key={bond.id}
+                  className="flex-shrink-0 cursor-pointer"
+                  onClick={() => handleBondClick(bond.id)}
+                >
+                  <div className="text-center">
+                    <div className="relative">
+                      <Avatar className="w-16 h-16 ring-2 ring-orange-300 hover:ring-orange-400 transition-all">
+                        <AvatarImage src={bond.avatar} />
+                        <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white cave-font">
+                          {bond.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1">
+                        <SubscriptionBadge tier={bond.tier} size="sm" showLabel={false} />
+                      </div>
                     </div>
+                    <p className="text-xs text-white mt-1 cave-font">{bond.name}</p>
                   </div>
-                  <p className="text-xs text-white mt-1 cave-font">{bond.name}</p>
                 </div>
-              </div>
-            ))}
-            {/* Add new bond button */}
-            <div className="flex-shrink-0 cursor-pointer">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-orange-200/20 border-2 border-orange-300 border-dashed rounded-full flex items-center justify-center hover:bg-orange-200/30 transition-all">
-                  <Plus className="w-6 h-6 text-orange-300" />
+              ))}
+              {/* Add new bond button */}
+              <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate('/discover')}>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-orange-200/20 border-2 border-orange-300 border-dashed rounded-full flex items-center justify-center hover:bg-orange-200/30 transition-all">
+                    <Plus className="w-6 h-6 text-orange-300" />
+                  </div>
+                  <p className="text-xs text-orange-200 mt-1 cave-font">Discover</p>
                 </div>
-                <p className="text-xs text-orange-200 mt-1 cave-font">Discover</p>
               </div>
             </div>
           </div>
