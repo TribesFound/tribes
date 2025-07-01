@@ -66,6 +66,7 @@ const App = () => (
                   <Route path="/friends" element={<Friends />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/bonds" element={<Matches />} />
+                  <Route path="/chat/:userId" element={<Chat />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/admin" element={<Admin userEmail="tribes.found@gmail.com" userRole="Chief" />} />
