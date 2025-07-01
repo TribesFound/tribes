@@ -37,21 +37,40 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentUserId = 'current-user';
 
-  // Mock data - replace with real API calls
-  useEffect(() => {
-    // Mock chat user data
-    setChatUser({
-      id: userId || '1',
+  // Mock user data based on userId
+  const mockUsers: { [key: string]: ChatUser } = {
+    '1': {
+      id: '1',
       name: 'Alex Chen',
       avatar: '/placeholder.svg',
       isOnline: true
-    });
+    },
+    '2': {
+      id: '2',
+      name: 'Sarah Johnson',
+      avatar: '/placeholder.svg',
+      isOnline: false
+    },
+    '3': {
+      id: '3',
+      name: 'Mike Rodriguez',
+      avatar: '/placeholder.svg',
+      isOnline: true
+    },
+    '4': {
+      id: '4',
+      name: 'Emily Davis',
+      avatar: '/placeholder.svg',
+      isOnline: true
+    }
+  };
 
-    // Mock messages with delivery status
-    setMessages([
+  // Mock conversation data for each user
+  const mockConversations: { [key: string]: Message[] } = {
+    '1': [
       {
         id: '1',
-        senderId: userId || '1',
+        senderId: '1',
         content: 'Hey! Love your hiking photos 📸',
         timestamp: new Date(Date.now() - 7200000).toISOString(),
         isRead: true,
@@ -66,27 +85,60 @@ const Chat = () => {
         isRead: true,
         isDelivered: true,
         type: 'text'
-      },
+      }
+    ],
+    '2': [
       {
-        id: '3',
-        senderId: userId || '1',
-        content: 'Not yet, but it\'s definitely on my list now! Maybe we could go together sometime?',
-        timestamp: new Date(Date.now() - 6600000).toISOString(),
+        id: '1',
+        senderId: '2',
+        content: 'Hi there! How was your weekend?',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
         isRead: true,
         isDelivered: true,
         type: 'text'
-      },
+      }
+    ],
+    '3': [
       {
-        id: '4',
-        senderId: currentUserId,
-        content: 'That sounds great! I know some other trails too if you\'re interested.',
-        timestamp: new Date(Date.now() - 300000).toISOString(),
+        id: '1',
+        senderId: '3',
+        content: 'Want to grab coffee sometime?',
+        timestamp: new Date(Date.now() - 1800000).toISOString(),
         isRead: false,
         isDelivered: true,
         type: 'text'
       }
-    ]);
-  }, [userId]);
+    ],
+    '4': [
+      {
+        id: '1',
+        senderId: '4',
+        content: 'The event yesterday was so much fun! 🎉',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        isRead: true,
+        isDelivered: true,
+        type: 'text'
+      }
+    ]
+  };
+
+  useEffect(() => {
+    if (!userId) {
+      navigate('/friends');
+      return;
+    }
+
+    // Set chat user based on userId
+    const user = mockUsers[userId];
+    if (user) {
+      setChatUser(user);
+      // Load conversation history for this specific user
+      setMessages(mockConversations[userId] || []);
+    } else {
+      // If user not found, redirect back to friends
+      navigate('/friends');
+    }
+  }, [userId, navigate]);
 
   useEffect(() => {
     scrollToBottom();
@@ -97,6 +149,8 @@ const Chat = () => {
   };
 
   const handleSendMessage = (content: string) => {
+    if (!userId) return;
+
     const newMessage: Message = {
       id: Date.now().toString(),
       senderId: currentUserId,
@@ -108,6 +162,12 @@ const Chat = () => {
     };
     
     setMessages(prev => [...prev, newMessage]);
+
+    // Update the mock conversation data
+    if (!mockConversations[userId]) {
+      mockConversations[userId] = [];
+    }
+    mockConversations[userId].push(newMessage);
 
     // Simulate message delivery and read status
     setTimeout(() => {
@@ -148,7 +208,7 @@ const Chat = () => {
       
       const responseMessage: Message = {
         id: (Date.now() + 1).toString(),
-        senderId: userId || '1',
+        senderId: userId,
         content: randomResponse,
         timestamp: new Date().toISOString(),
         isRead: false,
@@ -157,6 +217,7 @@ const Chat = () => {
       };
       
       setMessages(prev => [...prev, responseMessage]);
+      mockConversations[userId].push(responseMessage);
     }, 4000);
   };
 
@@ -200,6 +261,10 @@ const Chat = () => {
         };
         
         setMessages(prev => [...prev, photoMessage]);
+        
+        if (userId && mockConversations[userId]) {
+          mockConversations[userId].push(photoMessage);
+        }
         
         toast({
           title: "Photo sent!",
