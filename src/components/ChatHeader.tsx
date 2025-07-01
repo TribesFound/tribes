@@ -8,7 +8,7 @@ import {
   MoreVertical, 
   User, 
   UserPlus, 
-  Phone, 
+  Plus, 
   Video 
 } from 'lucide-react';
 import {
@@ -29,12 +29,16 @@ interface ChatHeaderProps {
   chatUser: ChatUser;
   onViewProfile: () => void;
   onAddFriend: () => void;
+  onSendPhoto: () => void;
+  onVideoCall?: () => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ 
   chatUser, 
   onViewProfile, 
-  onAddFriend 
+  onAddFriend,
+  onSendPhoto,
+  onVideoCall
 }) => {
   const navigate = useNavigate();
 
@@ -71,12 +75,27 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       </div>
 
       <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="sm" className="p-2">
-          <Phone className="w-5 h-5 text-amber-700" />
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="p-2"
+          onClick={onSendPhoto}
+          title="Send Photo"
+        >
+          <Plus className="w-5 h-5 text-amber-700" />
         </Button>
-        <Button variant="ghost" size="sm" className="p-2">
-          <Video className="w-5 h-5 text-amber-700" />
-        </Button>
+        
+        {onVideoCall && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="p-2"
+            onClick={onVideoCall}
+            title="Video Call"
+          >
+            <Video className="w-5 h-5 text-amber-700" />
+          </Button>
+        )}
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

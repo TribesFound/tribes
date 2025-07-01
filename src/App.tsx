@@ -69,6 +69,7 @@ const App = () => (
                   <Route path="/bonds" element={<Matches />} />
                   <Route path="/chat/:userId" element={<Chat />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/:userId" element={<Profile />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/admin" element={<Admin userEmail="tribes.found@gmail.com" userRole="Chief" />} />
                   <Route path="*" element={<NotFound />} />

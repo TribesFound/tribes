@@ -8,13 +8,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Settings, Crown, Shield, Heart, MessageCircle, Calendar, Camera, MapPin, Instagram, Music, Languages, Users, Wine, Cigarette, UtensilsCrossed, Star, Eye, Sparkles, Link, Upload, CheckCircle } from 'lucide-react';
+import { Settings, Crown, Shield, Heart, MessageCircle, Camera, MapPin, Languages, Users, Wine, Cigarette, UtensilsCrossed, Star, Eye, Sparkles, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import SocialMediaConnect from '@/components/SocialMediaConnect';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user] = useState({
+  const [user, setUser] = useState({
     name: 'Jordan Smith',
     age: 26,
     location: 'San Francisco, CA',
@@ -47,15 +48,12 @@ const Profile = () => {
   });
 
   const [uploading, setUploading] = useState(false);
-  const [connectingInstagram, setConnectingInstagram] = useState(false);
-  const [connectingSpotify, setConnectingSpotify] = useState(false);
 
   const handlePhotoUpload = async (file: File) => {
     if (!file) return;
     
     setUploading(true);
     try {
-      // Simulate upload process
       await new Promise(resolve => setTimeout(resolve, 2000));
       toast({
         title: "Photo uploaded successfully!",
@@ -72,44 +70,24 @@ const Profile = () => {
     }
   };
 
-  const handleInstagramConnect = async () => {
-    setConnectingInstagram(true);
-    try {
-      // Simulate Instagram connection
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast({
-        title: "Instagram connected!",
-        description: "Your Instagram account is now linked to your profile.",
-      });
-    } catch (error) {
-      toast({
-        title: "Connection failed",
-        description: "Unable to connect to Instagram. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setConnectingInstagram(false);
-    }
+  const handleInstagramConnect = () => {
+    setUser(prev => ({ ...prev, instagramConnected: true, instagramUsername: '@jordan_adventures' }));
   };
 
-  const handleSpotifyConnect = async () => {
-    setConnectingSpotify(true);
-    try {
-      // Simulate Spotify connection
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast({
-        title: "Spotify connected!",
-        description: "Your music preferences are now synced.",
-      });
-    } catch (error) {
-      toast({
-        title: "Connection failed",
-        description: "Unable to connect to Spotify. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setConnectingSpotify(false);
-    }
+  const handleSpotifyConnect = () => {
+    setUser(prev => ({ ...prev, spotifyConnected: true }));
+  };
+
+  const handleWebsiteUpdate = (url: string) => {
+    setUser(prev => ({ ...prev, websiteUrl: url }));
+  };
+
+  const handleInstagramDisconnect = () => {
+    setUser(prev => ({ ...prev, instagramConnected: false, instagramUsername: '' }));
+  };
+
+  const handleSpotifyDisconnect = () => {
+    setUser(prev => ({ ...prev, spotifyConnected: false }));
   };
 
   return (
@@ -183,52 +161,23 @@ const Profile = () => {
                   </Badge>
                 )}
               </div>
+            </div>
 
-              {/* Social Media & Professional Connections */}
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-center space-x-2">
-                  <Button
-                    onClick={handleInstagramConnect}
-                    disabled={connectingInstagram}
-                    className={user.instagramConnected ? 'tribal-button' : 'tribal-button-outline'}
-                    size="sm"
-                  >
-                    {connectingInstagram ? (
-                      <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                    ) : (
-                      <Instagram className="w-4 h-4 mr-2" />
-                    )}
-                    {user.instagramConnected ? user.instagramUsername : 'Connect Instagram'}
-                  </Button>
-                  
-                  <Button
-                    onClick={handleSpotifyConnect}
-                    disabled={connectingSpotify}
-                    className={user.spotifyConnected ? 'tribal-button' : 'tribal-button-outline'}
-                    size="sm"
-                  >
-                    {connectingSpotify ? (
-                      <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
-                    ) : (
-                      <Music className="w-4 h-4 mr-2" />
-                    )}
-                    {user.spotifyConnected ? 'Spotify Connected' : 'Connect Spotify'}
-                  </Button>
-                </div>
-
-                {user.isBusinessProfile && user.websiteUrl && (
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={() => window.open(user.websiteUrl, '_blank')}
-                      className="tribal-button-outline"
-                      size="sm"
-                    >
-                      <Link className="w-4 h-4 mr-2" />
-                      Visit Website
-                    </Button>
-                  </div>
-                )}
-              </div>
+            {/* Social Media & Professional Connections */}
+            <div className="mb-6">
+              <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Social Connections</h3>
+              <SocialMediaConnect
+                instagramConnected={user.instagramConnected}
+                instagramUsername={user.instagramUsername}
+                spotifyConnected={user.spotifyConnected}
+                websiteUrl={user.websiteUrl}
+                isBusinessProfile={user.isBusinessProfile}
+                onInstagramConnect={handleInstagramConnect}
+                onSpotifyConnect={handleSpotifyConnect}
+                onWebsiteUpdate={handleWebsiteUpdate}
+                onInstagramDisconnect={handleInstagramDisconnect}
+                onSpotifyDisconnect={handleSpotifyDisconnect}
+              />
             </div>
 
             {/* Business Profile Settings */}
@@ -244,15 +193,6 @@ const Profile = () => {
                     <Switch 
                       checked={user.allowDiscussionChat}
                       className="data-[state=checked]:bg-purple-600"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-purple-700">Website URL</Label>
-                    <Input
-                      defaultValue={user.websiteUrl}
-                      placeholder="https://your-website.com"
-                      className="text-sm"
                     />
                   </div>
                 </div>

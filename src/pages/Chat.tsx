@@ -4,7 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ChatHeader from '@/components/ChatHeader';
 import MessageBubble from '@/components/MessageBubble';
+import PhotoMessage from '@/components/PhotoMessage';
 import MessageInput from '@/components/MessageInput';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
@@ -13,6 +15,9 @@ interface Message {
   timestamp: string;
   isRead: boolean;
   isDelivered: boolean;
+  type?: 'text' | 'photo';
+  photoUrl?: string;
+  expiresAt?: string;
 }
 
 interface ChatUser {
@@ -25,11 +30,12 @@ interface ChatUser {
 const Chat = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatUser, setChatUser] = useState<ChatUser | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const currentUserId = 'current-user'; // This would come from auth context
+  const currentUserId = 'current-user';
 
   // Mock data - replace with real API calls
   useEffect(() => {
@@ -47,33 +53,37 @@ const Chat = () => {
         id: '1',
         senderId: userId || '1',
         content: 'Hey! Love your hiking photos 📸',
-        timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+        timestamp: new Date(Date.now() - 7200000).toISOString(),
         isRead: true,
-        isDelivered: true
+        isDelivered: true,
+        type: 'text'
       },
       {
         id: '2',
         senderId: currentUserId,
         content: 'Thanks! That trail was amazing. Have you been there?',
-        timestamp: new Date(Date.now() - 6900000).toISOString(), // 1h 55m ago
+        timestamp: new Date(Date.now() - 6900000).toISOString(),
         isRead: true,
-        isDelivered: true
+        isDelivered: true,
+        type: 'text'
       },
       {
         id: '3',
         senderId: userId || '1',
         content: 'Not yet, but it\'s definitely on my list now! Maybe we could go together sometime?',
-        timestamp: new Date(Date.now() - 6600000).toISOString(), // 1h 50m ago
+        timestamp: new Date(Date.now() - 6600000).toISOString(),
         isRead: true,
-        isDelivered: true
+        isDelivered: true,
+        type: 'text'
       },
       {
         id: '4',
         senderId: currentUserId,
         content: 'That sounds great! I know some other trails too if you\'re interested.',
-        timestamp: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+        timestamp: new Date(Date.now() - 300000).toISOString(),
         isRead: false,
-        isDelivered: true
+        isDelivered: true,
+        type: 'text'
       }
     ]);
   }, [userId]);
@@ -93,7 +103,8 @@ const Chat = () => {
       content,
       timestamp: new Date().toISOString(),
       isRead: false,
-      isDelivered: false
+      isDelivered: false,
+      type: 'text'
     };
     
     setMessages(prev => [...prev, newMessage]);
@@ -109,7 +120,6 @@ const Chat = () => {
       );
     }, 1000);
 
-    // Simulate other user reading message
     setTimeout(() => {
       setMessages(prev => 
         prev.map(msg => 
@@ -142,7 +152,8 @@ const Chat = () => {
         content: randomResponse,
         timestamp: new Date().toISOString(),
         isRead: false,
-        isDelivered: true
+        isDelivered: true,
+        type: 'text'
       };
       
       setMessages(prev => [...prev, responseMessage]);
@@ -154,8 +165,61 @@ const Chat = () => {
   };
 
   const handleAddFriend = () => {
-    console.log('Sending friend request to:', chatUser?.name);
-    // Implement friend request logic
+    toast({
+      title: "Friend request sent!",
+      description: `You've sent a friend request to ${chatUser?.name}`,
+    });
+    
+    // Simulate navigation to friends list after a short delay
+    setTimeout(() => {
+      navigate('/friends');
+    }, 1500);
+  };
+
+  const handleSendPhoto = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        // Create a temporary URL for the image
+        const photoUrl = URL.createObjectURL(file);
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
+        
+        const photoMessage: Message = {
+          id: Date.now().toString(),
+          senderId: currentUserId,
+          content: 'Photo',
+          timestamp: new Date().toISOString(),
+          isRead: false,
+          isDelivered: true,
+          type: 'photo',
+          photoUrl,
+          expiresAt
+        };
+        
+        setMessages(prev => [...prev, photoMessage]);
+        
+        toast({
+          title: "Photo sent!",
+          description: "Photo will be available for 24 hours",
+        });
+      }
+    };
+    input.click();
+  };
+
+  const handleVideoCall = () => {
+    toast({
+      title: "Video call feature",
+      description: "Video calling will be available in a future update!",
+    });
+  };
+
+  const handleViewPhoto = (photoUrl: string) => {
+    // Open photo in full screen or modal
+    window.open(photoUrl, '_blank');
   };
 
   if (!chatUser) {
@@ -175,6 +239,8 @@ const Chat = () => {
         chatUser={chatUser}
         onViewProfile={handleViewProfile}
         onAddFriend={handleAddFriend}
+        onSendPhoto={handleSendPhoto}
+        onVideoCall={handleVideoCall}
       />
 
       {/* Messages Area */}
@@ -182,12 +248,23 @@ const Chat = () => {
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-1">
             {messages.map((message) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                isCurrentUser={message.senderId === currentUserId}
-                senderName={message.senderId !== currentUserId ? chatUser.name : undefined}
-              />
+              message.type === 'photo' ? (
+                <PhotoMessage
+                  key={message.id}
+                  photoUrl={message.photoUrl!}
+                  timestamp={message.timestamp}
+                  isCurrentUser={message.senderId === currentUserId}
+                  onView={() => handleViewPhoto(message.photoUrl!)}
+                  expiresAt={message.expiresAt!}
+                />
+              ) : (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  isCurrentUser={message.senderId === currentUserId}
+                  senderName={message.senderId !== currentUserId ? chatUser.name : undefined}
+                />
+              )
             ))}
             
             {/* Typing Indicator */}
