@@ -19,6 +19,7 @@ import Matches from "./pages/Matches";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
+import Chat from "./pages/Chat";
 import BottomNavigation from "./components/BottomNavigation";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
