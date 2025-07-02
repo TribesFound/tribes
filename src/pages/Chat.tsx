@@ -37,41 +37,111 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentUserId = 'current-user';
 
-  // Mock user data based on userId
+  // Updated mock users data to match Friends.tsx IDs
   const mockUsers: { [key: string]: ChatUser } = {
+    // Bonds
     '1': {
       id: '1',
-      name: 'Alex Chen',
+      name: 'Maya',
       avatar: '/placeholder.svg',
       isOnline: true
     },
     '2': {
       id: '2',
-      name: 'Sarah Johnson',
+      name: 'Jordan',
       avatar: '/placeholder.svg',
       isOnline: false
     },
     '3': {
       id: '3',
-      name: 'Mike Rodriguez',
+      name: 'Riley',
       avatar: '/placeholder.svg',
       isOnline: true
     },
     '4': {
       id: '4',
-      name: 'Emily Davis',
+      name: 'Casey',
       avatar: '/placeholder.svg',
       isOnline: true
+    },
+    // Friends
+    '5': {
+      id: '5',
+      name: 'Sarah Chen',
+      avatar: '/placeholder.svg',
+      isOnline: true
+    },
+    '6': {
+      id: '6',
+      name: 'Marcus Rodriguez',
+      avatar: '/placeholder.svg',
+      isOnline: false
+    },
+    '7': {
+      id: '7',
+      name: 'Emma Thompson',
+      avatar: '/placeholder.svg',
+      isOnline: true
+    },
+    '8': {
+      id: '8',
+      name: 'Tech Solutions Co.',
+      avatar: '/placeholder.svg',
+      isOnline: false
     }
   };
 
-  // Mock conversation data for each user
+  // Updated mock conversations for each user
   const mockConversations: { [key: string]: Message[] } = {
     '1': [
       {
         id: '1',
         senderId: '1',
-        content: 'Hey! Love your hiking photos 📸',
+        content: 'Hey! How have you been? 🌟',
+        timestamp: new Date(Date.now() - 7200000).toISOString(),
+        isRead: true,
+        isDelivered: true,
+        type: 'text'
+      }
+    ],
+    '2': [
+      {
+        id: '1',
+        senderId: '2',
+        content: 'That event was amazing! Thanks for the invite 🎉',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        isRead: true,
+        isDelivered: true,
+        type: 'text'
+      }
+    ],
+    '3': [
+      {
+        id: '1',
+        senderId: '3',
+        content: 'Looking forward to our coffee meetup! ☕',
+        timestamp: new Date(Date.now() - 1800000).toISOString(),
+        isRead: false,
+        isDelivered: true,
+        type: 'text'
+      }
+    ],
+    '4': [
+      {
+        id: '1',
+        senderId: '4',
+        content: 'Great networking opportunity coming up! Interested?',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        isRead: true,
+        isDelivered: true,
+        type: 'text'
+      }
+    ],
+    '5': [
+      {
+        id: '1',
+        senderId: '5',
+        content: 'Hi there! Love your hiking photos 📸',
         timestamp: new Date(Date.now() - 7200000).toISOString(),
         isRead: true,
         isDelivered: true,
@@ -87,33 +157,33 @@ const Chat = () => {
         type: 'text'
       }
     ],
-    '2': [
+    '6': [
       {
         id: '1',
-        senderId: '2',
-        content: 'Hi there! How was your weekend?',
+        senderId: '6',
+        content: 'Hey! How was your weekend adventure?',
         timestamp: new Date(Date.now() - 3600000).toISOString(),
         isRead: true,
         isDelivered: true,
         type: 'text'
       }
     ],
-    '3': [
+    '7': [
       {
         id: '1',
-        senderId: '3',
-        content: 'Want to grab coffee sometime?',
+        senderId: '7',
+        content: 'That board game cafe looks amazing! Let\'s go soon 🎲',
         timestamp: new Date(Date.now() - 1800000).toISOString(),
         isRead: false,
         isDelivered: true,
         type: 'text'
       }
     ],
-    '4': [
+    '8': [
       {
         id: '1',
-        senderId: '4',
-        content: 'The event yesterday was so much fun! 🎉',
+        senderId: '8',
+        content: 'Hello! We have some exciting networking events coming up. Would you like to learn more about our services?',
         timestamp: new Date(Date.now() - 86400000).toISOString(),
         isRead: true,
         isDelivered: true,
@@ -134,8 +204,10 @@ const Chat = () => {
       setChatUser(user);
       // Load conversation history for this specific user
       setMessages(mockConversations[userId] || []);
+      console.log(`Loading chat for user: ${user.name} (ID: ${userId})`);
     } else {
       // If user not found, redirect back to friends
+      console.log(`User not found for ID: ${userId}`);
       navigate('/friends');
     }
   }, [userId, navigate]);

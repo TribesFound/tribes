@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,17 +8,17 @@ import { MessageCircle, UserPlus, Calendar } from 'lucide-react';
 
 const bonds = [
   {
-    id: 1,
-    name: 'Alex Chen',
-    lastMessage: 'Hey! Love your hiking photos 📸',
+    id: '1',
+    name: 'Maya',
+    lastMessage: 'Hey! How have you been? 🌟',
     timestamp: '2 hours ago',
     isNew: true,
     avatar: '/placeholder.svg'
   },
   {
-    id: 2,
-    name: 'Sam Rodriguez',
-    lastMessage: 'That board game cafe looks amazing!',
+    id: '2',
+    name: 'Jordan',
+    lastMessage: 'That event was amazing! Thanks for the invite 🎉',
     timestamp: '1 day ago',
     isNew: false,
     avatar: '/placeholder.svg'
@@ -27,7 +28,7 @@ const bonds = [
 const Matches = () => {
   const navigate = useNavigate();
 
-  const handleChatClick = (bondId: number) => {
+  const handleChatClick = (bondId: string) => {
     navigate(`/chat/${bondId}`);
   };
 

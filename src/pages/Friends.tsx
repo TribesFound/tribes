@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,31 +29,31 @@ const Friends = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'active' | 'distance'>('name');
 
-  // Mock bonds/matches data
+  // Mock bonds/matches data - updated with correct IDs
   const mockBonds = [
     {
-      id: 1,
+      id: '1',
       name: 'Maya',
       avatar: '/placeholder.svg',
       tier: 'Oracle' as SubscriptionTier,
       isProfessional: false
     },
     {
-      id: 2,
+      id: '2',
       name: 'Jordan',
       avatar: '/placeholder.svg',
       tier: 'Bloodline' as SubscriptionTier,
       isProfessional: false
     },
     {
-      id: 3,
+      id: '3',
       name: 'Riley',
       avatar: '/placeholder.svg',
       tier: 'Inner Circle' as SubscriptionTier,
       isProfessional: false
     },
     {
-      id: 4,
+      id: '4',
       name: 'Casey',
       avatar: '/placeholder.svg',
       tier: 'Trade Guild' as SubscriptionTier,
@@ -60,9 +61,10 @@ const Friends = () => {
     }
   ];
 
+  // Updated mock friends data with string IDs to match Chat.tsx
   const mockFriends = [
     {
-      id: 1,
+      id: '5',
       name: 'Sarah Chen',
       avatar: '/placeholder.svg',
       isOnline: true,
@@ -73,7 +75,7 @@ const Friends = () => {
       isProfessional: false
     },
     {
-      id: 2,
+      id: '6',
       name: 'Marcus Rodriguez',
       avatar: '/placeholder.svg',
       isOnline: false,
@@ -84,7 +86,7 @@ const Friends = () => {
       isProfessional: false
     },
     {
-      id: 3,
+      id: '7',
       name: 'Emma Thompson',
       avatar: '/placeholder.svg',
       isOnline: true,
@@ -95,7 +97,7 @@ const Friends = () => {
       isProfessional: false
     },
     {
-      id: 4,
+      id: '8',
       name: 'Tech Solutions Co.',
       avatar: '/placeholder.svg',
       isOnline: false,
@@ -124,34 +126,34 @@ const Friends = () => {
       }
     });
 
-  const handleBondClick = (bondId: number) => {
+  const handleBondClick = (bondId: string) => {
     console.log(`Opening chat with bond ${bondId}`);
     navigate(`/chat/${bondId}`);
   };
 
-  const handleMessageClick = (friendId: number) => {
+  const handleMessageClick = (friendId: string) => {
     console.log(`Opening chat with friend ${friendId}`);
     navigate(`/chat/${friendId}`);
   };
 
-  const handleProfileClick = (friendId: number) => {
+  const handleProfileClick = (friendId: string) => {
     console.log(`Opening profile for friend ${friendId}`);
     navigate(`/profile/${friendId}`);
   };
 
-  const handleUnfriend = (friendId: number, friendName: string) => {
+  const handleUnfriend = (friendId: string, friendName: string) => {
     console.log(`Unfriending ${friendName}`);
   };
 
-  const handleBlock = (friendId: number, friendName: string) => {
+  const handleBlock = (friendId: string, friendName: string) => {
     console.log(`Blocking ${friendName}`);
   };
 
-  const handleReport = (friendId: number, friendName: string) => {
+  const handleReport = (friendId: string, friendName: string) => {
     console.log(`Reporting ${friendName}`);
   };
 
-  const handleRestrict = (friendId: number, friendName: string) => {
+  const handleRestrict = (friendId: string, friendName: string) => {
     console.log(`Restricting ${friendName}`);
   };
 
