@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Calendar as CalendarIcon, Upload, X, Edit, Trash2, CreditCard } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon, Upload, X, Edit, Trash2, CreditCard, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface EventFormData {
@@ -24,6 +23,7 @@ interface EventFormData {
   website?: string;
   ticketPrice?: number;
   enableROGPayment: boolean;
+  externalPaymentLink?: string;
   maxAttendees: number;
 }
 
@@ -47,6 +47,7 @@ const EventSetup = () => {
       website: '',
       ticketPrice: 0,
       enableROGPayment: false,
+      externalPaymentLink: '',
       maxAttendees: 50
     }
   });
@@ -124,6 +125,10 @@ const EventSetup = () => {
     navigate('/events');
   };
 
+  const handleROGPaymentInfo = () => {
+    navigate('/rog-payments');
+  };
+
   if (eventCreated) {
     return (
       <div className="min-h-screen cave-gradient p-4">
@@ -188,6 +193,7 @@ const EventSetup = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Event Details Card */}
             <Card className="cave-card">
               <CardHeader>
                 <CardTitle className="cave-font text-amber-900">Event Details</CardTitle>
@@ -332,12 +338,13 @@ const EventSetup = () => {
               </CardContent>
             </Card>
 
-            {/* Contact Information */}
+            {/* Contact Information Card */}
             <Card className="cave-card">
               <CardHeader>
                 <CardTitle className="cave-font text-amber-900">Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Phone */}
                 <FormField
                   control={form.control}
                   name="phone"
@@ -357,6 +364,7 @@ const EventSetup = () => {
                   )}
                 />
 
+                {/* Email */}
                 <FormField
                   control={form.control}
                   name="email"
@@ -376,6 +384,7 @@ const EventSetup = () => {
                   )}
                 />
 
+                {/* Website */}
                 <FormField
                   control={form.control}
                   name="website"
@@ -397,7 +406,7 @@ const EventSetup = () => {
               </CardContent>
             </Card>
 
-            {/* Photo Upload */}
+            {/* Photo Upload Card */}
             <Card className="cave-card">
               <CardHeader>
                 <CardTitle className="cave-font text-amber-900">Event Photos</CardTitle>
@@ -451,48 +460,21 @@ const EventSetup = () => {
               </CardContent>
             </Card>
 
-            {/* ROG Payment Integration */}
+            {/* Payment Integration Card */}
             <Card className="cave-card">
               <CardHeader>
                 <CardTitle className="cave-font text-amber-900 flex items-center">
                   <CreditCard className="w-5 h-5 mr-2" />
-                  Ticket Sales & ROG Integration
+                  Ticket Sales & Payment Options
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="enableROGPayment"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="w-4 h-4 text-orange-600"
-                        />
-                      </FormControl>
-                      <div>
-                        <FormLabel className="text-amber-800 cursor-pointer">
-                          Enable ROG Token Payments
-                        </FormLabel>
-                        <p className="text-sm text-amber-600">
-                          Accept payments in Roots of Gaia (ROG) tokens with 1% sales fee to Tribes
-                        </p>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="ticketPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-amber-800">
-                        Ticket Price {form.watch('enableROGPayment') ? '(ROG Tokens)' : '(USD)'}
-                      </FormLabel>
+                      <FormLabel className="text-amber-800">Ticket Price (USD)</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -505,44 +487,60 @@ const EventSetup = () => {
                         />
                       </FormControl>
                       <FormMessage />
-                      {form.watch('enableROGPayment') && form.watch('ticketPrice') > 0 && (
-                        <p className="text-xs text-amber-600">
-                          Tribes fee: {(form.watch('ticketPrice') * 0.01).toFixed(2)} ROG per ticket
-                        </p>
-                      )}
                     </FormItem>
                   )}
                 />
 
                 {form.watch('ticketPrice') > 0 && (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button type="button" className="cave-button w-full">
-                        Configure Ticket Sales
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="cave-card">
-                      <DialogHeader>
-                        <DialogTitle className="cave-font text-amber-900">
-                          Ticket Sales Configuration
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <p className="text-amber-700">
-                          Your ticket sales will be processed through the Tribes platform.
-                        </p>
-                        <div className="bg-orange-50 p-4 rounded-lg">
-                          <h4 className="font-semibold text-amber-800 mb-2">ROG Payment Benefits:</h4>
-                          <ul className="text-sm text-amber-700 space-y-1">
-                            <li>• Instant payments with blockchain security</li>
-                            <li>• Lower transaction fees (1% to Tribes)</li>
-                            <li>• Direct token-to-token transfers</li>
-                            <li>• Community rewards for attendees</li>
-                          </ul>
-                        </div>
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="externalPaymentLink"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-amber-800">External Payment Link</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="url"
+                              placeholder="https://your-payment-page.com"
+                              className="cave-input"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-amber-600">
+                            Link to your external payment page (Stripe, PayPal, etc.)
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="border border-amber-200 rounded-lg p-4 bg-amber-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-amber-800">ROG Token Payments</h4>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleROGPaymentInfo}
+                          className="text-amber-700 border-amber-300"
+                        >
+                          Learn More
+                        </Button>
                       </div>
-                    </DialogContent>
-                  </Dialog>
+                      <p className="text-amber-700 text-sm mb-3">
+                        Accept payments in Roots of Gaia (ROG) tokens with only 1% fees!
+                      </p>
+                      <Button
+                        type="button"
+                        onClick={handleROGPaymentInfo}
+                        className="cave-button w-full"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Set Up ROG Payments
+                      </Button>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
