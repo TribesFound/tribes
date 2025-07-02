@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +10,7 @@ import { Search, Plus, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Events = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('events');
@@ -85,6 +86,10 @@ const Events = () => {
     }
   ];
 
+  const handleCreateEvent = () => {
+    navigate('/event-setup');
+  };
+
   const handleJoinEvent = (eventId: string) => {
     toast({
       title: "Event joined!",
@@ -132,7 +137,7 @@ const Events = () => {
       <div className="bg-white/95 backdrop-blur-sm border-b border-orange-200 p-4">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold cave-font text-amber-900">Events</h1>
-          <Button className="cave-button">
+          <Button className="cave-button" onClick={handleCreateEvent}>
             <Plus className="w-4 h-4 mr-2" />
             Create Event
           </Button>

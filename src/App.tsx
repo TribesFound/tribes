@@ -15,6 +15,7 @@ import ProfileSetup from "./components/ProfileSetup";
 import Discover from "./pages/Discover";
 import Friends from "./pages/Friends";
 import Events from "./pages/Events";
+import EventSetup from "./pages/EventSetup";
 import Matches from "./pages/Matches";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -66,6 +67,7 @@ const App = () => (
                   <Route path="/discover" element={<Discover />} />
                   <Route path="/friends" element={<Friends />} />
                   <Route path="/events" element={<Events />} />
+                  <Route path="/event-setup" element={<EventSetup />} />
                   <Route path="/bonds" element={<Matches />} />
                   <Route path="/chat/:userId" element={<Chat />} />
                   <Route path="/profile" element={<Profile />} />
