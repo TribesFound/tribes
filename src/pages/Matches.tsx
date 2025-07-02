@@ -1,35 +1,93 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageCircle, UserPlus, Calendar } from 'lucide-react';
-
-const bonds = [
-  {
-    id: '1',
-    name: 'Maya',
-    lastMessage: 'Hey! How have you been? 🌟',
-    timestamp: '2 hours ago',
-    isNew: true,
-    avatar: '/placeholder.svg'
-  },
-  {
-    id: '2',
-    name: 'Jordan',
-    lastMessage: 'That event was amazing! Thanks for the invite 🎉',
-    timestamp: '1 day ago',
-    isNew: false,
-    avatar: '/placeholder.svg'
-  }
-];
+import { useToast } from '@/hooks/use-toast';
 
 const Matches = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [userBonds, setUserBonds] = useState<string[]>([]);
+
+  const allBonds = [
+    {
+      id: '1',
+      name: 'Maya',
+      lastMessage: 'Hey! How have you been? 🌟',
+      timestamp: '2 hours ago',
+      isNew: true,
+      avatar: '/placeholder.svg'
+    },
+    {
+      id: '2',
+      name: 'Jordan',
+      lastMessage: 'That event was amazing! Thanks for the invite 🎉',
+      timestamp: '1 day ago',
+      isNew: false,
+      avatar: '/placeholder.svg'
+    },
+    {
+      id: '3',
+      name: 'Riley',
+      lastMessage: 'Looking forward to our coffee meetup! ☕',
+      timestamp: '30 min ago',
+      isNew: true,
+      avatar: '/placeholder.svg'
+    },
+    {
+      id: '4',
+      name: 'Casey',
+      lastMessage: 'Great networking opportunity coming up! Interested?',
+      timestamp: '1 day ago',
+      isNew: false,
+      avatar: '/placeholder.svg'
+    }
+  ];
+
+  useEffect(() => {
+    // Load user's bonds from localStorage, default to all bonds if not set
+    const bonds = JSON.parse(localStorage.getItem('user_bonds') || '["1", "2", "3", "4"]');
+    setUserBonds(bonds);
+  }, []);
+
+  // Filter bonds based on current user's bonds
+  const bonds = allBonds.filter(bond => userBonds.includes(bond.id));
 
   const handleChatClick = (bondId: string) => {
     navigate(`/chat/${bondId}`);
+  };
+
+  const handleAddFriend = (bondId: string, bondName: string) => {
+    console.log('Adding friend:', bondName);
+    
+    // Get current friends from localStorage
+    const currentFriends = JSON.parse(localStorage.getItem('user_friends') || '[]');
+    
+    // Check if already a friend
+    if (currentFriends.includes(bondId)) {
+      toast({
+        title: "Already friends!",
+        description: `You're already friends with ${bondName}`,
+      });
+      return;
+    }
+
+    // Add to friends list
+    currentFriends.push(bondId);
+    localStorage.setItem('user_friends', JSON.stringify(currentFriends));
+
+    // Remove from bonds list
+    const updatedBonds = userBonds.filter(id => id !== bondId);
+    setUserBonds(updatedBonds);
+    localStorage.setItem('user_bonds', JSON.stringify(updatedBonds));
+
+    toast({
+      title: "Friend added!",
+      description: `You've added ${bondName} as a friend`,
+    });
   };
 
   const handleExploreEvents = () => {
@@ -100,7 +158,7 @@ const Matches = () => {
                       className="cave-button-outline"
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Adding friend:', bond.name);
+                        handleAddFriend(bond.id, bond.name);
                       }}
                     >
                       <UserPlus className="w-4 h-4 mr-2" />

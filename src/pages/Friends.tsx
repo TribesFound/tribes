@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +27,8 @@ const Friends = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'active' | 'distance'>('name');
+  const [userFriends, setUserFriends] = useState<string[]>([]);
+  const [userBonds, setUserBonds] = useState<string[]>([]);
 
   // Mock bonds/matches data - updated with correct IDs
   const mockBonds = [
@@ -109,7 +110,21 @@ const Friends = () => {
     }
   ];
 
-  const filteredFriends = mockFriends
+  useEffect(() => {
+    // Load user's friends and bonds from localStorage
+    const friends = JSON.parse(localStorage.getItem('user_friends') || '[]');
+    const bonds = JSON.parse(localStorage.getItem('user_bonds') || '["1", "2", "3", "4"]'); // Default bonds
+    setUserFriends(friends);
+    setUserBonds(bonds);
+  }, []);
+
+  // Filter bonds based on current user's bonds
+  const currentBonds = mockBonds.filter(bond => userBonds.includes(bond.id));
+  
+  // Filter friends based on current user's friends
+  const currentFriends = mockFriends.filter(friend => userFriends.includes(friend.id));
+
+  const filteredFriends = currentFriends
     .filter(friend => 
       friend.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -171,7 +186,7 @@ const Friends = () => {
           </div>
           <Badge className="cave-badge">
             <Users className="w-4 h-4 mr-1" />
-            {mockFriends.length}
+            {filteredFriends.length}
           </Badge>
         </div>
 
@@ -180,7 +195,7 @@ const Friends = () => {
           <h2 className="text-lg font-bold cave-font text-white mb-3">Your Bonds</h2>
           <div className="overflow-x-auto">
             <div className="flex space-x-3 pb-2 min-w-max">
-              {mockBonds.map((bond) => (
+              {currentBonds.map((bond) => (
                 <div
                   key={bond.id}
                   className="flex-shrink-0 cursor-pointer"

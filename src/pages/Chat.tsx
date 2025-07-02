@@ -294,16 +294,40 @@ const Chat = () => {
   };
 
   const handleViewProfile = () => {
+    // Navigate to the chat partner's profile, not current user's profile
     navigate(`/profile/${userId}`);
   };
 
   const handleAddFriend = () => {
+    if (!userId || !chatUser) return;
+
+    // Get current friends from localStorage or use empty array
+    const currentFriends = JSON.parse(localStorage.getItem('user_friends') || '[]');
+    
+    // Check if already a friend
+    if (currentFriends.includes(userId)) {
+      toast({
+        title: "Already friends!",
+        description: `You're already friends with ${chatUser.name}`,
+      });
+      return;
+    }
+
+    // Add to friends list
+    currentFriends.push(userId);
+    localStorage.setItem('user_friends', JSON.stringify(currentFriends));
+
+    // Remove from bonds list if it exists there
+    const currentBonds = JSON.parse(localStorage.getItem('user_bonds') || '[]');
+    const updatedBonds = currentBonds.filter((bondId: string) => bondId !== userId);
+    localStorage.setItem('user_bonds', JSON.stringify(updatedBonds));
+
     toast({
-      title: "Friend request sent!",
-      description: `You've sent a friend request to ${chatUser?.name}`,
+      title: "Friend added!",
+      description: `You've added ${chatUser.name} as a friend`,
     });
     
-    // Simulate navigation to friends list after a short delay
+    // Navigate to friends list after a short delay
     setTimeout(() => {
       navigate('/friends');
     }, 1500);
