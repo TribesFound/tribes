@@ -53,7 +53,7 @@ const App = () => (
                   <Route path="/signup-method" element={<SignUpMethod />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/passcode-setup" element={<PasscodeSetup />} />
-                  <Route path="/passcode-entry" element={<PasscodeEntry />} />
+                  <Route path="/passcode-entry" element={<PasscodeEntry onSuccess={() => {}} onForgotPasscode={() => {}} />} />
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/profile/:userId" element={<Profile />} />
@@ -68,7 +68,7 @@ const App = () => (
                   <Route path="/bonds" element={<Matches />} />
                   <Route path="/chat/:userId" element={<Chat />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin" element={<Admin userEmail="admin@tribes.app" userRole="admin" />} />
                   <Route path="/rog-payments" element={<ROGPayments />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

@@ -1,4 +1,3 @@
-
 export interface UserProfile {
   id: string;
   name: string;
@@ -199,3 +198,21 @@ export class MatchingAlgorithm {
 }
 
 export const matchingAlgorithm = new MatchingAlgorithm();
+
+export const calculateCompatibilityScore = (currentUserId: string, targetUser: any): CompatibilityScore => {
+  // Mock current user data
+  const currentUser: UserProfile = {
+    id: currentUserId,
+    name: 'Current User',
+    age: 28,
+    bio: 'Test user',
+    hobbies: ['Photography', 'Hiking', 'Cooking'],
+    passions: ['Travel', 'Art', 'Technology'],
+    languages: ['English', 'Spanish'],
+    dietaryPreference: 'Vegetarian',
+    photos: [],
+    avatar: '/placeholder.svg'
+  };
+
+  return matchingAlgorithm.calculateCompatibility(currentUser, targetUser);
+};
