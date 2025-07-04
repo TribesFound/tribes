@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,8 +52,8 @@ const Matches = () => {
     setUserBonds(bonds);
   }, []);
 
-  // Filter bonds based on current user's bonds
-  const bonds = allBonds.filter(bond => userBonds.includes(bond.id));
+  // Keep all chats visible, regardless of friend status
+  const bonds = allBonds;
 
   const handleChatClick = (bondId: string) => {
     navigate(`/chat/${bondId}`);
@@ -79,7 +78,7 @@ const Matches = () => {
     currentFriends.push(bondId);
     localStorage.setItem('user_friends', JSON.stringify(currentFriends));
 
-    // Remove from bonds list
+    // Remove from bonds list (for Friends page display)
     const updatedBonds = userBonds.filter(id => id !== bondId);
     setUserBonds(updatedBonds);
     localStorage.setItem('user_bonds', JSON.stringify(updatedBonds));
@@ -99,12 +98,12 @@ const Matches = () => {
       <div className="max-w-md mx-auto pt-8">
         <div className="text-center mb-8">
           <img 
-            src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
+            src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4f83f2f45f4f.png" 
             alt="Tribes Hand Logo" 
             className="w-10 h-10 mx-auto mb-4"
           />
           <h1 className="text-2xl font-bold cave-font text-white">Your Messages</h1>
-          <p className="text-orange-200">{bonds.length} bonds waiting</p>
+          <p className="text-orange-200">{bonds.length} conversations</p>
         </div>
 
         <div className="space-y-4">

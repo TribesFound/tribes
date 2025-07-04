@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,14 +49,23 @@ const Settings = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button className="w-full tribal-button-outline justify-start">
+              <Button 
+                onClick={() => navigate('/edit-profile')}
+                className="w-full tribal-button-outline justify-start"
+              >
                 Edit Profile Information
               </Button>
-              <Button className="w-full tribal-button-outline justify-start">
-                Change Photos
+              <Button 
+                onClick={() => navigate('/business-dashboard')}
+                className="w-full tribal-button-outline justify-start"
+              >
+                Business Dashboard
               </Button>
-              <Button className="w-full tribal-button-outline justify-start">
-                Update Interests & Hobbies
+              <Button 
+                onClick={() => navigate('/privacy-settings')}
+                className="w-full tribal-button-outline justify-start"
+              >
+                Privacy & Security
               </Button>
             </CardContent>
           </Card>
@@ -77,7 +85,10 @@ const Settings = () => {
             </CardHeader>
             <CardContent>
               {userSubscription.canUpgrade && (
-                <Button className="w-full tribal-button">
+                <Button 
+                  onClick={() => navigate('/subscription')}
+                  className="w-full tribal-button"
+                >
                   Upgrade to Premium
                 </Button>
               )}
@@ -210,8 +221,11 @@ const Settings = () => {
                 />
               </div>
               
-              <Button className="w-full tribal-button-outline justify-start">
-                Blocked Users
+              <Button 
+                onClick={() => navigate('/privacy-settings')}
+                className="w-full tribal-button-outline justify-start"
+              >
+                Advanced Privacy Settings
               </Button>
               <Button className="w-full tribal-button-outline justify-start">
                 Privacy Policy

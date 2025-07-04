@@ -1,560 +1,336 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Calendar } from '@/components/ui/calendar';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useForm } from 'react-hook-form';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CalendarDays, MapPin, Users, DollarSign, Crown, ArrowLeft, Save, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Calendar as CalendarIcon, Upload, X, Edit, Trash2, CreditCard, ExternalLink } from 'lucide-react';
-import { format } from 'date-fns';
-
-interface EventFormData {
-  title: string;
-  description: string;
-  location: string;
-  date: Date;
-  time: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  ticketPrice?: number;
-  enableROGPayment: boolean;
-  externalPaymentLink?: string;
-  maxAttendees: number;
-}
+import { eventCategories, EventCategory } from '@/utils/eventTypes';
 
 const EventSetup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date>();
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [eventCreated, setEventCreated] = useState(false);
-  const [createdEventId, setCreatedEventId] = useState<string>('');
-
-  const form = useForm<EventFormData>({
-    defaultValues: {
-      title: '',
-      description: '',
-      location: '',
-      time: '',
-      phone: '',
-      email: '',
-      website: '',
-      ticketPrice: 0,
-      enableROGPayment: false,
-      externalPaymentLink: '',
-      maxAttendees: 50
-    }
+  
+  const [eventData, setEventData] = useState({
+    title: '',
+    description: '',
+    category: eventCategories[0],
+    location: {
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      venue: ''
+    },
+    date: '',
+    time: '',
+    duration: 120,
+    maxAttendees: undefined as number | undefined,
+    minAttendees: undefined as number | undefined,
+    price: 0,
+    paymentRequired: false,
+    paymentUrl: '',
+    requirements: [] as string[],
+    whatToBring: [] as string[],
+    ageRestriction: {
+      min: 18,
+      max: undefined as number | undefined
+    },
+    isRecurring: false,
+    requiresApproval: false,
+    isPrivate: false
   });
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files && uploadedImages.length < 5) {
-      const newImages: string[] = [];
-      Array.from(files).forEach((file, index) => {
-        if (uploadedImages.length + newImages.length < 5) {
-          const imageUrl = URL.createObjectURL(file);
-          newImages.push(imageUrl);
+  const [newRequirement, setNewRequirement] = useState('');
+  const [newWhatToBring, setNewWhatToBring] = useState('');
+
+  const handleInputChange = (field: string, value: any) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      setEventData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent as keyof typeof prev],
+          [child]: value
         }
-      });
-      setUploadedImages([...uploadedImages, ...newImages]);
-      
-      toast({
-        title: 'Images uploaded',
-        description: `${newImages.length} image(s) added successfully.`
-      });
-    } else if (uploadedImages.length >= 5) {
-      toast({
-        title: 'Upload limit reached',
-        description: 'Maximum 5 images allowed per event.',
-        variant: 'destructive'
-      });
+      }));
+    } else {
+      setEventData(prev => ({
+        ...prev,
+        [field]: value
+      }));
     }
   };
 
-  const removeImage = (index: number) => {
-    const newImages = uploadedImages.filter((_, i) => i !== index);
-    setUploadedImages(newImages);
+  const handleCategorySelect = (category: EventCategory) => {
+    setEventData(prev => ({ ...prev, category }));
   };
 
-  const onSubmit = (data: EventFormData) => {
-    if (!selectedDate) {
+  const addRequirement = () => {
+    if (newRequirement.trim()) {
+      setEventData(prev => ({
+        ...prev,
+        requirements: [...prev.requirements, newRequirement.trim()]
+      }));
+      setNewRequirement('');
+    }
+  };
+
+  const removeRequirement = (index: number) => {
+    setEventData(prev => ({
+      ...prev,
+      requirements: prev.requirements.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addWhatToBring = () => {
+    if (newWhatToBring.trim()) {
+      setEventData(prev => ({
+        ...prev,
+        whatToBring: [...prev.whatToBring, newWhatToBring.trim()]
+      }));
+      setNewWhatToBring('');
+    }
+  };
+
+  const removeWhatToBring = (index: number) => {
+    setEventData(prev => ({
+      ...prev,
+      whatToBring: prev.whatToBring.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleCreateEvent = () => {
+    if (!eventData.title || !eventData.date || !eventData.time) {
       toast({
-        title: 'Date required',
-        description: 'Please select an event date.',
-        variant: 'destructive'
+        title: "Missing Information",
+        description: "Please fill in all required fields (title, date, time)",
+        variant: "destructive"
       });
       return;
     }
 
-    // Simulate event creation
-    const eventId = `event_${Date.now()}`;
-    setCreatedEventId(eventId);
-    setEventCreated(true);
-
     toast({
-      title: 'Event created successfully!',
-      description: `${data.title} has been created and published.`
+      title: "Event Created!",
+      description: `${eventData.title} has been created successfully`,
     });
 
-    console.log('Event data:', {
-      ...data,
-      date: selectedDate,
-      images: uploadedImages,
-      eventId
-    });
+    setTimeout(() => {
+      navigate('/events');
+    }, 1500);
   };
-
-  const handleEditEvent = () => {
-    toast({
-      title: 'Edit mode',
-      description: 'Event editing functionality will be available soon!'
-    });
-  };
-
-  const handleCancelEvent = () => {
-    toast({
-      title: 'Event cancelled',
-      description: 'Your event has been cancelled and removed.'
-    });
-    navigate('/events');
-  };
-
-  const handleROGPaymentInfo = () => {
-    navigate('/rog-payments');
-  };
-
-  if (eventCreated) {
-    return (
-      <div className="min-h-screen cave-gradient p-4">
-        <div className="max-w-2xl mx-auto pt-8">
-          <Card className="cave-card">
-            <CardHeader className="text-center">
-              <CardTitle className="cave-font text-amber-900 text-2xl">
-                🎉 Event Created Successfully!
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 text-center">
-              <p className="text-amber-700">
-                Your event has been published and is now visible to the community.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  onClick={handleEditEvent}
-                  className="cave-button"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Event
-                </Button>
-                
-                <Button 
-                  onClick={handleCancelEvent}
-                  variant="destructive"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Cancel Event
-                </Button>
-                
-                <Button 
-                  onClick={() => navigate('/events')}
-                  variant="outline"
-                  className="cave-button-outline"
-                >
-                  View All Events
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen cave-gradient p-4 pb-20">
-      <div className="max-w-2xl mx-auto pt-8">
-        {/* Header */}
-        <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
+    <div className="min-h-screen tribal-gradient p-4 pb-20">
+      <div className="max-w-md mx-auto pt-8 space-y-6">
+        <div className="flex items-center justify-between mb-6">
+          <Button 
+            variant="ghost" 
             onClick={() => navigate('/events')}
-            className="mr-4"
+            className="text-white hover:bg-orange-100/20"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="text-2xl font-bold cave-font text-white">Create Event</h1>
+          <h1 className="text-2xl font-bold tribal-font text-white">Create Event</h1>
+          <div className="w-8"></div>
         </div>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Event Details Card */}
-            <Card className="cave-card">
-              <CardHeader>
-                <CardTitle className="cave-font text-amber-900">Event Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Title */}
-                <FormField
-                  control={form.control}
-                  name="title"
-                  rules={{ required: 'Event title is required' }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Event Title *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Enter event title"
-                          className="cave-input"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+        <Card className="tribal-card">
+          <CardHeader>
+            <CardTitle className="tribal-font text-amber-900 flex items-center">
+              <Crown className="w-5 h-5 mr-2 text-yellow-500" />
+              Professional Event
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Basic Info */}
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title" className="tribal-text font-medium">Event Title *</Label>
+                <Input
+                  id="title"
+                  value={eventData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  placeholder="Enter event title"
+                  className="tribal-input"
                 />
+              </div>
 
-                {/* Description */}
-                <FormField
-                  control={form.control}
-                  name="description"
-                  rules={{ required: 'Event description is required' }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Description *</FormLabel>
-                      <FormControl>
-                        <textarea
-                          {...field}
-                          placeholder="Describe your event..."
-                          className="cave-input min-h-[100px] resize-none"
-                          rows={4}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div>
+                <Label htmlFor="description" className="tribal-text font-medium">Description</Label>
+                <Textarea
+                  id="description"
+                  value={eventData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Describe your event..."
+                  className="tribal-input resize-none min-h-[100px]"
+                  rows={4}
                 />
+              </div>
+            </div>
 
-                {/* Location */}
-                <FormField
-                  control={form.control}
-                  name="location"
-                  rules={{ required: 'Event location is required' }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Location *</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Event location or address"
-                          className="cave-input"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            {/* Category Selection */}
+            <div>
+              <Label className="tribal-text font-medium mb-3 block">Event Category</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {eventCategories.map((category) => (
+                  <Button
+                    key={category.id}
+                    variant={eventData.category.id === category.id ? "default" : "outline"}
+                    className={`h-auto p-3 flex flex-col items-center space-y-1 ${
+                      eventData.category.id === category.id 
+                        ? 'tribal-button' 
+                        : 'tribal-button-outline'
+                    }`}
+                    onClick={() => handleCategorySelect(category)}
+                  >
+                    <span className="text-lg">{category.icon}</span>
+                    <span className="text-xs text-center">{category.name}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Date & Time */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="date" className="tribal-text font-medium">Date *</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={eventData.date}
+                  onChange={(e) => handleInputChange('date', e.target.value)}
+                  className="tribal-input"
                 />
+              </div>
+              <div>
+                <Label htmlFor="time" className="tribal-text font-medium">Time *</Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={eventData.time}
+                  onChange={(e) => handleInputChange('time', e.target.value)}
+                  className="tribal-input"
+                />
+              </div>
+            </div>
 
-                {/* Date and Time */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-amber-800 text-sm font-medium mb-2 block">
-                      Date *
-                    </label>
-                    <Sheet open={showCalendar} onOpenChange={setShowCalendar}>
-                      <SheetTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal cave-input"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {selectedDate ? format(selectedDate, 'PPP') : 'Select date'}
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent side="bottom" className="h-[400px]">
-                        <SheetHeader>
-                          <SheetTitle>Select Event Date</SheetTitle>
-                        </SheetHeader>
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            setSelectedDate(date);
-                            setShowCalendar(false);
-                          }}
-                          disabled={(date) => date < new Date()}
-                          className="rounded-md border mt-4"
-                        />
-                      </SheetContent>
-                    </Sheet>
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="time"
-                    rules={{ required: 'Event time is required' }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-amber-800">Time *</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="time"
-                            className="cave-input"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+            {/* Location */}
+            <div className="space-y-3">
+              <Label className="tribal-text font-medium flex items-center">
+                <MapPin className="w-4 h-4 mr-1" />
+                Location
+              </Label>
+              <div className="space-y-2">
+                <Input
+                  placeholder="Venue name"
+                  value={eventData.location.venue}
+                  onChange={(e) => handleInputChange('location.venue', e.target.value)}
+                  className="tribal-input"
+                />
+                <Input
+                  placeholder="Street address"
+                  value={eventData.location.address}
+                  onChange={(e) => handleInputChange('location.address', e.target.value)}
+                  className="tribal-input"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    placeholder="City"
+                    value={eventData.location.city}
+                    onChange={(e) => handleInputChange('location.city', e.target.value)}
+                    className="tribal-input"
+                  />
+                  <Input
+                    placeholder="ZIP"
+                    value={eventData.location.zipCode}
+                    onChange={(e) => handleInputChange('location.zipCode', e.target.value)}
+                    className="tribal-input"
                   />
                 </div>
+              </div>
+            </div>
 
-                {/* Max Attendees */}
-                <FormField
-                  control={form.control}
-                  name="maxAttendees"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Maximum Attendees</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          min="1"
-                          placeholder="50"
-                          className="cave-input"
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 50)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            {/* Capacity */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="maxAttendees" className="tribal-text font-medium">Max Attendees</Label>
+                <Input
+                  id="maxAttendees"
+                  type="number"
+                  value={eventData.maxAttendees || ''}
+                  onChange={(e) => handleInputChange('maxAttendees', e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="No limit"
+                  className="tribal-input"
                 />
-              </CardContent>
-            </Card>
-
-            {/* Contact Information Card */}
-            <Card className="cave-card">
-              <CardHeader>
-                <CardTitle className="cave-font text-amber-900">Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Phone */}
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Phone (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="tel"
-                          placeholder="+1 (555) 123-4567"
-                          className="cave-input"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              </div>
+              <div>
+                <Label htmlFor="duration" className="tribal-text font-medium">Duration (min)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  value={eventData.duration}
+                  onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
+                  className="tribal-input"
                 />
+              </div>
+            </div>
 
-                {/* Email */}
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Email (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="contact@example.com"
-                          className="cave-input"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Website */}
-                <FormField
-                  control={form.control}
-                  name="website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Website (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="url"
-                          placeholder="https://example.com"
-                          className="cave-input"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Photo Upload Card */}
-            <Card className="cave-card">
-              <CardHeader>
-                <CardTitle className="cave-font text-amber-900">Event Photos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border-2 border-dashed border-amber-300 rounded-lg p-6 text-center">
-                    <Upload className="w-8 h-8 text-amber-600 mx-auto mb-2" />
-                    <p className="text-amber-700 mb-2">Upload up to 5 photos</p>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="photo-upload"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => document.getElementById('photo-upload')?.click()}
-                      className="cave-button-outline"
-                    >
-                      Choose Photos
-                    </Button>
-                  </div>
-
-                  {uploadedImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                      {uploadedImages.map((image, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={image}
-                            alt={`Upload ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
-                            onClick={() => removeImage(index)}
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+            {/* Pricing */}
+            <div className="space-y-3">
+              <Label className="tribal-text font-medium flex items-center">
+                <DollarSign className="w-4 h-4 mr-1" />
+                Pricing
+              </Label>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="tribal-text">Payment Required</span>
+                  <Button
+                    variant={eventData.paymentRequired ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleInputChange('paymentRequired', !eventData.paymentRequired)}
+                    className={eventData.paymentRequired ? 'tribal-button' : 'tribal-button-outline'}
+                  >
+                    {eventData.paymentRequired ? 'Yes' : 'No'}
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Payment Integration Card */}
-            <Card className="cave-card">
-              <CardHeader>
-                <CardTitle className="cave-font text-amber-900 flex items-center">
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Ticket Sales & Payment Options
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="ticketPrice"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-amber-800">Ticket Price (USD)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="cave-input"
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch('ticketPrice') > 0 && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="externalPaymentLink"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-amber-800">External Payment Link</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type="url"
-                              placeholder="https://your-payment-page.com"
-                              className="cave-input"
-                            />
-                          </FormControl>
-                          <p className="text-xs text-amber-600">
-                            Link to your external payment page (Stripe, PayPal, etc.)
-                          </p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                
+                {eventData.paymentRequired && (
+                  <div className="space-y-2">
+                    <Input
+                      type="number"
+                      placeholder="Price ($)"
+                      value={eventData.price}
+                      onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                      className="tribal-input"
                     />
-
-                    <div className="border border-amber-200 rounded-lg p-4 bg-amber-50">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-amber-800">ROG Token Payments</h4>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleROGPaymentInfo}
-                          className="text-amber-700 border-amber-300"
-                        >
-                          Learn More
-                        </Button>
-                      </div>
-                      <p className="text-amber-700 text-sm mb-3">
-                        Accept payments in Roots of Gaia (ROG) tokens with only 1% fees!
-                      </p>
-                      <Button
-                        type="button"
-                        onClick={handleROGPaymentInfo}
-                        className="cave-button w-full"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Set Up ROG Payments
-                      </Button>
-                    </div>
-                  </>
+                    <Input
+                      placeholder="Payment URL (external link)"
+                      value={eventData.paymentUrl}
+                      onChange={(e) => handleInputChange('paymentUrl', e.target.value)}
+                      className="tribal-input"
+                    />
+                  </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Create Event Button */}
-            <Button
-              type="submit"
-              className="w-full cave-button text-lg py-6"
-              disabled={!form.formState.isValid}
+            <Button 
+              onClick={handleCreateEvent}
+              className="w-full tribal-button"
+              size="lg"
             >
+              <Save className="w-4 h-4 mr-2" />
               Create Event
             </Button>
-          </form>
-        </Form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
