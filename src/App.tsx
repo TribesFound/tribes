@@ -20,6 +20,7 @@ import PasscodeEntry from "./pages/PasscodeEntry";
 import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
+import PasswordChange from "./pages/PasswordChange";
 import Subscription from "./pages/Subscription";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import PrivacySettings from "./pages/PrivacySettings";
@@ -58,6 +59,7 @@ const App = () => (
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/profile/:userId" element={<Profile />} />
                   <Route path="/edit-profile" element={<EditProfile />} />
+                  <Route path="/password-change" element={<PasswordChange />} />
                   <Route path="/subscription" element={<Subscription />} />
                   <Route path="/business-dashboard" element={<BusinessDashboard />} />
                   <Route path="/privacy-settings" element={<PrivacySettings />} />
@@ -68,7 +70,7 @@ const App = () => (
                   <Route path="/bonds" element={<Matches />} />
                   <Route path="/chat/:userId" element={<Chat />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/admin" element={<Admin userEmail="admin@tribes.app" userRole="admin" />} />
+                  <Route path="/admin" element={<Admin userEmail="admin@tribes.app" userRole="Chief" />} />
                   <Route path="/rog-payments" element={<ROGPayments />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

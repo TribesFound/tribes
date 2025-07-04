@@ -1,445 +1,232 @@
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Settings, Crown, Shield, Heart, MessageCircle, Camera, MapPin, Languages, Users, Wine, Cigarette, UtensilsCrossed, Star, Eye, Sparkles, Upload } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Settings, MapPin, Briefcase, Heart, Camera, Share2, MessageCircle, UserPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import SocialMediaConnect from '@/components/SocialMediaConnect';
+import FileUpload from '@/components/ui/file-upload';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { userId } = useParams();
   const { toast } = useToast();
-  const [user, setUser] = useState({
-    name: 'Jordan Smith',
-    age: 26,
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [profilePhoto, setProfilePhoto] = useState('/placeholder.svg');
+  
+  const isOwnProfile = !userId;
+
+  const profileData = {
+    name: 'Alex Rivera',
+    age: 28,
+    bio: 'Adventure seeker and coffee enthusiast. Love exploring new places and meeting interesting people. Always up for a good conversation over coffee or exploring the city.',
     location: 'San Francisco, CA',
-    bio: 'Adventure seeker and tech enthusiast. Love capturing moments through photography and exploring new places. Always looking for new trails to hike and people to share experiences with.',
-    lookingFor: 'Meaningful connections and outdoor adventure partners',
-    hobbies: ['Photography', 'Hiking', 'Cooking', 'Reading', 'Yoga'],
-    passions: ['Technology', 'Travel', 'Art', 'Science', 'Environment'],
-    languages: ['English', 'Spanish', 'French'],
-    pets: ['Dog', 'Cat'],
-    hasPets: true,
-    drinkPreference: 'Socially',
-    smokePreference: 'No',
-    dietaryPreference: 'Vegetarian',
-    zodiacSign: 'Leo',
-    humanDesign: 'Generator',
-    mayanDreamspell: 'Blue Night',
-    instagramConnected: true,
-    instagramUsername: '@jordan_adventures',
-    spotifyConnected: true,
-    websiteUrl: 'https://jordansmith.com',
-    avatar: '/placeholder.svg',
-    additionalPhotos: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
-    isPro: true,
-    isBusinessProfile: true,
-    allowDiscussionChat: true,
-    matchCount: 12,
-    friendCount: 8,
-    verifiedEmail: 'jordan@example.com',
-    locationShared: true
-  });
-
-  const [uploading, setUploading] = useState(false);
-
-  const handlePhotoUpload = async (file: File) => {
-    if (!file) return;
-    
-    setUploading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast({
-        title: "Photo uploaded successfully!",
-        description: "Your profile photo has been updated.",
-      });
-    } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
+    profession: 'UX Designer',
+    interests: ['Photography', 'Hiking', 'Cooking', 'Travel', 'Art'],
+    photos: [
+      profilePhoto,
+      '/placeholder.svg',
+      '/placeholder.svg',
+      '/placeholder.svg',
+      '/placeholder.svg'
+    ],
+    stats: {
+      connections: 127,
+      events: 23,
+      matches: 45
     }
   };
 
-  const handleInstagramConnect = () => {
-    setUser(prev => ({ ...prev, instagramConnected: true, instagramUsername: '@jordan_adventures' }));
+  const handlePhotoUpload = (file: File) => {
+    const url = URL.createObjectURL(file);
+    setProfilePhoto(url);
+    toast({
+      title: "Photo uploaded!",
+      description: "Your profile photo has been updated",
+    });
   };
 
-  const handleSpotifyConnect = () => {
-    setUser(prev => ({ ...prev, spotifyConnected: true }));
+  const handleShare = () => {
+    toast({
+      title: "Profile shared!",
+      description: "Profile link copied to clipboard",
+    });
   };
 
-  const handleWebsiteUpdate = (url: string) => {
-    setUser(prev => ({ ...prev, websiteUrl: url }));
+  const handleMessage = () => {
+    navigate(`/chat/${userId}`);
   };
 
-  const handleInstagramDisconnect = () => {
-    setUser(prev => ({ ...prev, instagramConnected: false, instagramUsername: '' }));
-  };
-
-  const handleSpotifyDisconnect = () => {
-    setUser(prev => ({ ...prev, spotifyConnected: false }));
+  const handleAddFriend = () => {
+    toast({
+      title: "Friend request sent!",
+      description: `You've sent a friend request to ${profileData.name}`,
+    });
   };
 
   return (
     <div className="min-h-screen tribal-gradient p-4 pb-20">
-      <div className="max-w-md mx-auto pt-8 space-y-6">
-        <div className="text-center text-white mb-8">
-          <div className="flex justify-center mb-4">
+      <div className="max-w-md mx-auto pt-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-3">
             <img 
-              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
+              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4f83f2f45f4f.png" 
               alt="Tribes Hand Logo" 
-              className="w-10 h-10"
+              className="w-8 h-8"
             />
+            <h1 className="text-xl font-bold tribal-font text-white">
+              {isOwnProfile ? 'My Profile' : profileData.name}
+            </h1>
           </div>
-          <h1 className="text-3xl font-bold tribal-font">Your Tribe Profile</h1>
+          {isOwnProfile && (
+            <Button
+              onClick={() => navigate('/settings')}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-orange-200/20"
+            >
+              <Settings className="w-5 h-5" />
+            </Button>
+          )}
         </div>
 
-        <Card className="tribal-card">
-          <CardContent className="p-6">
-            <div className="text-center mb-6">
-              <div className="relative inline-block">
-                <Avatar className="w-32 h-32 mx-auto mb-4 ring-4 ring-orange-200">
-                  <AvatarImage src={user.avatar} />
-                  <AvatarFallback className="bg-gradient-to-br from-orange-400 to-yellow-400 text-white text-3xl tribal-font">
-                    {user.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <Button
-                  onClick={() => document.getElementById('photo-upload')?.click()}
-                  className="absolute bottom-2 right-2 rounded-full w-10 h-10 p-0 tribal-button"
-                  disabled={uploading}
-                >
-                  {uploading ? <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" /> : <Camera className="w-5 h-5" />}
-                </Button>
-                
-                <input
-                  id="photo-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => e.target.files?.[0] && handlePhotoUpload(e.target.files[0])}
-                  className="hidden"
-                />
-              </div>
-              
-              <div className="flex items-center justify-center space-x-2 mb-2">
-                <h2 className="text-2xl font-bold tribal-font text-amber-900">
-                  {user.name}, {user.age}
-                </h2>
-                {user.isPro && <Crown className="w-6 h-6 text-yellow-500" />}
-                {user.isBusinessProfile && (
-                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                    Professional
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="flex items-center justify-center tribal-text mb-2">
-                <MapPin className="w-4 h-4 mr-1" />
-                <span>{user.location}</span>
-              </div>
-
-              <div className="flex justify-center space-x-2 mb-4">
-                <Badge className="bg-green-100 text-green-800 border-green-200">
-                  <Shield className="w-3 h-3 mr-1" />
-                  Verified
-                </Badge>
-                {user.locationShared && (
-                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                    <MapPin className="w-3 h-3 mr-1" />
-                    Location Shared
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Social Media & Professional Connections */}
-            <div className="mb-6">
-              <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Social Connections</h3>
-              <SocialMediaConnect
-                instagramConnected={user.instagramConnected}
-                instagramUsername={user.instagramUsername}
-                spotifyConnected={user.spotifyConnected}
-                websiteUrl={user.websiteUrl}
-                isBusinessProfile={user.isBusinessProfile}
-                onInstagramConnect={handleInstagramConnect}
-                onSpotifyConnect={handleSpotifyConnect}
-                onWebsiteUpdate={handleWebsiteUpdate}
-                onInstagramDisconnect={handleInstagramDisconnect}
-                onSpotifyDisconnect={handleSpotifyDisconnect}
-              />
-            </div>
-
-            {/* Business Profile Settings */}
-            {user.isBusinessProfile && (
-              <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                <h3 className="font-bold tribal-font text-lg mb-3 text-purple-800">Professional Settings</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-sm font-medium text-purple-700">Allow Discussion Chat</Label>
-                      <p className="text-xs text-purple-600">Let people chat about your events</p>
+        <div className="space-y-6">
+          {/* Profile Header */}
+          <Card className="tribal-card">
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="relative">
+                  <Avatar className="w-32 h-32 ring-4 ring-orange-200">
+                    <AvatarImage src={profileData.photos[currentPhotoIndex]} />
+                    <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white text-2xl">
+                      {profileData.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isOwnProfile && (
+                    <div className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg">
+                      <FileUpload onFileSelect={handlePhotoUpload}>
+                        <Camera className="w-4 h-4 text-orange-600 cursor-pointer" />
+                      </FileUpload>
                     </div>
-                    <Switch 
-                      checked={user.allowDiscussionChat}
-                      className="data-[state=checked]:bg-purple-600"
-                    />
+                  )}
+                </div>
+                
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold tribal-font text-amber-900">
+                    {profileData.name}, {profileData.age}
+                  </h2>
+                  <div className="flex items-center justify-center space-x-2 mt-2">
+                    <MapPin className="w-4 h-4 text-amber-600" />
+                    <span className="text-amber-700">{profileData.location}</span>
+                  </div>
+                  <div className="flex items-center justify-center space-x-2 mt-1">
+                    <Briefcase className="w-4 h-4 text-amber-600" />
+                    <span className="text-amber-700">{profileData.profession}</span>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Photo Gallery */}
-            {user.additionalPhotos.length > 0 && (
-              <div className="mb-6">
-                <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Photos</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {user.additionalPhotos.map((photo, index) => (
+                {/* Action Buttons */}
+                <div className="flex space-x-3 w-full">
+                  {isOwnProfile ? (
+                    <>
+                      <Button onClick={handleShare} className="flex-1 tribal-button-outline">
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
+                      </Button>
+                      <Button onClick={() => navigate('/edit-profile')} className="flex-1 tribal-button">
+                        Edit Profile
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button onClick={handleMessage} className="flex-1 tribal-button">
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Message
+                      </Button>
+                      <Button onClick={handleAddFriend} className="flex-1 tribal-button-outline">
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Add Friend
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Stats */}
+          <Card className="tribal-card">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold tribal-font text-amber-900">
+                    {profileData.stats.connections}
+                  </div>
+                  <div className="text-sm text-amber-700">Connections</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold tribal-font text-amber-900">
+                    {profileData.stats.events}
+                  </div>
+                  <div className="text-sm text-amber-700">Events</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold tribal-font text-amber-900">
+                    {profileData.stats.matches}
+                  </div>
+                  <div className="text-sm text-amber-700">Matches</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Photo Gallery */}
+          <Card className="tribal-card">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold tribal-font text-amber-900 mb-4">Photos</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {profileData.photos.map((photo, index) => (
+                  <div
+                    key={index}
+                    className={`relative cursor-pointer rounded-lg overflow-hidden ${
+                      currentPhotoIndex === index ? 'ring-2 ring-orange-400' : ''
+                    }`}
+                    onClick={() => setCurrentPhotoIndex(index)}
+                  >
                     <img
-                      key={index}
                       src={photo}
                       alt={`Photo ${index + 1}`}
-                      className="w-full h-20 object-cover rounded-lg ring-2 ring-orange-200"
+                      className="w-full h-24 object-cover"
                     />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="text-center tribal-card p-4">
-                <div className="text-2xl font-bold tribal-font text-orange-600">{user.matchCount}</div>
-                <div className="text-sm tribal-text">Connections</div>
-              </div>
-              <div className="text-center tribal-card p-4">
-                <div className="text-2xl font-bold tribal-font text-green-600">{user.friendCount}</div>
-                <div className="text-sm tribal-text">Friends</div>
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              {/* Bio */}
-              {user.bio && (
-                <div>
-                  <h3 className="font-bold tribal-font text-lg mb-2 text-amber-900">About Me</h3>
-                  <p className="tribal-text text-sm leading-relaxed">
-                    {user.bio}
-                  </p>
-                </div>
-              )}
-
-              {/* Looking For */}
-              {user.lookingFor && (
-                <div>
-                  <h3 className="font-bold tribal-font text-lg mb-2 text-amber-900">Looking For</h3>
-                  <p className="tribal-text text-sm leading-relaxed">
-                    {user.lookingFor}
-                  </p>
-                </div>
-              )}
-
-              {/* Hobbies */}
-              <div>
-                <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Hobbies</h3>
-                <div className="flex flex-wrap gap-2">
-                  {user.hobbies.map((hobby) => (
-                    <Badge key={hobby} className="tribal-badge">
-                      {hobby}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Passions */}
-              <div>
-                <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900">Passions</h3>
-                <div className="flex flex-wrap gap-2">
-                  {user.passions.map((passion) => (
-                    <Badge key={passion} className="tribal-badge">
-                      {passion}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-
-              {/* Languages */}
-              {user.languages.length > 0 && (
-                <div>
-                  <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900 flex items-center">
-                    <Languages className="w-5 h-5 mr-2" />
-                    Languages
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {user.languages.map((language) => (
-                      <Badge key={language} className="tribal-badge bg-blue-100 text-blue-800 border-blue-200">
-                        {language}
-                      </Badge>
-                    ))}
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-              {/* Pets */}
-              {user.hasPets && user.pets.length > 0 && (
-                <div>
-                  <h3 className="font-bold tribal-font text-lg mb-3 text-amber-900 flex items-center">
-                    <Heart className="w-5 h-5 mr-2" />
-                    Pets
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {user.pets.map((pet) => (
-                      <Badge key={pet} className="tribal-badge bg-green-100 text-green-800 border-green-200">
-                        {pet}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
+          {/* Bio */}
+          <Card className="tribal-card">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold tribal-font text-amber-900 mb-4">About</h3>
+              <p className="text-amber-700 leading-relaxed">{profileData.bio}</p>
+            </CardContent>
+          </Card>
 
-              {/* Lifestyle Preferences */}
-              <div className="grid grid-cols-1 gap-4">
-                <div className="flex items-center justify-between p-3 tribal-card">
-                  <div className="flex items-center space-x-2">
-                    <Wine className="w-5 h-5 text-purple-600" />
-                    <span className="tribal-text font-medium">Drinking</span>
-                  </div>
-                  <Badge className="tribal-badge bg-purple-100 text-purple-800 border-purple-200">
-                    {user.drinkPreference}
+          {/* Interests */}
+          <Card className="tribal-card">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold tribal-font text-amber-900 mb-4 flex items-center">
+                <Heart className="w-5 h-5 mr-2" />
+                Interests
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {profileData.interests.map((interest, index) => (
+                  <Badge key={index} className="tribal-badge">
+                    {interest}
                   </Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 tribal-card">
-                  <div className="flex items-center space-x-2">
-                    <Cigarette className="w-5 h-5 text-gray-600" />
-                    <span className="tribal-text font-medium">Smoking</span>
-                  </div>
-                  <Badge className="tribal-badge bg-gray-100 text-gray-800 border-gray-200">
-                    {user.smokePreference}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 tribal-card">
-                  <div className="flex items-center space-x-2">
-                    <UtensilsCrossed className="w-5 h-5 text-green-600" />
-                    <span className="tribal-text font-medium">Diet</span>
-                  </div>
-                  <Badge className="tribal-badge bg-green-100 text-green-800 border-green-200">
-                    {user.dietaryPreference}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Spiritual & Personality */}
-              <div className="grid grid-cols-1 gap-4">
-                <div className="flex items-center justify-between p-3 tribal-card">
-                  <div className="flex items-center space-x-2">
-                    <Star className="w-5 h-5 text-yellow-600" />
-                    <span className="tribal-text font-medium">Zodiac</span>
-                  </div>
-                  <Badge className="tribal-badge bg-yellow-100 text-yellow-800 border-yellow-200">
-                    {user.zodiacSign}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 tribal-card">
-                  <div className="flex items-center space-x-2">
-                    <Eye className="w-5 h-5 text-indigo-600" />
-                    <span className="tribal-text font-medium">Human Design</span>
-                  </div>
-                  <Badge className="tribal-badge bg-indigo-100 text-indigo-800 border-indigo-200">
-                    {user.humanDesign}
-                  </Badge>
-                </div>
-
-                <div className="flex items-center justify-between p-3 tribal-card">
-                  <div className="flex items-center space-x-2">
-                    <Sparkles className="w-5 h-5 text-cyan-600" />
-                    <span className="tribal-text font-medium">Mayan Dreamspell</span>
-                  </div>
-                  <Badge className="tribal-badge bg-cyan-100 text-cyan-800 border-cyan-200">
-                    {user.mayanDreamspell}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Cards */}
-        <div className="space-y-4">
-          {!user.isPro && (
-            <Card className="tribal-card border-2 border-yellow-200">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold tribal-font flex items-center text-amber-900">
-                      <Crown className="w-5 h-5 mr-2 text-yellow-500" />
-                      Upgrade to Pro
-                    </h3>
-                    <p className="text-sm tribal-text">
-                      Access events and premium features
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={() => navigate('/subscription')}
-                    className="tribal-button"
-                  >
-                    Upgrade
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button 
-              onClick={() => navigate('/bonds')}
-              className="tribal-card h-16 flex-col border-2 border-orange-200 hover:border-orange-300 hover:bg-orange-50" 
-              variant="outline"
-            >
-              <MessageCircle className="w-6 h-6 mb-1 text-orange-600" />
-              <span className="text-sm font-medium tribal-text">Messages</span>
-            </Button>
-            
-            <Button 
-              onClick={() => navigate('/friends')}
-              className="tribal-card h-16 flex-col border-2 border-green-200 hover:border-green-300 hover:bg-green-50" 
-              variant="outline"
-            >
-              <Heart className="w-6 h-6 mb-1 text-green-600" />
-              <span className="text-sm font-medium tribal-text">Friends</span>
-            </Button>
-          </div>
-
-          <Button 
-            onClick={() => navigate('/settings')}
-            className="w-full tribal-card border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50" 
-            variant="outline"
-          >
-            <Settings className="w-5 h-5 mr-2" />
-            <span className="tribal-text">Account Settings</span>
-          </Button>
-
-          <Card className="tribal-card border-2 border-green-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Shield className="w-6 h-6 text-green-600" />
-                  <div>
-                    <h3 className="font-bold tribal-font text-amber-900">Community Standing</h3>
-                    <p className="text-sm tribal-text">Good member • 0 strikes</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>

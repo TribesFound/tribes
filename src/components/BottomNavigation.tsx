@@ -65,9 +65,19 @@ const BottomNavigation = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const hiddenPaths = ['/auth', '/welcome', '/signup-method', '/settings', '/splash', '/profile-setup', '/passcode-setup', '/passcode-entry', '/onboarding'];
+  // Updated hidden paths to show navigation on more pages after registration
+  const hiddenPaths = [
+    '/auth', 
+    '/welcome', 
+    '/signup-method', 
+    '/splash', 
+    '/passcode-setup', 
+    '/passcode-entry', 
+    '/onboarding',
+    '/'
+  ];
   
-  if (hiddenPaths.some(path => location.pathname.startsWith(path))) {
+  if (hiddenPaths.some(path => location.pathname === path)) {
     return null;
   }
 
