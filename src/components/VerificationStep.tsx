@@ -7,7 +7,6 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { Mail, Phone, MapPin, Calendar, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
 import { requestSecureLocation, LocationError } from '@/utils/geolocation';
 import { verifyAge } from '@/utils/ageVerification';
-import GoogleSignInButton from './GoogleSignInButton';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface VerificationStepProps {
@@ -33,14 +32,6 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   
   const { sendVerificationCode, verifyCode } = useAuth();
 
-  const handleGoogleSuccess = () => {
-    setStep('age');
-  };
-
-  const handleGoogleError = (errorMessage: string) => {
-    setError(errorMessage);
-  };
-
   const handleSendVerification = async () => {
     setIsVerifying(true);
     setError('');
@@ -51,7 +42,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       setStep('verify');
       console.log(`Verification code sent to ${contact} via ${contactMethod}`);
     } catch (error) {
-      setError('Failed to send verification code');
+      setError('Failed to send verification code. Please check your connection and try again.');
       console.error('Verification send error:', error);
     } finally {
       setIsVerifying(false);
@@ -138,7 +129,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
         <Card className="cave-card">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl cave-font text-amber-900">
-              {step === 'method' && 'Choose Sign-up Method'}
+              {step === 'method' && 'Choose Verification Method'}
               {step === 'contact' && 'Contact Information'}
               {step === 'verify' && 'Verify Your Account'}
               {step === 'age' && 'Age Verification'}
@@ -155,13 +146,8 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
 
             {step === 'method' && (
               <div className="space-y-4">
-                <GoogleSignInButton
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                />
-                
-                <div className="text-center">
-                  <span className="text-amber-700 cave-text">or</span>
+                <div className="text-center mb-6">
+                  <p className="text-amber-700 cave-text">Choose how you'd like to verify your account</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -170,22 +156,20 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                       setContactMethod('email');
                       setStep('contact');
                     }}
-                    className="cave-button-outline"
-                    variant="outline"
+                    className="cave-button h-16 flex-col space-y-2"
                   >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Email
+                    <Mail className="w-6 h-6" />
+                    <span>Email</span>
                   </Button>
                   <Button
                     onClick={() => {
                       setContactMethod('phone');
                       setStep('contact');
                     }}
-                    className="cave-button-outline"
-                    variant="outline"
+                    className="cave-button h-16 flex-col space-y-2"
                   >
-                    <Phone className="w-4 h-4 mr-2" />
-                    Phone
+                    <Phone className="w-6 h-6" />
+                    <span>Phone</span>
                   </Button>
                 </div>
               </div>
@@ -203,6 +187,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                       onChange={(e) => setEmail(e.target.value)}
                       className="cave-input"
                       placeholder="your@email.com"
+                      required
                     />
                   </div>
                 ) : (
@@ -215,6 +200,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                       onChange={(e) => setPhone(e.target.value)}
                       className="cave-input"
                       placeholder="+1 (555) 000-0000"
+                      required
                     />
                   </div>
                 )}
@@ -229,7 +215,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                   </Button>
                   <Button
                     onClick={handleSendVerification}
-                    disabled={isVerifying || (!email && !phone)}
+                    disabled={isVerifying || (contactMethod === 'email' ? !email : !phone)}
                     className="flex-1 cave-button"
                   >
                     {isVerifying ? 'Sending...' : 'Send Code'}

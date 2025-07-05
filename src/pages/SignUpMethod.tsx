@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Phone } from 'lucide-react';
-import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 const SignUpMethod = () => {
   const navigate = useNavigate();
@@ -37,26 +36,20 @@ const SignUpMethod = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <GoogleSignInButton />
-
-            <div className="text-center">
-              <span className="text-amber-700 cave-text">or</span>
-            </div>
-
             <Button
               onClick={handleEmailSignup}
-              className="w-full cave-button"
+              className="w-full cave-button h-16 flex items-center justify-center space-x-3"
             >
-              <Mail className="w-5 h-5 mr-3" />
-              Sign up with Email
+              <Mail className="w-6 h-6" />
+              <span className="text-lg">Sign up with Email</span>
             </Button>
 
             <Button
               onClick={handlePhoneSignup}
-              className="w-full cave-button"
+              className="w-full cave-button h-16 flex items-center justify-center space-x-3"
             >
-              <Phone className="w-5 h-5 mr-3" />
-              Sign up with Phone
+              <Phone className="w-6 h-6" />
+              <span className="text-lg">Sign up with Phone</span>
             </Button>
 
             <div className="text-center pt-4">

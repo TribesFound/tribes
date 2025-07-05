@@ -25,7 +25,6 @@ export interface AuthContextType {
   isLoading: boolean;
   signUp: (data: any) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   sendVerificationCode: (contact: string, method: 'email' | 'phone') => Promise<void>;
@@ -112,70 +111,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signInWithGoogle = async () => {
-    setIsLoading(true);
-    try {
-      // Simulate Google OAuth redirect
-      console.log('Redirecting to Google OAuth...');
-      
-      // In a real implementation, this would redirect to Google's OAuth URL
-      const googleAuthUrl = `https://accounts.google.com/oauth/v2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=${encodeURIComponent(window.location.origin)}/auth/google/callback&response_type=code&scope=email%20profile`;
-      
-      // For demo purposes, simulate successful Google sign-in after a delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockGoogleUser: User = {
-        id: crypto.randomUUID(),
-        email: 'user@gmail.com',
-        name: 'Google User',
-        dateOfBirth: '1990-01-01',
-        profilePhoto: '',
-        location: {
-          lat: 37.7749,
-          lng: -122.4194,
-          city: 'San Francisco',
-          country: 'United States'
-        },
-        subscriptionTier: 'Free',
-        accountType: 'individual',
-        isVerified: true,
-        createdAt: new Date().toISOString()
-      };
-
-      localStorage.setItem('tribes_user', JSON.stringify(mockGoogleUser));
-      setUser(mockGoogleUser);
-      
-      // In production, you would actually redirect:
-      // window.location.href = googleAuthUrl;
-    } catch (error) {
-      console.error('Google sign in failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const sendVerificationCode = async (contact: string, method: 'email' | 'phone') => {
     try {
-      // Generate a 6-digit verification code
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      // For real implementation, you need to connect to Supabase
+      // This will require backend services for email/SMS delivery
       
-      // Store the verification code for validation
-      setPendingVerification({ contact, method, code: verificationCode });
-      
-      // Simulate sending the code
-      console.log(`Sending verification code ${verificationCode} to ${contact} via ${method}`);
+      console.log(`🚨 REAL VERIFICATION NEEDED: Send code to ${contact} via ${method}`);
       
       if (method === 'email') {
-        console.log(`📧 Email sent to ${contact}: Your Tribes verification code is ${verificationCode}`);
-        // In production, integrate with email service like SendGrid, Mailgun, etc.
+        // Real email implementation would use services like:
+        // - Supabase Auth
+        // - SendGrid
+        // - Mailgun
+        // - AWS SES
+        throw new Error('Real email verification requires Supabase integration. Please connect to Supabase to enable email verification.');
       } else {
-        console.log(`📱 SMS sent to ${contact}: Your Tribes verification code is ${verificationCode}`);
-        // In production, integrate with SMS service like Twilio, AWS SNS, etc.
+        // Real SMS implementation would use services like:
+        // - Twilio
+        // - AWS SNS
+        // - Supabase Edge Functions with SMS provider
+        throw new Error('Real SMS verification requires Supabase integration. Please connect to Supabase to enable SMS verification.');
       }
-      
-      // For demo purposes, show the code in console
-      alert(`Demo: Verification code sent! Check console for code: ${verificationCode}`);
       
     } catch (error) {
       console.error('Failed to send verification code:', error);
@@ -189,16 +145,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('No pending verification');
       }
       
-      const isValid = code === pendingVerification.code;
+      // Real verification would validate against backend
+      throw new Error('Real code verification requires Supabase integration.');
       
-      if (isValid) {
-        console.log('✅ Verification successful');
-        setPendingVerification(null);
-      } else {
-        console.log('❌ Invalid verification code');
-      }
-      
-      return isValid;
     } catch (error) {
       console.error('Code verification failed:', error);
       throw error;
@@ -234,7 +183,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     signUp,
     signIn,
-    signInWithGoogle,
     signOut,
     updateProfile,
     sendVerificationCode,
