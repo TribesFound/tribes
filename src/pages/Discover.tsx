@@ -27,6 +27,12 @@ const Discover = () => {
   }, []);
 
   const currentProfile = testProfiles[currentProfileIndex];
+  
+  // Transform the profile to match SwipeableCard expectations
+  const transformedProfile = currentProfile ? {
+    ...currentProfile,
+    photos: currentProfile.images // Map images to photos
+  } : null;
 
   const handleSwipeLeft = () => {
     console.log('Swiped left on:', currentProfile?.name);
@@ -44,7 +50,7 @@ const Discover = () => {
     // Show match popup
     setMatchPopup({
       isOpen: true,
-      matchedProfile: currentProfile
+      matchedProfile: transformedProfile
     });
 
     moveToNextProfile();
@@ -74,7 +80,7 @@ const Discover = () => {
     setMatchPopup({ isOpen: false, matchedProfile: null });
   };
 
-  if (!currentProfile) {
+  if (!transformedProfile) {
     return (
       <div className="min-h-screen cave-gradient flex items-center justify-center p-4">
         <Card className="cave-card">
@@ -130,7 +136,7 @@ const Discover = () => {
         {/* Swipeable Profile Card */}
         <div className="relative mb-8">
           <SwipeableCard
-            profile={currentProfile}
+            profile={transformedProfile}
             onSwipeLeft={handleSwipeLeft}
             onSwipeRight={handleSwipeRight}
           />
