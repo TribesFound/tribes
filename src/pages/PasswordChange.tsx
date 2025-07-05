@@ -5,241 +5,271 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Lock, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PasswordChange = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [step, setStep] = useState<'current' | 'verification' | 'new'>('current');
-  const [currentPasscode, setCurrentPasscode] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [newPasscode, setNewPasscode] = useState('');
-  const [confirmPasscode, setConfirmPasscode] = useState('');
-  const [contactMethod, setContactMethod] = useState<'email' | 'phone'>('email');
-  const [contactValue, setContactValue] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    currentPasscode: '',
+    email: '',
+    phone: '',
+    verificationCode: ''
+  });
+  const [step, setStep] = useState<'current' | 'forgot' | 'verify' | 'new'>('current');
 
-  const handleCurrentPasscode = () => {
-    if (currentPasscode.length === 6) {
-      // Simulate passcode verification
-      toast({
-        title: "Passcode verified",
-        description: "You can now create a new passcode",
-      });
-      setStep('new');
-    } else {
+  const handleCurrentPasscodeSubmit = () => {
+    if (formData.currentPasscode.length !== 4) {
       toast({
         title: "Invalid passcode",
-        description: "Please enter your 6-digit passcode",
+        description: "Please enter your 4-digit passcode",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulate passcode verification
+    if (formData.currentPasscode === '1234') { // Mock verification
+      navigate('/passcode-setup');
+    } else {
+      toast({
+        title: "Incorrect passcode",
+        description: "Please try again or choose 'Forgot Passcode'",
         variant: "destructive"
       });
     }
   };
 
   const handleForgotPasscode = () => {
-    setStep('verification');
+    setStep('forgot');
   };
 
-  const handleVerificationCode = () => {
-    if (verificationCode.length === 6) {
+  const handleSendVerificationCode = () => {
+    if (!formData.email && !formData.phone) {
       toast({
-        title: "Code verified",
-        description: "You can now create a new passcode",
+        title: "Missing information",
+        description: "Please enter your email or phone number",
+        variant: "destructive"
       });
-      setStep('new');
-    } else {
+      return;
+    }
+
+    // Simulate sending verification code
+    toast({
+      title: "Verification code sent",
+      description: `Code sent to ${formData.email || formData.phone}. Check your ${formData.email ? 'email' : 'messages'}.`,
+    });
+    setStep('verify');
+  };
+
+  const handleVerifyCode = () => {
+    if (formData.verificationCode.length !== 6) {
       toast({
         title: "Invalid code",
         description: "Please enter the 6-digit verification code",
         variant: "destructive"
       });
+      return;
     }
-  };
 
-  const handleNewPasscode = () => {
-    if (newPasscode.length === 6 && newPasscode === confirmPasscode) {
-      toast({
-        title: "Passcode updated",
-        description: "Your passcode has been successfully changed",
-      });
-      navigate('/settings');
-    } else if (newPasscode !== confirmPasscode) {
-      toast({
-        title: "Passcodes don't match",
-        description: "Please make sure both passcodes are identical",
-        variant: "destructive"
-      });
+    // Simulate code verification
+    if (formData.verificationCode === '123456') { // Mock verification
+      navigate('/passcode-setup');
     } else {
       toast({
-        title: "Invalid passcode",
-        description: "Passcode must be 6 digits",
+        title: "Invalid verification code",
+        description: "Please check your code and try again",
         variant: "destructive"
       });
     }
   };
 
   return (
-    <div className="min-h-screen tribal-gradient p-4">
+    <div className="min-h-screen cave-gradient p-4">
       <div className="max-w-md mx-auto pt-8">
         <div className="flex items-center space-x-3 mb-8">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate('/edit-profile')}
             className="text-white hover:bg-orange-200/20"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="text-2xl font-bold tribal-font text-white">Change Passcode</h1>
+          <img 
+            src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4f83f2f45f4f.png" 
+            alt="Tribes Hand Logo" 
+            className="w-8 h-8"
+          />
+          <h1 className="text-2xl font-bold cave-font text-white">Change Passcode</h1>
         </div>
 
-        <Card className="tribal-card">
-          <CardHeader>
-            <CardTitle className="text-lg tribal-font text-amber-900 flex items-center">
-              <Lock className="w-5 h-5 mr-2" />
-              {step === 'current' && 'Current Passcode'}
-              {step === 'verification' && 'Verification'}
-              {step === 'new' && 'New Passcode'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {step === 'current' && (
-              <>
-                <div>
-                  <Label htmlFor="current-passcode">Enter your current passcode</Label>
+        {step === 'current' && (
+          <Card className="cave-card">
+            <CardHeader>
+              <CardTitle className="text-lg cave-font text-amber-900 flex items-center">
+                <Lock className="w-5 h-5 mr-2" />
+                Enter Current Passcode
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label htmlFor="currentPasscode">Current 4-Digit Passcode</Label>
+                <div className="relative mt-2">
                   <Input
-                    id="current-passcode"
-                    type="password"
-                    maxLength={6}
-                    value={currentPasscode}
-                    onChange={(e) => setCurrentPasscode(e.target.value)}
-                    className="tribal-input mt-2"
-                    placeholder="000000"
+                    id="currentPasscode"
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={formData.currentPasscode}
+                    onChange={(e) => setFormData(prev => ({ ...prev, currentPasscode: e.target.value.slice(0, 4) }))}
+                    className="cave-input pr-10"
+                    placeholder="Enter your 4-digit passcode"
+                    maxLength={4}
                   />
-                </div>
-                <div className="space-y-3">
                   <Button
-                    onClick={handleCurrentPasscode}
-                    className="w-full tribal-button"
-                    disabled={currentPasscode.length !== 6}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                   >
-                    Verify Passcode
-                  </Button>
-                  <Button
-                    onClick={handleForgotPasscode}
-                    variant="outline"
-                    className="w-full tribal-button-outline"
-                  >
-                    Forgot Passcode?
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </Button>
                 </div>
-              </>
-            )}
+              </div>
 
-            {step === 'verification' && (
-              <>
-                <div className="space-y-4">
-                  <div>
-                    <Label>Choose verification method</Label>
-                    <div className="flex space-x-2 mt-2">
-                      <Button
-                        variant={contactMethod === 'email' ? 'default' : 'outline'}
-                        onClick={() => setContactMethod('email')}
-                        className="flex-1"
-                      >
-                        <Mail className="w-4 h-4 mr-2" />
-                        Email
-                      </Button>
-                      <Button
-                        variant={contactMethod === 'phone' ? 'default' : 'outline'}
-                        onClick={() => setContactMethod('phone')}
-                        className="flex-1"
-                      >
-                        <Phone className="w-4 h-4 mr-2" />
-                        Phone
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="contact">
-                      Enter your {contactMethod === 'email' ? 'email address' : 'phone number'}
-                    </Label>
-                    <Input
-                      id="contact"
-                      type={contactMethod === 'email' ? 'email' : 'tel'}
-                      value={contactValue}
-                      onChange={(e) => setContactValue(e.target.value)}
-                      className="tribal-input mt-2"
-                      placeholder={contactMethod === 'email' ? 'your@email.com' : '+1 (555) 123-4567'}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="verification-code">Enter verification code</Label>
-                    <Input
-                      id="verification-code"
-                      type="text"
-                      maxLength={6}
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value)}
-                      className="tribal-input mt-2"
-                      placeholder="123456"
-                    />
-                  </div>
-                </div>
-                
+              <div className="space-y-3">
                 <Button
-                  onClick={handleVerificationCode}
-                  className="w-full tribal-button"
-                  disabled={verificationCode.length !== 6 || !contactValue}
+                  onClick={handleCurrentPasscodeSubmit}
+                  className="w-full cave-button"
+                  disabled={formData.currentPasscode.length !== 4}
+                >
+                  Verify Passcode
+                </Button>
+
+                <Button
+                  onClick={handleForgotPasscode}
+                  variant="outline"
+                  className="w-full cave-button-outline"
+                >
+                  Forgot Passcode?
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 'forgot' && (
+          <Card className="cave-card">
+            <CardHeader>
+              <CardTitle className="text-lg cave-font text-amber-900">Reset Passcode</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-amber-700">
+                Enter the email or phone number associated with your account to receive a verification code.
+              </p>
+
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value, phone: '' }))}
+                  className="cave-input mt-2"
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div className="text-center">
+                <span className="text-amber-700">or</span>
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value, email: '' }))}
+                  className="cave-input mt-2"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={handleSendVerificationCode}
+                  className="w-full cave-button"
+                  disabled={!formData.email && !formData.phone}
+                >
+                  Send Verification Code
+                </Button>
+
+                <Button
+                  onClick={() => setStep('current')}
+                  variant="outline"
+                  className="w-full cave-button-outline"
+                >
+                  Back to Passcode Entry
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 'verify' && (
+          <Card className="cave-card">
+            <CardHeader>
+              <CardTitle className="text-lg cave-font text-amber-900">Enter Verification Code</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-amber-700">
+                We sent a 6-digit code to {formData.email || formData.phone}. Enter it below to continue.
+              </p>
+
+              <div>
+                <Label htmlFor="verificationCode">6-Digit Verification Code</Label>
+                <Input
+                  id="verificationCode"
+                  type="text"
+                  value={formData.verificationCode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, verificationCode: e.target.value.slice(0, 6) }))}
+                  className="cave-input mt-2 text-center text-lg tracking-widest"
+                  placeholder="123456"
+                  maxLength={6}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={handleVerifyCode}
+                  className="w-full cave-button"
+                  disabled={formData.verificationCode.length !== 6}
                 >
                   Verify Code
                 </Button>
-              </>
-            )}
 
-            {step === 'new' && (
-              <>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="new-passcode">New passcode</Label>
-                    <Input
-                      id="new-passcode"
-                      type="password"
-                      maxLength={6}
-                      value={newPasscode}
-                      onChange={(e) => setNewPasscode(e.target.value)}
-                      className="tribal-input mt-2"
-                      placeholder="000000"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="confirm-passcode">Confirm new passcode</Label>
-                    <Input
-                      id="confirm-passcode"
-                      type="password"
-                      maxLength={6}
-                      value={confirmPasscode}
-                      onChange={(e) => setConfirmPasscode(e.target.value)}
-                      className="tribal-input mt-2"
-                      placeholder="000000"
-                    />
-                  </div>
-                </div>
-                
                 <Button
-                  onClick={handleNewPasscode}
-                  className="w-full tribal-button"
-                  disabled={newPasscode.length !== 6 || confirmPasscode.length !== 6}
+                  onClick={handleSendVerificationCode}
+                  variant="outline"
+                  className="w-full cave-button-outline"
                 >
-                  Update Passcode
+                  Resend Code
                 </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
+
+                <Button
+                  onClick={() => setStep('forgot')}
+                  variant="ghost"
+                  className="w-full text-amber-700 hover:bg-orange-50"
+                >
+                  Change Email/Phone
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, MapPin, Users, Clock, ArrowLeft, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { EventType } from '@/utils/eventTypes';
 
 const EventSetup = () => {
   const navigate = useNavigate();
@@ -73,7 +72,7 @@ const EventSetup = () => {
 
     toast({
       title: "Event created!",
-      description: "Your event has been successfully created",
+      description: "Your event has been successfully created and will appear in the discover feed",
     });
 
     navigate('/events');
@@ -111,7 +110,7 @@ const EventSetup = () => {
                   id="title"
                   value={eventData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className="cave-input mt-2"
+                  className="cave-input mt-2 w-full"
                   placeholder="Enter event title"
                 />
               </div>
@@ -122,7 +121,7 @@ const EventSetup = () => {
                   id="description"
                   value={eventData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  className="cave-input mt-2 min-h-[100px]"
+                  className="cave-input mt-2 w-full min-h-[100px]"
                   placeholder="Describe your event..."
                 />
               </div>

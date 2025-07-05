@@ -4,242 +4,291 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  ArrowLeft, 
+  BarChart, 
   Users, 
   Calendar, 
-  Eye, 
-  MessageCircle, 
   TrendingUp, 
-  Star,
-  Share2,
-  Target,
-  BarChart3
+  Star, 
+  MessageSquare, 
+  Eye,
+  ArrowLeft,
+  Megaphone,
+  Zap,
+  Crown
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
-  
-  const analytics = {
-    profileViews: 1247,
-    eventViews: 856,
-    messages: 34,
-    connections: 89,
-    eventAttendees: 156,
-    rating: 4.8
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const handleComingSoon = () => {
+    toast({
+      title: "COMING SOON",
+      description: "This feature will be available in a future update!",
+    });
   };
 
-  const recentEvents = [
-    {
-      id: 1,
-      title: 'Tech Networking Mixer',
-      date: '2024-01-15',
-      attendees: 45,
-      status: 'completed',
-      revenue: 675
-    },
-    {
-      id: 2,
-      title: 'Startup Pitch Night',
-      date: '2024-01-20',
-      attendees: 32,
-      status: 'upcoming',
-      revenue: 0
-    }
-  ];
-
-  const promotionalTools = [
-    {
-      id: 'boost',
-      name: 'Profile Boost',
-      description: 'Increase visibility for 24 hours',
-      price: 4.99,
-      icon: TrendingUp
-    },
-    {
-      id: 'featured',
-      name: 'Featured Event',
-      description: 'Promote your next event',
-      price: 9.99,
-      icon: Star
-    },
-    {
-      id: 'targeted',
-      name: 'Targeted Promotion',
-      description: 'Reach specific audiences',
-      price: 19.99,
-      icon: Target
-    }
+  const stats = [
+    { label: 'Profile Views', value: '1,234', icon: Eye, change: '+12%' },
+    { label: 'Event Attendees', value: '89', icon: Users, change: '+8%' },
+    { label: 'Messages', value: '456', icon: MessageSquare, change: '+15%' },
+    { label: 'Events Created', value: '12', icon: Calendar, change: '+3%' }
   ];
 
   return (
-    <div className="min-h-screen tribal-gradient p-4 pb-20">
-      <div className="max-w-md mx-auto pt-8 space-y-6">
-        <div className="flex items-center justify-between mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/profile')}
-            className="text-white hover:bg-orange-100/20"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <h1 className="text-2xl font-bold tribal-font text-white">Business Dashboard</h1>
-          <div className="w-8"></div>
+    <div className="min-h-screen cave-gradient p-4 pb-20">
+      <div className="max-w-md mx-auto pt-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/profile')}
+              className="text-white hover:bg-orange-200/20"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <img 
+              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4f83f2f45f4f.png" 
+              alt="Tribes Hand Logo" 
+              className="w-8 h-8"
+            />
+            <h1 className="text-xl font-bold cave-font text-white">Business Dashboard</h1>
+          </div>
         </div>
 
-        <Tabs defaultValue="analytics" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 tribal-card">
-            <TabsTrigger value="analytics" className="tribal-text">Analytics</TabsTrigger>
-            <TabsTrigger value="events" className="tribal-text">Events</TabsTrigger>
-            <TabsTrigger value="promote" className="tribal-text">Promote</TabsTrigger>
-          </TabsList>
+        {/* Navigation Tabs */}
+        <div className="flex space-x-2 mb-6">
+          <Button
+            onClick={() => setActiveTab('overview')}
+            variant={activeTab === 'overview' ? 'default' : 'outline'}
+            className={activeTab === 'overview' ? 'cave-button' : 'cave-button-outline'}
+            size="sm"
+          >
+            Overview
+          </Button>
+          <Button
+            onClick={() => setActiveTab('promote')}
+            variant={activeTab === 'promote' ? 'default' : 'outline'}
+            className={activeTab === 'promote' ? 'cave-button' : 'cave-button-outline'}
+            size="sm"
+          >
+            Promote
+          </Button>
+          <Button
+            onClick={() => setActiveTab('analytics')}
+            variant={activeTab === 'analytics' ? 'default' : 'outline'}
+            className={activeTab === 'analytics' ? 'cave-button' : 'cave-button-outline'}
+            size="sm"
+          >
+            Analytics
+          </Button>
+        </div>
 
-          <TabsContent value="analytics" className="space-y-4">
-            {/* Key Metrics */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-4">
-              <Card className="tribal-card">
-                <CardContent className="p-4 text-center">
-                  <Eye className="w-6 h-6 mx-auto mb-2 text-blue-600" />
-                  <div className="text-2xl font-bold tribal-font text-amber-900">{analytics.profileViews}</div>
-                  <div className="text-sm tribal-text">Profile Views</div>
-                </CardContent>
-              </Card>
-
-              <Card className="tribal-card">
-                <CardContent className="p-4 text-center">
-                  <Users className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                  <div className="text-2xl font-bold tribal-font text-amber-900">{analytics.connections}</div>
-                  <div className="text-sm tribal-text">Connections</div>
-                </CardContent>
-              </Card>
-
-              <Card className="tribal-card">
-                <CardContent className="p-4 text-center">
-                  <MessageCircle className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                  <div className="text-2xl font-bold tribal-font text-amber-900">{analytics.messages}</div>
-                  <div className="text-sm tribal-text">Messages</div>
-                </CardContent>
-              </Card>
-
-              <Card className="tribal-card">
-                <CardContent className="p-4 text-center">
-                  <Star className="w-6 h-6 mx-auto mb-2 text-yellow-600" />
-                  <div className="text-2xl font-bold tribal-font text-amber-900">{analytics.rating}</div>
-                  <div className="text-sm tribal-text">Rating</div>
-                </CardContent>
-              </Card>
+              {stats.map((stat, index) => (
+                <Card key={index} className="cave-card">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-amber-700">{stat.label}</p>
+                        <p className="text-2xl font-bold cave-font text-amber-900">{stat.value}</p>
+                        <p className="text-xs text-green-600">{stat.change}</p>
+                      </div>
+                      <stat.icon className="w-8 h-8 text-amber-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
-            {/* Event Performance */}
-            <Card className="tribal-card">
+            {/* Quick Actions */}
+            <Card className="cave-card">
               <CardHeader>
-                <CardTitle className="tribal-font text-amber-900 flex items-center">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Event Performance
-                </CardTitle>
+                <CardTitle className="text-lg cave-font text-amber-900">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="tribal-text">Total Event Views</span>
-                  <span className="font-bold tribal-font text-amber-900">{analytics.eventViews}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="tribal-text">Total Attendees</span>
-                  <span className="font-bold tribal-font text-amber-900">{analytics.eventAttendees}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="tribal-text">Conversion Rate</span>
-                  <span className="font-bold tribal-font text-amber-900">18.2%</span>
+                <Button onClick={() => navigate('/event-setup')} className="w-full cave-button">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Create New Event
+                </Button>
+                <Button onClick={() => navigate('/edit-profile')} className="w-full cave-button-outline">
+                  <Users className="w-4 h-4 mr-2" />
+                  Update Business Profile
+                </Button>
+                <Button onClick={() => navigate('/subscription')} className="w-full cave-button-outline">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Manage Subscription
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card className="cave-card">
+              <CardHeader>
+                <CardTitle className="text-lg cave-font text-amber-900">Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <p className="text-sm text-amber-700">New event attendee registered</p>
+                    <Badge className="ml-auto cave-badge">2m ago</Badge>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <p className="text-sm text-amber-700">Profile viewed by 12 users</p>
+                    <Badge className="ml-auto cave-badge">1h ago</Badge>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    <p className="text-sm text-amber-700">New message received</p>
+                    <Badge className="ml-auto cave-badge">3h ago</Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="events" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold tribal-font text-white">Your Events</h3>
-              <Button onClick={() => navigate('/event-setup')} className="tribal-button">
-                Create Event
-              </Button>
-            </div>
+        {activeTab === 'promote' && (
+          <div className="space-y-6">
+            {/* Coming Soon Message */}
+            <Card className="cave-card border-orange-300 bg-orange-50/20">
+              <CardContent className="p-6 text-center">
+                <Megaphone className="w-12 h-12 text-orange-500 mx-auto mb-4" />
+                <h3 className="text-xl font-bold cave-font text-orange-700 mb-2">COMING SOON</h3>
+                <p className="text-orange-600">
+                  Advanced promotional features are being developed and will be available soon!
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="space-y-3">
-              {recentEvents.map((event) => (
-                <Card key={event.id} className="tribal-card">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-bold tribal-font text-amber-900">{event.title}</h4>
-                      <Badge className={`tribal-badge ${
-                        event.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {event.status}
-                      </Badge>
-                    </div>
-                    <div className="space-y-1 text-sm tribal-text">
-                      <p>Date: {new Date(event.date).toLocaleDateString()}</p>
-                      <p>Attendees: {event.attendees}</p>
-                      {event.revenue > 0 && <p>Revenue: ${event.revenue}</p>}
-                    </div>
-                    <div className="flex space-x-2 mt-3">
-                      <Button size="sm" variant="outline" className="tribal-button-outline">
-                        View Details
-                      </Button>
-                      <Button size="sm" variant="outline" className="tribal-button-outline">
-                        <Share2 className="w-3 h-3 mr-1" />
-                        Share
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="promote" className="space-y-4">
-            <h3 className="text-lg font-bold tribal-font text-white">Promotional Tools</h3>
-            
-            <div className="space-y-4">
-              {promotionalTools.map((tool) => (
-                <Card key={tool.id} className="tribal-card">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <tool.icon className="w-6 h-6 text-orange-600" />
-                        <div>
-                          <h4 className="font-bold tribal-font text-amber-900">{tool.name}</h4>
-                          <p className="text-sm tribal-text">{tool.description}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold tribal-font text-amber-900">${tool.price}</div>
-                        <Button size="sm" className="tribal-button mt-1">
-                          Purchase
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Promotion History */}
-            <Card className="tribal-card">
+            {/* Profile Boost */}
+            <Card className="cave-card">
               <CardHeader>
-                <CardTitle className="tribal-font text-amber-900 flex items-center">
-                  <BarChart3 className="w-5 h-5 mr-2" />
-                  Recent Promotions
+                <CardTitle className="text-lg cave-font text-amber-900 flex items-center">
+                  <Zap className="w-5 h-5 mr-2" />
+                  Profile Boost
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-amber-700">Increase your profile visibility and reach more potential customers.</p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-amber-900">24 Hour Boost</h4>
+                      <p className="text-sm text-amber-700">3x more visibility</p>
+                    </div>
+                    <Button onClick={handleComingSoon} className="cave-button">
+                      $4.99
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-amber-900">Weekly Boost</h4>
+                      <p className="text-sm text-amber-700">5x more visibility</p>
+                    </div>
+                    <Button onClick={handleComingSoon} className="cave-button">
+                      $19.99
+                    </Button>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-amber-900">Monthly Boost</h4>
+                      <p className="text-sm text-amber-700">10x more visibility</p>
+                    </div>
+                    <Button onClick={handleComingSoon} className="cave-button">
+                      $59.99
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div className="space-y-6">
+            {/* Performance Overview */}
+            <Card className="cave-card">
+              <CardHeader>
+                <CardTitle className="text-lg cave-font text-amber-900 flex items-center">
+                  <BarChart className="w-5 h-5 mr-2" />
+                  Performance Overview
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <p className="tribal-text">No recent promotions</p>
-                  <p className="text-sm tribal-text mt-1">Start promoting to boost your visibility!</p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-amber-700">Profile Completion</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full">
+                        <div className="w-16 h-2 bg-green-500 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-semibold text-amber-900">80%</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-amber-700">Engagement Rate</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full">
+                        <div className="w-12 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-semibold text-amber-900">65%</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-amber-700">Event Success Rate</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full">
+                        <div className="w-18 h-2 bg-orange-500 rounded-full"></div>
+                      </div>
+                      <span className="text-sm font-semibold text-amber-900">90%</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+
+            {/* Top Events */}
+            <Card className="cave-card">
+              <CardHeader>
+                <CardTitle className="text-lg cave-font text-amber-900">Top Performing Events</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-amber-900">Networking Mixer</h4>
+                      <p className="text-sm text-amber-700">45 attendees</p>
+                    </div>
+                    <Badge className="cave-badge">Top Event</Badge>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-amber-900">Product Launch</h4>
+                      <p className="text-sm text-amber-700">32 attendees</p>
+                    </div>
+                    <Badge variant="outline" className="border-amber-300">Popular</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

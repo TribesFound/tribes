@@ -12,25 +12,12 @@ const Subscription = () => {
 
   const personalPlans = [
     {
-      id: 'free',
-      name: 'Free',
-      duration: 'Forever',
-      price: 0,
-      icon: '👋',
-      features: [
-        'Basic profile creation',
-        'Limited swipes per day',
-        'Basic matching',
-        'Standard messaging'
-      ],
-      color: 'gray'
-    },
-    {
       id: 'bloodline',
       name: 'Bloodline',
       duration: '1 Month',
-      price: 9.99,
+      price: 3.33,
       icon: '🔥',
+      stripeUrl: 'https://buy.stripe.com/dRm28r0DodH17nJgSu3oA01',
       features: [
         'Unlimited swipes',
         'See who liked you',
@@ -46,8 +33,9 @@ const Subscription = () => {
       id: 'oracle',
       name: 'Oracle',
       duration: '6 Months',
-      price: 49.99,
+      price: 17.77,
       icon: '🔮',
+      stripeUrl: 'https://buy.stripe.com/7sY9AT71M8mH6jFfOq3oA02',
       features: [
         'Everything in Bloodline',
         'Advanced compatibility matching',
@@ -64,8 +52,9 @@ const Subscription = () => {
       id: 'inner-circle',
       name: 'Inner Circle',
       duration: '1 Year',
-      price: 89.99,
+      price: 33.33,
       icon: '👑',
+      stripeUrl: 'https://buy.stripe.com/5kQ28r2Lw7iDdM76dQ3oA03',
       features: [
         'Everything in Oracle',
         'Exclusive events access',
@@ -85,14 +74,16 @@ const Subscription = () => {
       id: 'trade-guild',
       name: 'Trade Guild',
       duration: '1 Month',
-      price: 29.99,
+      price: 9.99,
       icon: '⚡',
+      stripeUrl: 'https://buy.stripe.com/dRm9ATcm6auPazV0Tw3oA04',
       features: [
         'Business profile features',
         'Event creation tools',
         'Analytics dashboard',
         'Lead generation',
-        'Priority listings'
+        'Priority listings',
+        'Community networking'
       ],
       color: 'blue'
     },
@@ -100,24 +91,26 @@ const Subscription = () => {
       id: 'trade-council',
       name: 'Trade Council',
       duration: '1 Year',
-      price: 299.99,
+      price: 99.99,
       icon: '🏛️',
+      stripeUrl: 'https://buy.stripe.com/7sY7sLgCm1Yj7nJeKm3oA05',
       features: [
         'Everything in Trade Guild',
         'Advanced business tools',
         'Custom branding',
         'API access',
         'Dedicated account manager',
-        'White-label solutions'
+        'White-label solutions',
+        'ROG token rewards'
       ],
       color: 'indigo',
       savings: 'Save 17%'
     }
   ];
 
-  const handleSubscribe = (planId: string, planName: string) => {
-    // In a real app, this would integrate with Stripe
-    window.open('https://buy.stripe.com/test_example', '_blank');
+  const handleSubscribe = (stripeUrl: string) => {
+    // Open Stripe checkout in a new tab
+    window.open(stripeUrl, '_blank');
   };
 
   const getColorClasses = (color: string, isSelected: boolean = false) => {
@@ -173,7 +166,7 @@ const Subscription = () => {
                   </CardTitle>
                   <div className="text-2xl font-bold tribal-font text-amber-900">
                     ${plan.price}
-                    {plan.price > 0 && <span className="text-sm font-normal">/{plan.duration}</span>}
+                    <span className="text-sm font-normal">/{plan.duration}</span>
                   </div>
                   {plan.savings && (
                     <Badge className="bg-green-100 text-green-800 border-green-200">
@@ -192,18 +185,12 @@ const Subscription = () => {
                     ))}
                   </ul>
                   
-                  {currentPlan !== plan.name ? (
-                    <Button 
-                      onClick={() => handleSubscribe(plan.id, plan.name)}
-                      className="w-full tribal-button"
-                    >
-                      {plan.price === 0 ? 'Current Plan' : `Subscribe to ${plan.name}`}
-                    </Button>
-                  ) : (
-                    <Button disabled className="w-full bg-gray-200 text-gray-500">
-                      Current Plan
-                    </Button>
-                  )}
+                  <Button 
+                    onClick={() => handleSubscribe(plan.stripeUrl)}
+                    className="w-full tribal-button"
+                  >
+                    Subscribe to {plan.name}
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -246,7 +233,7 @@ const Subscription = () => {
                   </ul>
                   
                   <Button 
-                    onClick={() => handleSubscribe(plan.id, plan.name)}
+                    onClick={() => handleSubscribe(plan.stripeUrl)}
                     className="w-full tribal-button"
                   >
                     Subscribe to {plan.name}

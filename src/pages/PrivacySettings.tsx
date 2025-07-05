@@ -5,20 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { 
-  ArrowLeft, 
-  Shield, 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  Flag, 
-  UserX, 
-  AlertTriangle,
-  MapPin,
-  Bell
-} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Shield, Eye, Users, MapPin, MessageSquare, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const PrivacySettings = () => {
@@ -27,333 +15,261 @@ const PrivacySettings = () => {
   
   const [settings, setSettings] = useState({
     profileVisibility: 'public',
-    locationSharing: true,
-    onlineStatus: true,
+    showLocation: true,
+    showOnlineStatus: true,
+    allowMessages: 'everyone',
+    showInterests: true,
+    showPhotos: true,
+    pushNotifications: true,
+    emailNotifications: false,
     readReceipts: true,
-    allowMessages: 'connections',
-    showAge: true,
-    showDistance: true,
-    dataCollection: true,
-    marketingEmails: false,
-    pushNotifications: true
+    blockScreenshots: false
   });
 
-  const [reportData, setReportData] = useState({
-    reportType: '',
-    description: '',
-    userId: ''
-  });
-
-  const [blockedUsers] = useState([
-    { id: '1', name: 'Anonymous User', blockedAt: '2024-01-10' },
-    { id: '2', name: 'Spam Account', blockedAt: '2024-01-05' }
-  ]);
-
-  const handleSettingChange = (setting: string, value: any) => {
-    setSettings(prev => ({ ...prev, [setting]: value }));
-    toast({
-      title: "Privacy setting updated",
-      description: "Your privacy preferences have been saved.",
-    });
+  const handleSettingChange = (key: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
-  const handleReport = () => {
-    if (!reportData.reportType || !reportData.description) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all report details.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const handleSaveSettings = () => {
+    // Save settings to localStorage or backend
+    localStorage.setItem('privacy_settings', JSON.stringify(settings));
     toast({
-      title: "Report submitted",
-      description: "Thank you for helping keep our community safe. We'll review your report.",
-    });
-    
-    setReportData({ reportType: '', description: '', userId: '' });
-  };
-
-  const handleUnblock = (userId: string, userName: string) => {
-    toast({
-      title: "User unblocked",
-      description: `${userName} has been unblocked and can now interact with you.`,
+      title: "Settings saved",
+      description: "Your privacy settings have been updated successfully",
     });
   };
 
   return (
-    <div className="min-h-screen tribal-gradient p-4 pb-20">
-      <div className="max-w-md mx-auto pt-8 space-y-6">
-        <div className="flex items-center justify-between mb-6">
-          <Button 
-            variant="ghost" 
+    <div className="min-h-screen cave-gradient p-4 pb-20">
+      <div className="max-w-md mx-auto pt-8">
+        <div className="flex items-center space-x-3 mb-8">
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate('/settings')}
-            className="text-white hover:bg-orange-100/20"
+            className="text-white hover:bg-orange-200/20"
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="text-2xl font-bold tribal-font text-white">Privacy & Security</h1>
-          <div className="w-8"></div>
+          <img 
+            src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4f83f2f45f4f.png" 
+            alt="Tribes Hand Logo" 
+            className="w-8 h-8"
+          />
+          <h1 className="text-2xl font-bold cave-font text-white">Privacy Settings</h1>
         </div>
 
-        {/* Profile Privacy */}
-        <Card className="tribal-card">
-          <CardHeader>
-            <CardTitle className="tribal-font text-amber-900 flex items-center">
-              <Eye className="w-5 h-5 mr-2" />
-              Profile Privacy
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6">
+          {/* Profile Visibility */}
+          <Card className="cave-card">
+            <CardHeader>
+              <CardTitle className="text-lg cave-font text-amber-900 flex items-center">
+                <Eye className="w-5 h-5 mr-2" />
+                Profile Visibility
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <Label className="tribal-text font-medium">Show Online Status</Label>
-                <p className="text-xs tribal-text text-amber-600">Let others see when you're active</p>
+                <Label htmlFor="profileVisibility">Who can see my profile</Label>
+                <Select 
+                  value={settings.profileVisibility} 
+                  onValueChange={(value) => handleSettingChange('profileVisibility', value)}
+                >
+                  <SelectTrigger className="cave-input mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">Everyone</SelectItem>
+                    <SelectItem value="friends">Friends only</SelectItem>
+                    <SelectItem value="private">Only me</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Switch
-                checked={settings.onlineStatus}
-                onCheckedChange={(checked) => handleSettingChange('onlineStatus', checked)}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="showLocation">Show location</Label>
+                  <p className="text-sm text-amber-600">Display your city and distance</p>
+                </div>
+                <Switch
+                  id="showLocation"
+                  checked={settings.showLocation}
+                  onCheckedChange={(checked) => handleSettingChange('showLocation', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="showOnlineStatus">Show online status</Label>
+                  <p className="text-sm text-amber-600">Let others see when you're active</p>
+                </div>
+                <Switch
+                  id="showOnlineStatus"
+                  checked={settings.showOnlineStatus}
+                  onCheckedChange={(checked) => handleSettingChange('showOnlineStatus', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="showInterests">Show interests</Label>
+                  <p className="text-sm text-amber-600">Display your hobbies and interests</p>
+                </div>
+                <Switch
+                  id="showInterests"
+                  checked={settings.showInterests}
+                  onCheckedChange={(checked) => handleSettingChange('showInterests', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="showPhotos">Show all photos</Label>
+                  <p className="text-sm text-amber-600">Allow others to see your photo gallery</p>
+                </div>
+                <Switch
+                  id="showPhotos"
+                  checked={settings.showPhotos}
+                  onCheckedChange={(checked) => handleSettingChange('showPhotos', checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Messaging Privacy */}
+          <Card className="cave-card">
+            <CardHeader>
+              <CardTitle className="text-lg cave-font text-amber-900 flex items-center">
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Messaging & Communication
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <Label className="tribal-text font-medium">Location Sharing</Label>
-                <p className="text-xs tribal-text text-amber-600">Show your location to nearby users</p>
+                <Label htmlFor="allowMessages">Who can message me</Label>
+                <Select 
+                  value={settings.allowMessages} 
+                  onValueChange={(value) => handleSettingChange('allowMessages', value)}
+                >
+                  <SelectTrigger className="cave-input mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="everyone">Everyone</SelectItem>
+                    <SelectItem value="matches">Matches only</SelectItem>
+                    <SelectItem value="friends">Friends only</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Switch
-                checked={settings.locationSharing}
-                onCheckedChange={(checked) => handleSettingChange('locationSharing', checked)}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="tribal-text font-medium">Show Distance</Label>
-                <p className="text-xs tribal-text text-amber-600">Display distance in your profile</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="readReceipts">Read receipts</Label>
+                  <p className="text-sm text-amber-600">Show when you've read messages</p>
+                </div>
+                <Switch
+                  id="readReceipts"
+                  checked={settings.readReceipts}
+                  onCheckedChange={(checked) => handleSettingChange('readReceipts', checked)}
+                />
               </div>
-              <Switch
-                checked={settings.showDistance}
-                onCheckedChange={(checked) => handleSettingChange('showDistance', checked)}
-              />
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="tribal-text font-medium">Show Age</Label>
-                <p className="text-xs tribal-text text-amber-600">Display your age on profile</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="blockScreenshots">Block screenshots</Label>
+                  <p className="text-sm text-amber-600">Prevent screenshots in private chats</p>
+                </div>
+                <Switch
+                  id="blockScreenshots"
+                  checked={settings.blockScreenshots}
+                  onCheckedChange={(checked) => handleSettingChange('blockScreenshots', checked)}
+                />
               </div>
-              <Switch
-                checked={settings.showAge}
-                onCheckedChange={(checked) => handleSettingChange('showAge', checked)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Message Privacy */}
-        <Card className="tribal-card">
-          <CardHeader>
-            <CardTitle className="tribal-font text-amber-900 flex items-center">
-              <Lock className="w-5 h-5 mr-2" />
-              Message Privacy
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="tribal-text font-medium">Read Receipts</Label>
-                <p className="text-xs tribal-text text-amber-600">Show when you've read messages</p>
+          {/* Notifications */}
+          <Card className="cave-card">
+            <CardHeader>
+              <CardTitle className="text-lg cave-font text-amber-900 flex items-center">
+                <Bell className="w-5 h-5 mr-2" />
+                Notifications
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="pushNotifications">Push notifications</Label>
+                  <p className="text-sm text-amber-600">Receive notifications on your device</p>
+                </div>
+                <Switch
+                  id="pushNotifications"
+                  checked={settings.pushNotifications}
+                  onCheckedChange={(checked) => handleSettingChange('pushNotifications', checked)}
+                />
               </div>
-              <Switch
-                checked={settings.readReceipts}
-                onCheckedChange={(checked) => handleSettingChange('readReceipts', checked)}
-              />
-            </div>
 
-            <div>
-              <Label className="tribal-text font-medium mb-2 block">Who can message you</Label>
-              <div className="space-y-2">
-                {['everyone', 'connections', 'friends'].map((option) => (
-                  <Button
-                    key={option}
-                    variant={settings.allowMessages === option ? 'default' : 'outline'}
-                    className={`w-full justify-start ${
-                      settings.allowMessages === option ? 'tribal-button' : 'tribal-button-outline'
-                    }`}
-                    onClick={() => handleSettingChange('allowMessages', option)}
-                  >
-                    {option.charAt(0).toUpperCase() + option.slice(1)}
-                  </Button>
-                ))}
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="emailNotifications">Email notifications</Label>
+                  <p className="text-sm text-amber-600">Receive updates via email</p>
+                </div>
+                <Switch
+                  id="emailNotifications"
+                  checked={settings.emailNotifications}
+                  onCheckedChange={(checked) => handleSettingChange('emailNotifications', checked)}
+                />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Data & Notifications */}
-        <Card className="tribal-card">
-          <CardHeader>
-            <CardTitle className="tribal-font text-amber-900 flex items-center">
-              <Bell className="w-5 h-5 mr-2" />
-              Data & Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="tribal-text font-medium">Data Collection</Label>
-                <p className="text-xs tribal-text text-amber-600">Help improve our services</p>
-              </div>
-              <Switch
-                checked={settings.dataCollection}
-                onCheckedChange={(checked) => handleSettingChange('dataCollection', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="tribal-text font-medium">Marketing Emails</Label>
-                <p className="text-xs tribal-text text-amber-600">Receive promotional content</p>
-              </div>
-              <Switch
-                checked={settings.marketingEmails}
-                onCheckedChange={(checked) => handleSettingChange('marketingEmails', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <Label className="tribal-text font-medium">Push Notifications</Label>
-                <p className="text-xs tribal-text text-amber-600">Get notified of new activity</p>
-              </div>
-              <Switch
-                checked={settings.pushNotifications}
-                onCheckedChange={(checked) => handleSettingChange('pushNotifications', checked)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Report User */}
-        <Card className="tribal-card border-red-200">
-          <CardHeader>
-            <CardTitle className="tribal-font text-amber-900 flex items-center">
-              <Flag className="w-5 h-5 mr-2" />
-              Report a User
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="tribal-text font-medium">Report Type</Label>
-              <select
-                value={reportData.reportType}
-                onChange={(e) => setReportData(prev => ({ ...prev, reportType: e.target.value }))}
-                className="w-full p-2 border border-orange-200 rounded-md tribal-input"
+          {/* Data & Security */}
+          <Card className="cave-card">
+            <CardHeader>
+              <CardTitle className="text-lg cave-font text-amber-900 flex items-center">
+                <Shield className="w-5 h-5 mr-2" />
+                Data & Security
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Button 
+                variant="outline" 
+                className="w-full cave-button-outline"
+                onClick={() => {
+                  toast({
+                    title: "Data export started",
+                    description: "You'll receive an email with your data within 24 hours",
+                  });
+                }}
               >
-                <option value="">Select reason</option>
-                <option value="harassment">Harassment</option>
-                <option value="spam">Spam</option>
-                <option value="fake-profile">Fake Profile</option>
-                <option value="inappropriate-content">Inappropriate Content</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <Label className="tribal-text font-medium">User ID (optional)</Label>
-              <Input
-                value={reportData.userId}
-                onChange={(e) => setReportData(prev => ({ ...prev, userId: e.target.value }))}
-                placeholder="Enter user ID or username"
-                className="tribal-input"
-              />
-            </div>
-
-            <div>
-              <Label className="tribal-text font-medium">Description</Label>
-              <Textarea
-                value={reportData.description}
-                onChange={(e) => setReportData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe the issue..."
-                className="tribal-input"
-                rows={3}
-              />
-            </div>
-
-            <Button onClick={handleReport} className="w-full bg-red-600 hover:bg-red-700 text-white">
-              <Flag className="w-4 h-4 mr-2" />
-              Submit Report
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Blocked Users */}
-        <Card className="tribal-card">
-          <CardHeader>
-            <CardTitle className="tribal-font text-amber-900 flex items-center">
-              <UserX className="w-5 h-5 mr-2" />
-              Blocked Users
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {blockedUsers.length > 0 ? (
-              <div className="space-y-3">
-                {blockedUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                    <div>
-                      <p className="font-medium tribal-text">{user.name}</p>
-                      <p className="text-xs tribal-text text-amber-600">
-                        Blocked on {new Date(user.blockedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleUnblock(user.id, user.name)}
-                      className="tribal-button-outline"
-                    >
-                      Unblock
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <UserX className="w-12 h-12 mx-auto text-amber-300 mb-2" />
-                <p className="tribal-text">No blocked users</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Emergency Contacts */}
-        <Card className="tribal-card border-orange-200">
-          <CardHeader>
-            <CardTitle className="tribal-font text-amber-900 flex items-center">
-              <AlertTriangle className="w-5 h-5 mr-2" />
-              Safety Center
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm tribal-text">
-              Your safety is our priority. Use these resources if you need help.
-            </p>
-            <div className="space-y-2">
-              <Button variant="outline" className="w-full tribal-button-outline justify-start">
-                Safety Tips & Guidelines
+                Download my data
               </Button>
-              <Button variant="outline" className="w-full tribal-button-outline justify-start">
-                Emergency Contacts
+              
+              <Button 
+                variant="outline" 
+                className="w-full cave-button-outline text-red-600 border-red-300 hover:bg-red-50"
+                onClick={() => {
+                  toast({
+                    title: "Account deletion requested",
+                    description: "We're sorry to see you go. Your account will be deleted within 30 days.",
+                    variant: "destructive"
+                  });
+                }}
+              >
+                Delete my account
               </Button>
-              <Button className="w-full bg-red-600 hover:bg-red-700 text-white">
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                Emergency Help
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {/* Save Button */}
+          <Button onClick={handleSaveSettings} className="w-full cave-button text-lg py-6">
+            <Shield className="w-5 h-5 mr-2" />
+            Save Privacy Settings
+          </Button>
+        </div>
       </div>
     </div>
   );

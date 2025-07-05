@@ -38,7 +38,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled }) 
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Type a message..."
-          className="flex-1 cave-input"
+          className="flex-1 cave-input border-amber-200 focus:border-orange-400 focus:ring-orange-400"
           disabled={disabled}
         />
         
@@ -49,7 +49,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled }) 
         <Button
           onClick={handleSend}
           disabled={!message.trim() || disabled}
-          className="cave-button p-3"
+          className="cave-button p-3 min-w-[48px]"
         >
           <Send className="w-4 h-4" />
         </Button>
