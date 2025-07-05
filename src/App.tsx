@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { PasscodeProvider } from "./contexts/PasscodeContext";
 import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import BottomNavigation from "./components/BottomNavigation";
+import TestRunner from "./components/TestRunner";
 
 // Pages
 import Index from "./pages/Index";
@@ -43,6 +44,7 @@ const App = () => (
       <AuthProvider>
         <PasscodeProvider>
           <SubscriptionProvider>
+            <TestRunner />
             <Toaster />
             <Sonner />
             <BrowserRouter>

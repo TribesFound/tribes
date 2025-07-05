@@ -1,216 +1,71 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import ChatHeader from '@/components/ChatHeader';
-import MessageBubble from '@/components/MessageBubble';
-import PhotoMessage from '@/components/PhotoMessage';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ArrowLeft, Phone, Video, MoreVertical, UserPlus, Eye } from 'lucide-react';
 import MessageInput from '@/components/MessageInput';
 import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
-  senderId: string;
   content: string;
-  timestamp: string;
-  isRead: boolean;
-  isDelivered: boolean;
-  type?: 'text' | 'photo';
-  photoUrl?: string;
-  expiresAt?: string;
-}
-
-interface ChatUser {
-  id: string;
-  name: string;
-  avatar: string;
-  isOnline: boolean;
+  timestamp: Date;
+  senderId: string;
+  type: 'text' | 'image';
 }
 
 const Chat = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [chatUser, setChatUser] = useState<ChatUser | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const currentUserId = 'current-user';
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isFriend, setIsFriend] = useState(false);
 
-  // Updated mock users data to match Friends.tsx IDs
-  const mockUsers: { [key: string]: ChatUser } = {
-    // Bonds
-    '1': {
-      id: '1',
-      name: 'Maya',
-      avatar: '/placeholder.svg',
-      isOnline: true
-    },
-    '2': {
-      id: '2',
-      name: 'Jordan',
-      avatar: '/placeholder.svg',
-      isOnline: false
-    },
-    '3': {
-      id: '3',
-      name: 'Riley',
-      avatar: '/placeholder.svg',
-      isOnline: true
-    },
-    '4': {
-      id: '4',
-      name: 'Casey',
-      avatar: '/placeholder.svg',
-      isOnline: true
-    },
-    // Friends
-    '5': {
-      id: '5',
-      name: 'Sarah Chen',
-      avatar: '/placeholder.svg',
-      isOnline: true
-    },
-    '6': {
-      id: '6',
-      name: 'Marcus Rodriguez',
-      avatar: '/placeholder.svg',
-      isOnline: false
-    },
-    '7': {
-      id: '7',
-      name: 'Emma Thompson',
-      avatar: '/placeholder.svg',
-      isOnline: true
-    },
-    '8': {
-      id: '8',
-      name: 'Tech Solutions Co.',
-      avatar: '/placeholder.svg',
-      isOnline: false
-    }
-  };
-
-  // Updated mock conversations for each user
-  const mockConversations: { [key: string]: Message[] } = {
-    '1': [
-      {
-        id: '1',
-        senderId: '1',
-        content: 'Hey! How have you been? 🌟',
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        isRead: true,
-        isDelivered: true,
-        type: 'text'
-      }
-    ],
-    '2': [
-      {
-        id: '1',
-        senderId: '2',
-        content: 'That event was amazing! Thanks for the invite 🎉',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        isRead: true,
-        isDelivered: true,
-        type: 'text'
-      }
-    ],
-    '3': [
-      {
-        id: '1',
-        senderId: '3',
-        content: 'Looking forward to our coffee meetup! ☕',
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
-        isRead: false,
-        isDelivered: true,
-        type: 'text'
-      }
-    ],
-    '4': [
-      {
-        id: '1',
-        senderId: '4',
-        content: 'Great networking opportunity coming up! Interested?',
-        timestamp: new Date(Date.now() - 86400000).toISOString(),
-        isRead: true,
-        isDelivered: true,
-        type: 'text'
-      }
-    ],
-    '5': [
-      {
-        id: '1',
-        senderId: '5',
-        content: 'Hi there! Love your hiking photos 📸',
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        isRead: true,
-        isDelivered: true,
-        type: 'text'
-      },
-      {
-        id: '2',
-        senderId: currentUserId,
-        content: 'Thanks! That trail was amazing. Have you been there?',
-        timestamp: new Date(Date.now() - 6900000).toISOString(),
-        isRead: true,
-        isDelivered: true,
-        type: 'text'
-      }
-    ],
-    '6': [
-      {
-        id: '1',
-        senderId: '6',
-        content: 'Hey! How was your weekend adventure?',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        isRead: true,
-        isDelivered: true,
-        type: 'text'
-      }
-    ],
-    '7': [
-      {
-        id: '1',
-        senderId: '7',
-        content: 'That board game cafe looks amazing! Let\'s go soon 🎲',
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
-        isRead: false,
-        isDelivered: true,
-        type: 'text'
-      }
-    ],
-    '8': [
-      {
-        id: '1',
-        senderId: '8',
-        content: 'Hello! We have some exciting networking events coming up. Would you like to learn more about our services?',
-        timestamp: new Date(Date.now() - 86400000).toISOString(),
-        isRead: true,
-        isDelivered: true,
-        type: 'text'
-      }
-    ]
+  const chatPartner = {
+    id: userId || '1',
+    name: 'Maya',
+    avatar: '/placeholder.svg',
+    isOnline: true,
+    lastSeen: 'Active now'
   };
 
   useEffect(() => {
-    if (!userId) {
-      navigate('/friends');
-      return;
+    // Load messages for this chat
+    const chatKey = `chat_${userId}`;
+    const savedMessages = localStorage.getItem(chatKey);
+    if (savedMessages) {
+      const parsed = JSON.parse(savedMessages);
+      setMessages(parsed.map((msg: any) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
+      })));
+    } else {
+      // Default messages
+      setMessages([
+        {
+          id: '1',
+          content: 'Hey! How have you been? 🌟',
+          timestamp: new Date(Date.now() - 3600000),
+          senderId: userId || '1',
+          type: 'text'
+        },
+        {
+          id: '2',
+          content: 'Hi Maya! I\'ve been great, thanks for asking. How about you?',
+          timestamp: new Date(Date.now() - 3300000),
+          senderId: 'current_user',
+          type: 'text'
+        }
+      ]);
     }
 
-    // Set chat user based on userId
-    const user = mockUsers[userId];
-    if (user) {
-      setChatUser(user);
-      // Load conversation history for this specific user
-      setMessages(mockConversations[userId] || []);
-      console.log(`Loading chat for user: ${user.name} (ID: ${userId})`);
-    } else {
-      // If user not found, redirect back to friends
-      console.log(`User not found for ID: ${userId}`);
-      navigate('/friends');
-    }
-  }, [userId, navigate]);
+    // Check if user is friend
+    const friends = JSON.parse(localStorage.getItem('user_friends') || '[]');
+    setIsFriend(friends.includes(userId));
+  }, [userId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -221,232 +76,172 @@ const Chat = () => {
   };
 
   const handleSendMessage = (content: string) => {
-    if (!userId) return;
-
     const newMessage: Message = {
       id: Date.now().toString(),
-      senderId: currentUserId,
       content,
-      timestamp: new Date().toISOString(),
-      isRead: false,
-      isDelivered: false,
+      timestamp: new Date(),
+      senderId: 'current_user',
       type: 'text'
     };
-    
-    setMessages(prev => [...prev, newMessage]);
 
-    // Update the mock conversation data
-    if (!mockConversations[userId]) {
-      mockConversations[userId] = [];
-    }
-    mockConversations[userId].push(newMessage);
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
 
-    // Simulate message delivery and read status
+    // Save to localStorage
+    const chatKey = `chat_${userId}`;
+    localStorage.setItem(chatKey, JSON.stringify(updatedMessages));
+
+    // Simulate response after 2 seconds
     setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === newMessage.id 
-            ? { ...msg, isDelivered: true }
-            : msg
-        )
-      );
-    }, 1000);
-
-    setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === newMessage.id 
-            ? { ...msg, isRead: true }
-            : msg
-        )
-      );
-    }, 3000);
-
-    // Simulate typing indicator and response
-    setTimeout(() => {
-      setIsTyping(true);
-    }, 2000);
-
-    setTimeout(() => {
-      setIsTyping(false);
-      const responses = [
-        "That's awesome! 😊",
-        "Sounds like a plan!",
-        "I'm excited about this!",
-        "Can't wait to explore together!",
-        "Perfect timing!"
-      ];
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      
       const responseMessage: Message = {
         id: (Date.now() + 1).toString(),
-        senderId: userId,
-        content: randomResponse,
-        timestamp: new Date().toISOString(),
-        isRead: false,
-        isDelivered: true,
+        content: "Thanks for your message! I'll get back to you soon 😊",
+        timestamp: new Date(),
+        senderId: userId || '1',
         type: 'text'
       };
       
-      setMessages(prev => [...prev, responseMessage]);
-      mockConversations[userId].push(responseMessage);
-    }, 4000);
-  };
-
-  const handleViewProfile = () => {
-    // Navigate to the chat partner's profile, not current user's profile
-    navigate(`/profile/${userId}`);
+      const finalMessages = [...updatedMessages, responseMessage];
+      setMessages(finalMessages);
+      localStorage.setItem(chatKey, JSON.stringify(finalMessages));
+    }, 2000);
   };
 
   const handleAddFriend = () => {
-    if (!userId || !chatUser) return;
-
-    // Get current friends from localStorage or use empty array
     const currentFriends = JSON.parse(localStorage.getItem('user_friends') || '[]');
     
-    // Check if already a friend
     if (currentFriends.includes(userId)) {
       toast({
         title: "Already friends!",
-        description: `You're already friends with ${chatUser.name}`,
+        description: `You're already friends with ${chatPartner.name}`,
       });
       return;
     }
 
-    // Add to friends list
     currentFriends.push(userId);
     localStorage.setItem('user_friends', JSON.stringify(currentFriends));
+    setIsFriend(true);
 
-    // Remove from bonds list if it exists there
-    const currentBonds = JSON.parse(localStorage.getItem('user_bonds') || '[]');
-    const updatedBonds = currentBonds.filter((bondId: string) => bondId !== userId);
+    // Remove from bonds list
+    const bonds = JSON.parse(localStorage.getItem('user_bonds') || '[]');
+    const updatedBonds = bonds.filter((id: string) => id !== userId);
     localStorage.setItem('user_bonds', JSON.stringify(updatedBonds));
 
     toast({
       title: "Friend added!",
-      description: `You've added ${chatUser.name} as a friend`,
-    });
-    
-    // Navigate to friends list after a short delay
-    setTimeout(() => {
-      navigate('/friends');
-    }, 1500);
-  };
-
-  const handleSendPhoto = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        // Create a temporary URL for the image
-        const photoUrl = URL.createObjectURL(file);
-        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours from now
-        
-        const photoMessage: Message = {
-          id: Date.now().toString(),
-          senderId: currentUserId,
-          content: 'Photo',
-          timestamp: new Date().toISOString(),
-          isRead: false,
-          isDelivered: true,
-          type: 'photo',
-          photoUrl,
-          expiresAt
-        };
-        
-        setMessages(prev => [...prev, photoMessage]);
-        
-        if (userId && mockConversations[userId]) {
-          mockConversations[userId].push(photoMessage);
-        }
-        
-        toast({
-          title: "Photo sent!",
-          description: "Photo will be available for 24 hours",
-        });
-      }
-    };
-    input.click();
-  };
-
-  const handleVideoCall = () => {
-    toast({
-      title: "Video call feature",
-      description: "Video calling will be available in a future update!",
+      description: `You've added ${chatPartner.name} as a friend`,
     });
   };
 
-  const handleViewPhoto = (photoUrl: string) => {
-    // Open photo in full screen or modal
-    window.open(photoUrl, '_blank');
+  const handleViewProfile = () => {
+    navigate(`/profile/${userId}`);
   };
 
-  if (!chatUser) {
-    return (
-      <div className="min-h-screen cave-gradient flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Loading chat...</p>
-        </div>
-      </div>
-    );
-  }
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
   return (
-    <div className="min-h-screen cave-gradient flex flex-col">
-      <ChatHeader
-        chatUser={chatUser}
-        onViewProfile={handleViewProfile}
-        onAddFriend={handleAddFriend}
-        onSendPhoto={handleSendPhoto}
-        onVideoCall={handleVideoCall}
-      />
-
-      {/* Messages Area */}
-      <div className="flex-1 flex flex-col" style={{ height: 'calc(100vh - 140px)' }}>
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-1">
-            {messages.map((message) => (
-              message.type === 'photo' ? (
-                <PhotoMessage
-                  key={message.id}
-                  photoUrl={message.photoUrl!}
-                  timestamp={message.timestamp}
-                  isCurrentUser={message.senderId === currentUserId}
-                  onView={() => handleViewPhoto(message.photoUrl!)}
-                  expiresAt={message.expiresAt!}
-                />
-              ) : (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  isCurrentUser={message.senderId === currentUserId}
-                  senderName={message.senderId !== currentUserId ? chatUser.name : undefined}
-                />
-              )
-            ))}
+    <div className="flex flex-col h-screen cave-gradient">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-sm border-b border-orange-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/bonds')}
+              className="p-2"
+            >
+              <ArrowLeft className="w-5 h-5 text-amber-700" />
+            </Button>
             
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex justify-start mb-3">
-                <div className="bg-white border border-orange-200 rounded-2xl rounded-bl-md px-4 py-3 max-w-xs">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  </div>
-                </div>
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={handleViewProfile}>
+              <div className="relative">
+                <Avatar className="w-10 h-10 ring-2 ring-orange-200">
+                  <AvatarImage src={chatPartner.avatar} />
+                  <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white">
+                    {chatPartner.name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                {chatPartner.isOnline && (
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                )}
               </div>
+              
+              <div>
+                <h3 className="font-semibold text-amber-900 cave-font">
+                  {chatPartner.name}
+                </h3>
+                <p className="text-xs text-amber-600">
+                  {chatPartner.lastSeen}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            {!isFriend && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleAddFriend}
+                className="p-2"
+              >
+                <UserPlus className="w-5 h-5 text-amber-700" />
+              </Button>
             )}
             
-            <div ref={messagesEndRef} />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleViewProfile}
+              className="p-2"
+            >
+              <Eye className="w-5 h-5 text-amber-700" />
+            </Button>
+
+            <Button variant="ghost" size="sm" className="p-2">
+              <Phone className="w-5 h-5 text-amber-700" />
+            </Button>
+            
+            <Button variant="ghost" size="sm" className="p-2">
+              <Video className="w-5 h-5 text-amber-700" />
+            </Button>
+            
+            <Button variant="ghost" size="sm" className="p-2">
+              <MoreVertical className="w-5 h-5 text-amber-700" />
+            </Button>
           </div>
-        </ScrollArea>
+        </div>
       </div>
 
-      <MessageInput onSendMessage={handleSendMessage} disabled={isTyping} />
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${message.senderId === 'current_user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+              message.senderId === 'current_user'
+                ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
+                : 'bg-white/80 text-amber-900 border border-orange-200'
+            }`}>
+              <p className="text-sm">{message.content}</p>
+              <p className={`text-xs mt-1 ${
+                message.senderId === 'current_user' ? 'text-orange-100' : 'text-amber-600'
+              }`}>
+                {formatTime(message.timestamp)}
+              </p>
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Message Input */}
+      <MessageInput onSendMessage={handleSendMessage} />
     </div>
   );
 };

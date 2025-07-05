@@ -1,406 +1,222 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  MessageCircle, 
-  Users, 
-  Plus, 
-  MoreVertical,
-  UserMinus,
-  Blocks,
-  Flag
-} from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import SubscriptionBadge, { SubscriptionTier } from '@/components/SubscriptionBadge';
+import { Input } from '@/components/ui/input';
+import { Search, MessageCircle, Users, Eye } from 'lucide-react';
 
 const Friends = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'active' | 'distance'>('name');
-  const [userFriends, setUserFriends] = useState<string[]>([]);
-  const [userBonds, setUserBonds] = useState<string[]>([]);
+  const [bonds, setBonds] = useState<any[]>([]);
+  const [friends, setFriends] = useState<any[]>([]);
 
-  // Mock bonds/matches data - updated with correct IDs
-  const mockBonds = [
+  const allUsers = [
     {
       id: '1',
       name: 'Maya',
       avatar: '/placeholder.svg',
-      tier: 'Oracle' as SubscriptionTier,
-      isProfessional: false
+      lastActive: '2 hours ago',
+      mutualFriends: 3
     },
     {
       id: '2',
       name: 'Jordan',
       avatar: '/placeholder.svg',
-      tier: 'Bloodline' as SubscriptionTier,
-      isProfessional: false
+      lastActive: '1 day ago',
+      mutualFriends: 5
     },
     {
       id: '3',
       name: 'Riley',
       avatar: '/placeholder.svg',
-      tier: 'Inner Circle' as SubscriptionTier,
-      isProfessional: false
+      lastActive: '30 min ago',
+      mutualFriends: 2
     },
     {
       id: '4',
       name: 'Casey',
       avatar: '/placeholder.svg',
-      tier: 'Trade Guild' as SubscriptionTier,
-      isProfessional: true
-    }
-  ];
-
-  // Updated mock friends data with string IDs to match Chat.tsx
-  const mockFriends = [
-    {
-      id: '5',
-      name: 'Sarah Chen',
-      avatar: '/placeholder.svg',
-      isOnline: true,
-      lastActive: '2 min ago',
-      distance: '1.2 km',
-      mutualInterests: 3,
-      tier: 'Oracle' as SubscriptionTier,
-      isProfessional: false
-    },
-    {
-      id: '6',
-      name: 'Marcus Rodriguez',
-      avatar: '/placeholder.svg',
-      isOnline: false,
-      lastActive: '1 hour ago',
-      distance: '3.5 km',
-      mutualInterests: 5,
-      tier: 'Inner Circle' as SubscriptionTier,
-      isProfessional: false
-    },
-    {
-      id: '7',
-      name: 'Emma Thompson',
-      avatar: '/placeholder.svg',
-      isOnline: true,
-      lastActive: 'Active now',
-      distance: '0.8 km',
-      mutualInterests: 2,
-      tier: 'Bloodline' as SubscriptionTier,
-      isProfessional: false
-    },
-    {
-      id: '8',
-      name: 'Tech Solutions Co.',
-      avatar: '/placeholder.svg',
-      isOnline: false,
-      lastActive: '30 min ago',
-      distance: '2.1 km',
-      mutualInterests: 1,
-      tier: 'Trade Council' as SubscriptionTier,
-      isProfessional: true
+      lastActive: '1 day ago',
+      mutualFriends: 4
     }
   ];
 
   useEffect(() => {
-    // Load user's friends and bonds from localStorage
-    const friends = JSON.parse(localStorage.getItem('user_friends') || '[]');
-    const bonds = JSON.parse(localStorage.getItem('user_bonds') || '["1", "2", "3", "4"]'); // Default bonds
-    setUserFriends(friends);
-    setUserBonds(bonds);
+    const userBonds = JSON.parse(localStorage.getItem('user_bonds') || '[]');
+    const userFriends = JSON.parse(localStorage.getItem('user_friends') || '[]');
+
+    const bondsData = allUsers.filter(user => userBonds.includes(user.id));
+    const friendsData = allUsers.filter(user => userFriends.includes(user.id));
+
+    setBonds(bondsData);
+    setFriends(friendsData);
   }, []);
 
-  // Filter bonds based on current user's bonds
-  const currentBonds = mockBonds.filter(bond => userBonds.includes(bond.id));
-  
-  // Filter friends based on current user's friends
-  const currentFriends = mockFriends.filter(friend => userFriends.includes(friend.id));
-
-  const filteredFriends = currentFriends
-    .filter(friend => 
-      friend.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'active':
-          return a.isOnline === b.isOnline ? 0 : a.isOnline ? -1 : 1;
-        case 'distance':
-          return parseFloat(a.distance) - parseFloat(b.distance);
-        default:
-          return 0;
-      }
-    });
-
-  const handleBondClick = (bondId: string) => {
-    console.log(`Opening chat with bond ${bondId}`);
-    navigate(`/chat/${bondId}`);
+  const handleChatClick = (userId: string) => {
+    navigate(`/chat/${userId}`);
   };
 
-  const handleMessageClick = (friendId: string) => {
-    console.log(`Opening chat with friend ${friendId}`);
-    navigate(`/chat/${friendId}`);
+  const handleViewProfile = (userId: string) => {
+    navigate(`/profile/${userId}`);
   };
 
-  const handleProfileClick = (friendId: string) => {
-    console.log(`Opening profile for friend ${friendId}`);
-    navigate(`/profile/${friendId}`);
-  };
-
-  const handleUnfriend = (friendId: string, friendName: string) => {
-    console.log(`Unfriending ${friendName}`);
-  };
-
-  const handleBlock = (friendId: string, friendName: string) => {
-    console.log(`Blocking ${friendName}`);
-  };
-
-  const handleReport = (friendId: string, friendName: string) => {
-    console.log(`Reporting ${friendName}`);
-  };
-
-  const handleRestrict = (friendId: string, friendName: string) => {
-    console.log(`Restricting ${friendName}`);
-  };
+  const filteredFriends = friends.filter(friend =>
+    friend.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="min-h-screen cave-gradient p-4 pb-20 overflow-y-auto">
+    <div className="min-h-screen cave-gradient p-4 pb-20">
       <div className="max-w-md mx-auto pt-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
-              alt="Tribes Hand Logo" 
-              className="w-10 h-10"
-            />
-            <h1 className="text-2xl font-bold cave-font text-white">My Tribe</h1>
-          </div>
-          <Badge className="cave-badge">
-            <Users className="w-4 h-4 mr-1" />
-            {filteredFriends.length}
-          </Badge>
+        <div className="text-center mb-8">
+          <img 
+            src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4f83f2f45f4f.png" 
+            alt="Tribes Hand Logo" 
+            className="w-10 h-10 mx-auto mb-4"
+          />
+          <h1 className="text-2xl font-bold cave-font text-white">Your Tribe</h1>
+          <p className="text-orange-200">{bonds.length + friends.length} connections</p>
         </div>
 
-        {/* Bonds Section - Now Horizontally Scrollable */}
-        <div className="mb-6">
-          <h2 className="text-lg font-bold cave-font text-white mb-3">Your Bonds</h2>
-          <div className="overflow-x-auto">
-            <div className="flex space-x-3 pb-2 min-w-max">
-              {currentBonds.map((bond) => (
+        {/* Your Bonds */}
+        {bonds.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold cave-font text-white mb-4">
+              Your Bonds ({bonds.length})
+            </h2>
+            <div className="flex space-x-3 overflow-x-auto pb-2">
+              {bonds.map((bond) => (
                 <div
                   key={bond.id}
-                  className="flex-shrink-0 cursor-pointer"
-                  onClick={() => handleBondClick(bond.id)}
+                  className="flex-shrink-0 text-center cursor-pointer"
+                  onClick={() => handleViewProfile(bond.id)}
                 >
-                  <div className="text-center">
-                    <div className="relative">
-                      <Avatar className="w-16 h-16 ring-2 ring-orange-300 hover:ring-orange-400 transition-all">
-                        <AvatarImage src={bond.avatar} />
-                        <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white cave-font">
-                          {bond.name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-1 -right-1">
-                        <SubscriptionBadge tier={bond.tier} size="sm" showLabel={false} />
-                      </div>
-                    </div>
-                    <p className="text-xs text-white mt-1 cave-font">{bond.name}</p>
-                  </div>
+                  <Avatar className="w-16 h-16 ring-2 ring-orange-200 mx-auto mb-2">
+                    <AvatarImage src={bond.avatar} />
+                    <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white">
+                      {bond.name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-white text-sm font-medium">{bond.name}</p>
                 </div>
               ))}
-              {/* Add new bond button */}
-              <div className="flex-shrink-0 cursor-pointer" onClick={() => navigate('/discover')}>
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-orange-200/20 border-2 border-orange-300 border-dashed rounded-full flex items-center justify-center hover:bg-orange-200/30 transition-all">
-                    <Plus className="w-6 h-6 text-orange-300" />
-                  </div>
-                  <p className="text-xs text-orange-200 mt-1 cave-font">Discover</p>
-                </div>
-              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Search and Filter Section */}
-        <div className="space-y-4 mb-6">
+        {/* Search Friends */}
+        <div className="mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-600 w-4 h-4" />
             <Input
               placeholder="Search friends..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="cave-input pl-10"
+              className="pl-10 cave-input border-amber-200 focus:border-orange-400 focus:ring-orange-400"
             />
-          </div>
-
-          <div className="flex space-x-2">
-            <Button
-              onClick={() => setSortBy('name')}
-              variant={sortBy === 'name' ? 'default' : 'outline'}
-              className={sortBy === 'name' ? 'cave-button' : 'cave-button-outline'}
-              size="sm"
-            >
-              A-Z
-            </Button>
-            <Button
-              onClick={() => setSortBy('active')}
-              variant={sortBy === 'active' ? 'default' : 'outline'}
-              className={sortBy === 'active' ? 'cave-button' : 'cave-button-outline'}
-              size="sm"
-            >
-              Most Active
-            </Button>
-            <Button
-              onClick={() => setSortBy('distance')}
-              variant={sortBy === 'distance' ? 'default' : 'outline'}
-              className={sortBy === 'distance' ? 'cave-button' : 'cave-button-outline'}
-              size="sm"
-            >
-              Closest
-            </Button>
           </div>
         </div>
 
         {/* Friends List */}
-        <div>
-          <h2 className="text-lg font-bold cave-font text-white mb-3">Friends</h2>
-          <div className="space-y-3">
-            {filteredFriends.map((friend) => (
-              <Card key={friend.id} className="cave-card">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <Avatar 
-                          className="w-12 h-12 ring-2 ring-orange-200 cursor-pointer"
-                          onClick={() => handleProfileClick(friend.id)}
-                        >
-                          <AvatarImage src={friend.avatar} />
-                          <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white cave-font">
-                            {friend.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        {friend.isOnline && !friend.isProfessional && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h3 
-                            className="font-bold cave-font text-amber-900 cursor-pointer hover:text-orange-600"
-                            onClick={() => handleProfileClick(friend.id)}
-                          >
-                            {friend.name}
-                          </h3>
-                          <SubscriptionBadge tier={friend.tier} size="sm" showLabel={false} />
-                        </div>
-                        <p className="text-sm text-amber-700">
-                          {friend.isProfessional 
-                            ? 'Professional Account' 
-                            : friend.isOnline ? 'Online' : friend.lastActive
-                          }
-                        </p>
-                        <div className="flex items-center space-x-3 mt-1">
-                          <span className="text-xs text-amber-600">
-                            {friend.distance} away
-                          </span>
-                          {!friend.isProfessional && (
-                            <span className="text-xs text-amber-600">
-                              {friend.mutualInterests} shared interests
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        className="cave-button p-2"
-                        onClick={() => handleMessageClick(friend.id)}
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </Button>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4 text-amber-700" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="cave-card">
-                          {!friend.isProfessional ? (
-                            <>
-                              <DropdownMenuItem
-                                onClick={() => handleUnfriend(friend.id, friend.name)}
-                                className="text-amber-800 hover:bg-orange-100"
-                              >
-                                <UserMinus className="mr-2 h-4 w-4" />
-                                Unfriend
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleBlock(friend.id, friend.name)}
-                                className="text-red-600 hover:bg-red-50"
-                              >
-                                <Blocks className="mr-2 h-4 w-4" />
-                                Block
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleReport(friend.id, friend.name)}
-                                className="text-red-600 hover:bg-red-50"
-                              >
-                                <Flag className="mr-2 h-4 w-4" />
-                                Report
-                              </DropdownMenuItem>
-                            </>
-                          ) : (
-                            <>
-                              <DropdownMenuItem
-                                onClick={() => handleRestrict(friend.id, friend.name)}
-                                className="text-amber-800 hover:bg-orange-100"
-                              >
-                                <Blocks className="mr-2 h-4 w-4" />
-                                Restrict
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleReport(friend.id, friend.name)}
-                                className="text-red-600 hover:bg-red-50"
-                              >
-                                <Flag className="mr-2 h-4 w-4" />
-                                Report
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold cave-font text-white">
+            Friends ({friends.length})
+          </h2>
+          
+          {filteredFriends.map((friend) => (
+            <Card
+              key={friend.id}
+              className="cave-card hover:bg-orange-50/10 transition-all"
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-4">
+                  <div 
+                    className="cursor-pointer"
+                    onClick={() => handleViewProfile(friend.id)}
+                  >
+                    <Avatar className="w-16 h-16 ring-2 ring-orange-200">
+                      <AvatarImage src={friend.avatar} />
+                      <AvatarFallback className="bg-gradient-to-br from-orange-400 to-amber-400 text-white cave-font">
+                        {friend.name[0]}
+                      </AvatarFallback>
+                    </Avatar>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
 
-        {filteredFriends.length === 0 && (
-          <div className="text-center py-12">
-            <Users className="w-16 h-16 mx-auto text-orange-300 mb-4" />
-            <h3 className="text-xl font-bold cave-font text-white mb-2">
-              No friends found
-            </h3>
-            <p className="text-orange-200">
-              {searchTerm ? 'Try a different search term' : 'Start connecting with people to build your tribe!'}
-            </p>
-          </div>
-        )}
+                  <div className="flex-1 min-w-0">
+                    <h3 
+                      className="text-amber-900 font-semibold text-lg cave-font cursor-pointer hover:text-orange-600"
+                      onClick={() => handleViewProfile(friend.id)}
+                    >
+                      {friend.name}
+                    </h3>
+                    <p className="text-amber-700 text-sm">
+                      Active {friend.lastActive}
+                    </p>
+                    <p className="text-amber-600 text-xs">
+                      {friend.mutualFriends} mutual connections
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col space-y-2">
+                    <Button
+                      size="sm"
+                      className="cave-button"
+                      onClick={() => handleChatClick(friend.id)}
+                    >
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Chat
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="cave-button-outline"
+                      onClick={() => handleViewProfile(friend.id)}
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Profile
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {filteredFriends.length === 0 && friends.length > 0 && (
+            <Card className="cave-card">
+              <CardContent className="p-8 text-center">
+                <Search className="w-16 h-16 text-amber-300 mx-auto mb-4" />
+                <h3 className="text-amber-900 text-xl font-semibold mb-2 cave-font">
+                  No friends found
+                </h3>
+                <p className="text-amber-700">
+                  Try adjusting your search terms
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {friends.length === 0 && (
+            <Card className="cave-card">
+              <CardContent className="p-8 text-center">
+                <Users className="w-16 h-16 text-amber-300 mx-auto mb-4" />
+                <h3 className="text-amber-900 text-xl font-semibold mb-2 cave-font">
+                  No friends yet
+                </h3>
+                <p className="text-amber-700">
+                  Add friends from your bonds to see them here!
+                </p>
+                <Button 
+                  className="cave-button mt-4"
+                  onClick={() => navigate('/bonds')}
+                >
+                  View Your Messages
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

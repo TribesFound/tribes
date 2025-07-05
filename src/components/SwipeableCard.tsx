@@ -7,21 +7,22 @@ import { Badge } from '@/components/ui/badge';
 import { Heart, X, MapPin, Users } from 'lucide-react';
 
 interface SwipeableCardProps {
-  user: {
+  profile: {
     id: string;
     name: string;
     age: number;
     location: string;
-    images: string[];
+    photos: string[];
     interests: string[];
     bio: string;
     distance: string;
     mutualFriends: number;
   };
-  onSwipe: (direction: 'left' | 'right', userId: string) => void;
+  onSwipeLeft: () => void;
+  onSwipeRight: () => void;
 }
 
-const SwipeableCard: React.FC<SwipeableCardProps> = ({ user, onSwipe }) => {
+const SwipeableCard: React.FC<SwipeableCardProps> = ({ profile, onSwipeLeft, onSwipeRight }) => {
   const [exitX, setExitX] = useState(0);
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-25, 25]);
@@ -32,10 +33,10 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({ user, onSwipe }) => {
     
     if (info.offset.x > threshold) {
       setExitX(200);
-      onSwipe('right', user.id);
+      onSwipeRight();
     } else if (info.offset.x < -threshold) {
       setExitX(-200);
-      onSwipe('left', user.id);
+      onSwipeLeft();
     }
   };
 
@@ -53,8 +54,8 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({ user, onSwipe }) => {
       <Card className="cave-card h-full overflow-hidden relative">
         <div className="relative h-64 bg-gradient-to-br from-orange-200 to-amber-200">
           <img
-            src={user.images[0]}
-            alt={user.name}
+            src={profile.photos[0]}
+            alt={profile.name}
             className="w-full h-full object-cover"
           />
           
@@ -79,32 +80,32 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({ user, onSwipe }) => {
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold cave-font text-amber-900">
-              {user.name}, {user.age}
+              {profile.name}, {profile.age}
             </h3>
             <div className="flex items-center text-amber-600 text-sm">
               <MapPin className="w-4 h-4 mr-1" />
-              {user.distance}
+              {profile.distance}
             </div>
           </div>
 
           <p className="text-amber-700 text-sm line-clamp-2">
-            {user.bio}
+            {profile.bio}
           </p>
 
           <div className="flex items-center text-amber-600 text-sm">
             <Users className="w-4 h-4 mr-1" />
-            {user.mutualFriends} mutual connections
+            {profile.mutualFriends} mutual connections
           </div>
 
           <div className="flex flex-wrap gap-1">
-            {user.interests.slice(0, 3).map((interest, index) => (
+            {profile.interests.slice(0, 3).map((interest, index) => (
               <Badge key={index} className="cave-badge text-xs">
                 {interest}
               </Badge>
             ))}
-            {user.interests.length > 3 && (
+            {profile.interests.length > 3 && (
               <Badge className="cave-badge text-xs">
-                +{user.interests.length - 3} more
+                +{profile.interests.length - 3} more
               </Badge>
             )}
           </div>
