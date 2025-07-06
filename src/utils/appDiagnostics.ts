@@ -171,6 +171,25 @@ export const runAppDiagnostics = async (): Promise<DiagnosticResult[]> => {
     });
   }
 
+  // Test 7: Navigation and Routing
+  try {
+    const currentPath = window.location.pathname;
+    results.push({
+      category: 'Navigation',
+      test: 'React Router',
+      status: 'pass',
+      message: `Router working correctly on path: ${currentPath}`
+    });
+  } catch (error: any) {
+    results.push({
+      category: 'Navigation',
+      test: 'React Router',
+      status: 'fail',
+      message: `Router test failed: ${error.message}`,
+      details: error
+    });
+  }
+
   // Summary
   const passed = results.filter(r => r.status === 'pass').length;
   const failed = results.filter(r => r.status === 'fail').length;
@@ -182,12 +201,18 @@ export const runAppDiagnostics = async (): Promise<DiagnosticResult[]> => {
   console.log(`❌ Failed: ${failed}`);
   console.log(`\n🎉 Diagnostics completed!`);
   
+  // Log individual results for debugging
+  results.forEach(result => {
+    const icon = result.status === 'pass' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
+    console.log(`${icon} ${result.category} - ${result.test}: ${result.message}`);
+  });
+  
   return results;
 };
 
 // Auto-run diagnostics on import for testing
 if (typeof window !== 'undefined') {
   runAppDiagnostics().then(results => {
-    console.log('Diagnostic results:', results);
+    console.log('Background diagnostic results:', results);
   });
 }

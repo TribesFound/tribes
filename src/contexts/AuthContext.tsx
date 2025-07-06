@@ -42,67 +42,83 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [pendingVerification, setPendingVerification] = useState<{contact: string, method: 'email' | 'phone', code: string} | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         
         if (session?.user) {
-          // Fetch user profile from our profiles table
-          try {
-            const { data: profile, error } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', session.user.id)
-              .single();
-            
-            if (error) {
-              console.error('Error fetching profile:', error);
-            } else if (profile) {
-              // Safely parse location with fallback
-              let location = { lat: 0, lng: 0, city: '', country: '' };
-              if (profile.location && typeof profile.location === 'object' && profile.location !== null) {
-                const loc = profile.location as any;
-                if (loc.lat && loc.lng && loc.city && loc.country) {
-                  location = {
-                    lat: Number(loc.lat),
-                    lng: Number(loc.lng),
-                    city: String(loc.city),
-                    country: String(loc.country)
-                  };
+          // Defer profile fetch to avoid auth callback issues
+          setTimeout(async () => {
+            try {
+              const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+              
+              if (error) {
+                console.error('Error fetching profile:', error);
+                // Create a basic user object from auth data
+                setUser({
+                  id: session.user.id,
+                  email: session.user.email,
+                  phone: session.user.phone,
+                  name: session.user.user_metadata?.name || 'User',
+                  dateOfBirth: '',
+                  profilePhoto: '',
+                  location: { lat: 0, lng: 0, city: '', country: '' },
+                  subscriptionTier: 'Free',
+                  accountType: 'individual',
+                  isVerified: false,
+                  createdAt: session.user.created_at
+                });
+              } else if (profile) {
+                // Safely parse location with fallback
+                let location = { lat: 0, lng: 0, city: '', country: '' };
+                if (profile.location && typeof profile.location === 'object' && profile.location !== null) {
+                  const loc = profile.location as any;
+                  if (loc.lat && loc.lng && loc.city && loc.country) {
+                    location = {
+                      lat: Number(loc.lat),
+                      lng: Number(loc.lng),
+                      city: String(loc.city),
+                      country: String(loc.country)
+                    };
+                  }
                 }
+
+                // Safely parse subscription tier with fallback
+                const validTiers: User['subscriptionTier'][] = ['Free', 'Bloodline', 'Oracle', 'Inner Circle', 'Trade Guild', 'Trade Council'];
+                const subscriptionTier = validTiers.includes(profile.subscription_tier as any) 
+                  ? profile.subscription_tier as User['subscriptionTier']
+                  : 'Free';
+
+                // Safely parse account type with fallback
+                const validAccountTypes: User['accountType'][] = ['individual', 'professional'];
+                const accountType = validAccountTypes.includes(profile.account_type as any)
+                  ? profile.account_type as User['accountType']
+                  : 'individual';
+
+                setUser({
+                  id: profile.id,
+                  email: session.user.email,
+                  phone: session.user.phone,
+                  name: profile.name || 'User',
+                  dateOfBirth: profile.date_of_birth || '',
+                  profilePhoto: profile.profile_photo || '',
+                  location,
+                  subscriptionTier,
+                  accountType,
+                  isVerified: Boolean(profile.is_verified),
+                  createdAt: profile.created_at
+                });
               }
-
-              // Safely parse subscription tier with fallback
-              const validTiers: User['subscriptionTier'][] = ['Free', 'Bloodline', 'Oracle', 'Inner Circle', 'Trade Guild', 'Trade Council'];
-              const subscriptionTier = validTiers.includes(profile.subscription_tier as any) 
-                ? profile.subscription_tier as User['subscriptionTier']
-                : 'Free';
-
-              // Safely parse account type with fallback
-              const validAccountTypes: User['accountType'][] = ['individual', 'professional'];
-              const accountType = validAccountTypes.includes(profile.account_type as any)
-                ? profile.account_type as User['accountType']
-                : 'individual';
-
-              setUser({
-                id: profile.id,
-                email: session.user.email,
-                phone: session.user.phone,
-                name: profile.name || 'User',
-                dateOfBirth: profile.date_of_birth || '',
-                profilePhoto: profile.profile_photo || '',
-                location,
-                subscriptionTier,
-                accountType,
-                isVerified: Boolean(profile.is_verified),
-                createdAt: profile.created_at
-              });
+            } catch (error) {
+              console.error('Error in profile fetch:', error);
             }
-          } catch (error) {
-            console.error('Error fetching profile:', error);
-          }
+          }, 0);
         } else {
           setUser(null);
         }
@@ -111,10 +127,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Check for existing session
+    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (!session) {
+      if (session) {
+        setSession(session);
+      } else {
         setIsLoading(false);
       }
     });
@@ -127,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error: authError } = await supabase.auth.signUp({
         email: data.email,
-        password: data.password || crypto.randomUUID().slice(0, 8), // Generate temporary password
+        password: data.password || crypto.randomUUID().slice(0, 12), // Generate secure temporary password
         options: {
           emailRedirectTo: `${window.location.origin}/auth`,
           data: {

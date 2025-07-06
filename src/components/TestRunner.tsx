@@ -12,6 +12,10 @@ const TestRunner: React.FC = () => {
       try {
         const results = await runAppDiagnostics();
         setDiagnosticResults(results);
+        console.log('🎉 App diagnostics completed successfully!');
+        console.log(`✅ ${results.filter(r => r.status === 'pass').length} tests passed`);
+        console.log(`⚠️ ${results.filter(r => r.status === 'warning').length} warnings`);
+        console.log(`❌ ${results.filter(r => r.status === 'fail').length} failed`);
       } catch (error) {
         console.error('Failed to run diagnostics:', error);
       } finally {
