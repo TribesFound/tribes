@@ -60,6 +60,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (error) {
               console.error('Error fetching profile:', error);
             } else if (profile) {
+              // Safely parse location with fallback
+              let location = { lat: 0, lng: 0, city: '', country: '' };
+              if (profile.location && typeof profile.location === 'object' && profile.location !== null) {
+                const loc = profile.location as any;
+                if (loc.lat && loc.lng && loc.city && loc.country) {
+                  location = {
+                    lat: Number(loc.lat),
+                    lng: Number(loc.lng),
+                    city: String(loc.city),
+                    country: String(loc.country)
+                  };
+                }
+              }
+
+              // Safely parse subscription tier with fallback
+              const validTiers: User['subscriptionTier'][] = ['Free', 'Bloodline', 'Oracle', 'Inner Circle', 'Trade Guild', 'Trade Council'];
+              const subscriptionTier = validTiers.includes(profile.subscription_tier as any) 
+                ? profile.subscription_tier as User['subscriptionTier']
+                : 'Free';
+
+              // Safely parse account type with fallback
+              const validAccountTypes: User['accountType'][] = ['individual', 'professional'];
+              const accountType = validAccountTypes.includes(profile.account_type as any)
+                ? profile.account_type as User['accountType']
+                : 'individual';
+
               setUser({
                 id: profile.id,
                 email: session.user.email,
@@ -67,10 +93,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 name: profile.name || 'User',
                 dateOfBirth: profile.date_of_birth || '',
                 profilePhoto: profile.profile_photo || '',
-                location: profile.location || { lat: 0, lng: 0, city: '', country: '' },
-                subscriptionTier: profile.subscription_tier || 'Free',
-                accountType: profile.account_type || 'individual',
-                isVerified: profile.is_verified || false,
+                location,
+                subscriptionTier,
+                accountType,
+                isVerified: Boolean(profile.is_verified),
                 createdAt: profile.created_at
               });
             }
@@ -103,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: data.email,
         password: data.password || crypto.randomUUID().slice(0, 8), // Generate temporary password
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/auth`,
           data: {
             name: data.name,
             date_of_birth: data.dateOfBirth,
@@ -179,14 +205,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('No pending verification');
       }
       
-      const verifyParams = {
-        token: code,
-        type: pendingVerification.method === 'email' ? 'email' as const : 'sms' as const,
-        ...(pendingVerification.method === 'email' 
-          ? { email: pendingVerification.contact }
-          : { phone: pendingVerification.contact }
-        )
-      };
+      let verifyParams: any;
+      
+      if (pendingVerification.method === 'email') {
+        verifyParams = {
+          email: pendingVerification.contact,
+          token: code,
+          type: 'email' as const
+        };
+      } else {
+        verifyParams = {
+          phone: pendingVerification.contact,
+          token: code,
+          type: 'sms' as const
+        };
+      }
       
       const { error } = await supabase.auth.verifyOtp(verifyParams);
       

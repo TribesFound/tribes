@@ -1,20 +1,40 @@
 
 import React, { useEffect, useState } from 'react';
-import { runComprehensiveTest } from '@/utils/appTesting';
+import { runAppDiagnostics, DiagnosticResult } from '@/utils/appDiagnostics';
 
 const TestRunner: React.FC = () => {
-  const [testResults, setTestResults] = useState<any>(null);
+  const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    const results = runComprehensiveTest();
-    setTestResults(results);
+    const runDiagnostics = async () => {
+      setIsRunning(true);
+      try {
+        const results = await runAppDiagnostics();
+        setDiagnosticResults(results);
+      } catch (error) {
+        console.error('Failed to run diagnostics:', error);
+      } finally {
+        setIsRunning(false);
+      }
+    };
+
+    runDiagnostics();
   }, []);
 
-  if (!testResults) return null;
+  const passedTests = diagnosticResults.filter(r => r.status === 'pass').length;
+  const failedTests = diagnosticResults.filter(r => r.status === 'fail').length;
+  const warningTests = diagnosticResults.filter(r => r.status === 'warning').length;
 
   return (
     <div className="hidden">
-      {/* Hidden component for testing purposes */}
+      {/* Hidden component that runs diagnostics in the background */}
+      <div data-testid="diagnostic-summary">
+        <span data-testid="passed-count">{passedTests}</span>
+        <span data-testid="failed-count">{failedTests}</span>
+        <span data-testid="warning-count">{warningTests}</span>
+        <span data-testid="is-running">{isRunning}</span>
+      </div>
     </div>
   );
 };

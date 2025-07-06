@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,8 +31,22 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const [isLocationGranted, setIsLocationGranted] = useState(false);
   const [error, setError] = useState('');
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isCodeVerified, setIsCodeVerified] = useState(false);
   
-  const { sendVerificationCode, verifyCode } = useAuth();
+  const { sendVerificationCode, verifyCode, user } = useAuth();
+
+  // Auto-redirect when verification is complete
+  useEffect(() => {
+    if (isCodeVerified) {
+      const timer = setTimeout(() => {
+        setStep('age');
+        setError('');
+        console.log('✅ Verification successful - proceeding to age verification');
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isCodeVerified]);
 
   const handleSendVerification = async () => {
     setIsVerifying(true);
@@ -43,7 +57,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       await sendVerificationCode(contact, contactMethod);
       setStep('verify');
       console.log(`Verification code sent to ${contact} via ${contactMethod}`);
-    } catch (error) {
+    } catch (error: any) {
       setError('Failed to send verification code. Please check your connection and try again.');
       console.error('Verification send error:', error);
     } finally {
@@ -53,18 +67,21 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
 
   const handleVerifyCode = async () => {
     if (verificationCode.length === 6) {
+      setIsVerifying(true);
       try {
         const isValid = await verifyCode(verificationCode);
         if (isValid) {
-          setStep('age');
+          setIsCodeVerified(true);
           setError('');
-          console.log('✅ Verification successful - proceeding to age verification');
+          console.log('✅ Verification successful - auto-redirecting...');
         } else {
           setError('Invalid verification code. Please try again.');
         }
-      } catch (error) {
+      } catch (error: any) {
         setError('Verification failed. Please try again.');
         console.error('Code verification error:', error);
+      } finally {
+        setIsVerifying(false);
       }
     }
   };
@@ -125,6 +142,14 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       });
     }
   };
+
+  // If user is already authenticated, skip verification
+  useEffect(() => {
+    if (user && user.isVerified) {
+      console.log('User already verified, skipping verification steps');
+      // Could redirect to profile setup or dashboard
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen cave-gradient flex items-center justify-center p-4">
@@ -246,6 +271,12 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                   <p className="text-sm cave-text mb-4">
                     Enter the 6-digit code sent to {contactMethod === 'email' ? email : phone}
                   </p>
+                  {isCodeVerified && (
+                    <div className="flex items-center justify-center space-x-2 text-green-600 mb-4">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="text-sm">Code verified! Redirecting...</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-center">
@@ -254,10 +285,11 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     value={verificationCode}
                     onChange={(value) => {
                       setVerificationCode(value);
-                      if (value.length === 6) {
+                      if (value.length === 6 && !isCodeVerified) {
                         setTimeout(() => handleVerifyCode(), 500);
                       }
                     }}
+                    disabled={isVerifying || isCodeVerified}
                   >
                     <InputOTPGroup>
                       {[...Array(6)].map((_, i) => (
@@ -267,13 +299,26 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                   </InputOTP>
                 </div>
 
-                <Button
-                  onClick={() => handleSendVerification()}
-                  variant="ghost"
-                  className="w-full cave-button-ghost"
-                >
-                  Resend Code
-                </Button>
+                {!isCodeVerified && (
+                  <>
+                    <Button
+                      onClick={() => handleSendVerification()}
+                      variant="ghost"
+                      className="w-full cave-button-ghost"
+                      disabled={isVerifying}
+                    >
+                      Resend Code
+                    </Button>
+                    
+                    <Button
+                      onClick={() => setStep('age')}
+                      variant="outline"
+                      className="w-full cave-button-outline"
+                    >
+                      Continue Manually
+                    </Button>
+                  </>
+                )}
               </>
             )}
 
@@ -334,7 +379,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     {isRedirecting ? (
                       <div className="space-y-3">
                         <p className="text-xs text-amber-600">
-                          Redirecting automatically...
+                          Redirecting automatically in 2 seconds...
                         </p>
                         <Button
                           onClick={handleManualContinue}
