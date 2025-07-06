@@ -56,26 +56,36 @@ export const runAppDiagnostics = async (): Promise<DiagnosticResult[]> => {
     });
   }
 
-  // Test 3: Database Tables Accessibility
-  const tables = ['profiles', 'events', 'messages', 'conversations', 'friendships', 'matches', 'user_preferences', 'professional_profiles'];
+  // Test 3: Database Tables Accessibility - Fixed TypeScript issue
+  const tableTests = [
+    { name: 'profiles', query: () => supabase.from('profiles').select('*').limit(1) },
+    { name: 'events', query: () => supabase.from('events').select('*').limit(1) },
+    { name: 'messages', query: () => supabase.from('messages').select('*').limit(1) },
+    { name: 'conversations', query: () => supabase.from('conversations').select('*').limit(1) },
+    { name: 'friendships', query: () => supabase.from('friendships').select('*').limit(1) },
+    { name: 'matches', query: () => supabase.from('matches').select('*').limit(1) },
+    { name: 'user_preferences', query: () => supabase.from('user_preferences').select('*').limit(1) },
+    { name: 'professional_profiles', query: () => supabase.from('professional_profiles').select('*').limit(1) },
+    { name: 'event_participants', query: () => supabase.from('event_participants').select('*').limit(1) }
+  ];
   
-  for (const table of tables) {
+  for (const table of tableTests) {
     try {
-      const { error } = await supabase.from(table).select('*').limit(1);
+      const { error } = await table.query();
       if (error) throw error;
       
       results.push({
         category: 'Database',
-        test: `Table Access: ${table}`,
+        test: `Table Access: ${table.name}`,
         status: 'pass',
-        message: `Successfully accessed ${table} table`
+        message: `Successfully accessed ${table.name} table`
       });
     } catch (error: any) {
       results.push({
         category: 'Database',
-        test: `Table Access: ${table}`,
+        test: `Table Access: ${table.name}`,
         status: error.code === 'PGRST116' ? 'warning' : 'fail',
-        message: error.code === 'PGRST116' ? `${table} table is empty (normal for new apps)` : `Failed to access ${table} table: ${error.message}`,
+        message: error.code === 'PGRST116' ? `${table.name} table is empty (normal for new apps)` : `Failed to access ${table.name} table: ${error.message}`,
         details: error
       });
     }
