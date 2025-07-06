@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 export interface User {
   id: string;
@@ -36,40 +38,82 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
   const [pendingVerification, setPendingVerification] = useState<{contact: string, method: 'email' | 'phone', code: string} | null>(null);
 
   useEffect(() => {
-    // Check for existing session
-    const checkAuthState = async () => {
-      try {
-        const storedUser = localStorage.getItem('tribes_user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        setSession(session);
+        
+        if (session?.user) {
+          // Fetch user profile from our profiles table
+          try {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+            
+            if (profile) {
+              setUser({
+                id: profile.id,
+                email: session.user.email,
+                phone: session.user.phone,
+                name: profile.name || 'User',
+                dateOfBirth: profile.date_of_birth || '',
+                profilePhoto: profile.profile_photo || '',
+                location: profile.location || { lat: 0, lng: 0, city: '', country: '' },
+                subscriptionTier: profile.subscription_tier || 'Free',
+                accountType: profile.account_type || 'individual',
+                isVerified: profile.is_verified || false,
+                createdAt: profile.created_at
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+          }
+        } else {
+          setUser(null);
         }
-      } catch (error) {
-        console.error('Auth state check failed:', error);
-      } finally {
+        
         setIsLoading(false);
       }
-    };
+    );
 
-    checkAuthState();
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (!session) {
+        setIsLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (data: any) => {
     setIsLoading(true);
     try {
-      const newUser: User = {
-        id: crypto.randomUUID(),
-        ...data,
-        subscriptionTier: 'Free' as const,
-        accountType: 'individual' as const,
-        isVerified: true,
-        createdAt: new Date().toISOString()
-      };
+      const { error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password || crypto.randomUUID().slice(0, 8), // Generate temporary password
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            name: data.name,
+            date_of_birth: data.dateOfBirth,
+            location: data.location,
+            account_type: data.accountType || 'individual'
+          }
+        }
+      });
 
-      localStorage.setItem('tribes_user', JSON.stringify(newUser));
-      setUser(newUser);
+      if (authError) throw authError;
+      
+      console.log('User signed up successfully');
     } catch (error) {
       console.error('Sign up failed:', error);
       throw error;
@@ -81,28 +125,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log('Signing in with:', email, password);
-      
-      const mockUser: User = {
-        id: crypto.randomUUID(),
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        name: 'Demo User',
-        dateOfBirth: '1990-01-01',
-        profilePhoto: '',
-        location: {
-          lat: 37.7749,
-          lng: -122.4194,
-          city: 'San Francisco',
-          country: 'United States'
-        },
-        subscriptionTier: 'Free',
-        accountType: 'individual',
-        isVerified: true,
-        createdAt: new Date().toISOString()
-      };
+        password
+      });
 
-      localStorage.setItem('tribes_user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      if (error) throw error;
     } catch (error) {
       console.error('Sign in failed:', error);
       throw error;
@@ -113,26 +141,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendVerificationCode = async (contact: string, method: 'email' | 'phone') => {
     try {
-      // For real implementation, you need to connect to Supabase
-      // This will require backend services for email/SMS delivery
-      
-      console.log(`🚨 REAL VERIFICATION NEEDED: Send code to ${contact} via ${method}`);
-      
       if (method === 'email') {
-        // Real email implementation would use services like:
-        // - Supabase Auth
-        // - SendGrid
-        // - Mailgun
-        // - AWS SES
-        throw new Error('Real email verification requires Supabase integration. Please connect to Supabase to enable email verification.');
+        const { error } = await supabase.auth.signInWithOtp({
+          email: contact,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth`
+          }
+        });
+        
+        if (error) throw error;
+        
+        // Store pending verification info
+        setPendingVerification({ contact, method, code: 'pending' });
+        console.log(`Verification code sent to ${contact} via email`);
       } else {
-        // Real SMS implementation would use services like:
-        // - Twilio
-        // - AWS SNS
-        // - Supabase Edge Functions with SMS provider
-        throw new Error('Real SMS verification requires Supabase integration. Please connect to Supabase to enable SMS verification.');
+        const { error } = await supabase.auth.signInWithOtp({
+          phone: contact,
+        });
+        
+        if (error) throw error;
+        
+        // Store pending verification info
+        setPendingVerification({ contact, method, code: 'pending' });
+        console.log(`Verification code sent to ${contact} via SMS`);
       }
-      
     } catch (error) {
       console.error('Failed to send verification code:', error);
       throw error;
@@ -145,9 +177,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('No pending verification');
       }
       
-      // Real verification would validate against backend
-      throw new Error('Real code verification requires Supabase integration.');
+      const { error } = await supabase.auth.verifyOtp({
+        [pendingVerification.method === 'email' ? 'email' : 'phone']: pendingVerification.contact,
+        token: code,
+        type: pendingVerification.method === 'email' ? 'email' : 'sms'
+      });
       
+      if (error) throw error;
+      
+      setPendingVerification(null);
+      return true;
     } catch (error) {
       console.error('Code verification failed:', error);
       throw error;
@@ -156,8 +195,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      localStorage.removeItem('tribes_user');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       setUser(null);
+      setSession(null);
       setPendingVerification(null);
     } catch (error) {
       console.error('Sign out failed:', error);
@@ -167,10 +209,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateProfile = async (data: Partial<User>) => {
     try {
-      if (user) {
-        const updatedUser = { ...user, ...data };
-        localStorage.setItem('tribes_user', JSON.stringify(updatedUser));
-        setUser(updatedUser);
+      if (user && session) {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            name: data.name,
+            profile_photo: data.profilePhoto,
+            location: data.location,
+            subscription_tier: data.subscriptionTier,
+            account_type: data.accountType,
+            is_verified: data.isVerified
+          })
+          .eq('id', user.id);
+
+        if (error) throw error;
+        
+        setUser({ ...user, ...data });
       }
     } catch (error) {
       console.error('Profile update failed:', error);

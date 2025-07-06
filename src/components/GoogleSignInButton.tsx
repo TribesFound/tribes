@@ -17,16 +17,15 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   className = ''
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signInWithGoogle } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     
     try {
-      await signInWithGoogle();
-      onSuccess?.();
-      navigate('/onboarding');
+      // This component is deprecated - Google auth has been removed
+      onError?.('Google authentication is currently disabled');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed';
       console.error('Google sign-in error:', errorMessage);
@@ -39,15 +38,11 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
   return (
     <Button
       onClick={handleGoogleSignIn}
-      disabled={isLoading}
-      className={`w-full cave-button bg-white text-amber-900 border-2 border-orange-300 hover:bg-orange-50 ${className}`}
+      disabled={true}
+      className={`w-full cave-button bg-gray-300 text-gray-500 cursor-not-allowed ${className}`}
     >
-      {isLoading ? (
-        <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-      ) : (
-        <Chrome className="w-5 h-5 mr-3" />
-      )}
-      {isLoading ? 'Signing in...' : 'Continue with Google'}
+      <Chrome className="w-5 h-5 mr-3" />
+      Google Sign-in Disabled
     </Button>
   );
 };

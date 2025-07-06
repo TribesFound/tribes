@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isLocationGranted, setIsLocationGranted] = useState(false);
   const [error, setError] = useState('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   const { sendVerificationCode, verifyCode } = useAuth();
 
@@ -56,6 +58,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
         if (isValid) {
           setStep('age');
           setError('');
+          console.log('✅ Verification successful - proceeding to age verification');
         } else {
           setError('Invalid verification code. Please try again.');
         }
@@ -92,7 +95,9 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       });
       
       setIsLocationGranted(true);
+      setIsRedirecting(true);
       
+      // Auto-redirect after 2 seconds
       setTimeout(() => {
         onComplete({
           [contactMethod]: contactMethod === 'email' ? email : phone,
@@ -104,10 +109,20 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
             country: locationData.country
           }
         });
-      }, 1000);
+      }, 2000);
     } catch (locationError) {
       const error = locationError as LocationError;
       setError(`Location access failed: ${error.message}`);
+    }
+  };
+
+  const handleManualContinue = () => {
+    if (isLocationGranted && location) {
+      onComplete({
+        [contactMethod]: contactMethod === 'email' ? email : phone,
+        dateOfBirth,
+        location
+      });
     }
   };
 
@@ -316,9 +331,26 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     <p className="text-sm cave-text mb-2">
                       Location verified: {location?.city}, {location?.country}
                     </p>
-                    <p className="text-xs text-amber-600">
-                      Setting up your profile...
-                    </p>
+                    {isRedirecting ? (
+                      <div className="space-y-3">
+                        <p className="text-xs text-amber-600">
+                          Redirecting automatically...
+                        </p>
+                        <Button
+                          onClick={handleManualContinue}
+                          className="w-full cave-button"
+                        >
+                          Continue Now
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={handleManualContinue}
+                        className="w-full cave-button"
+                      >
+                        Continue
+                      </Button>
+                    )}
                   </div>
                 )}
               </>
