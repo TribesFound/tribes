@@ -51,13 +51,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           // Fetch user profile from our profiles table
           try {
-            const { data: profile } = await supabase
+            const { data: profile, error } = await supabase
               .from('profiles')
               .select('*')
               .eq('id', session.user.id)
               .single();
             
-            if (profile) {
+            if (error) {
+              console.error('Error fetching profile:', error);
+            } else if (profile) {
               setUser({
                 id: profile.id,
                 email: session.user.email,
@@ -177,11 +179,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('No pending verification');
       }
       
-      const { error } = await supabase.auth.verifyOtp({
-        [pendingVerification.method === 'email' ? 'email' : 'phone']: pendingVerification.contact,
+      const verifyParams = {
         token: code,
-        type: pendingVerification.method === 'email' ? 'email' : 'sms'
-      });
+        type: pendingVerification.method === 'email' ? 'email' as const : 'sms' as const,
+        ...(pendingVerification.method === 'email' 
+          ? { email: pendingVerification.contact }
+          : { phone: pendingVerification.contact }
+        )
+      };
+      
+      const { error } = await supabase.auth.verifyOtp(verifyParams);
       
       if (error) throw error;
       
