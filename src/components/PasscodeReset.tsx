@@ -27,7 +27,7 @@ const PasscodeReset = ({ onComplete, onCancel }: PasscodeResetProps) => {
     // Simulate sending verification code
     setTimeout(() => {
       setIsVerifying(false);
-      console.log(`Verification code sent to ${user?.email || user?.phone}`);
+      console.log(`Verification code sent to ${user?.email}`);
     }, 1500);
   };
 
@@ -122,10 +122,10 @@ const PasscodeReset = ({ onComplete, onCancel }: PasscodeResetProps) => {
               <>
                 <div className="text-center">
                   <div className="flex items-center justify-center mb-4">
-                    {user?.email ? <Mail className="w-8 h-8 text-orange-600" /> : <Phone className="w-8 h-8 text-orange-600" />}
+                    <Mail className="w-8 h-8 text-orange-600" />
                   </div>
                   <p className="text-amber-800 mb-4">
-                    We'll send a verification code to {user?.email || user?.phone}
+                    We'll send a verification code to {user?.email}
                   </p>
                 </div>
 

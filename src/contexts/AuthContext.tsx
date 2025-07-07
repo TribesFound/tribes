@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
@@ -84,13 +83,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
+      let parsedLocation = undefined;
+      if (profile?.location && typeof profile.location === 'object') {
+        try {
+          parsedLocation = profile.location as {
+            lat: number;
+            lng: number;
+            city: string;
+            country: string;
+          };
+        } catch (e) {
+          console.warn('Failed to parse location data:', e);
+        }
+      }
+
       const userData: User = {
         id: supabaseUser.id,
         email: supabaseUser.email,
         name: profile?.name || supabaseUser.user_metadata?.name || 'User',
         profilePhoto: profile?.profile_photo,
         dateOfBirth: profile?.date_of_birth,
-        location: profile?.location,
+        location: parsedLocation,
         subscriptionTier: profile?.subscription_tier || 'Free',
         accountType: profile?.account_type || 'individual',
         isVerified: profile?.is_verified || false

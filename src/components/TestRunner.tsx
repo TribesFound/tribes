@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { runAppDiagnostics, DiagnosticResult } from '@/utils/appDiagnostics';
+import { runComprehensiveDiagnostics, DiagnosticResult } from '@/utils/appDiagnostics';
 
 const TestRunner: React.FC = () => {
   const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
@@ -10,12 +10,12 @@ const TestRunner: React.FC = () => {
     const runDiagnostics = async () => {
       setIsRunning(true);
       try {
-        const results = await runAppDiagnostics();
+        const results = await runComprehensiveDiagnostics();
         setDiagnosticResults(results);
         console.log('🎉 App diagnostics completed successfully!');
         console.log(`✅ ${results.filter(r => r.status === 'pass').length} tests passed`);
         console.log(`⚠️ ${results.filter(r => r.status === 'warning').length} warnings`);
-        console.log(`❌ ${results.filter(r => r.status === 'fail').length} failed`);
+        console.log(`❌ ${results.filter(r => r.status === 'error').length} failed`);
       } catch (error) {
         console.error('Failed to run diagnostics:', error);
       } finally {
@@ -27,7 +27,7 @@ const TestRunner: React.FC = () => {
   }, []);
 
   const passedTests = diagnosticResults.filter(r => r.status === 'pass').length;
-  const failedTests = diagnosticResults.filter(r => r.status === 'fail').length;
+  const errorTests = diagnosticResults.filter(r => r.status === 'error').length;
   const warningTests = diagnosticResults.filter(r => r.status === 'warning').length;
 
   return (
@@ -35,7 +35,7 @@ const TestRunner: React.FC = () => {
       {/* Hidden component that runs diagnostics in the background */}
       <div data-testid="diagnostic-summary">
         <span data-testid="passed-count">{passedTests}</span>
-        <span data-testid="failed-count">{failedTests}</span>
+        <span data-testid="failed-count">{errorTests}</span>
         <span data-testid="warning-count">{warningTests}</span>
         <span data-testid="is-running">{isRunning}</span>
       </div>

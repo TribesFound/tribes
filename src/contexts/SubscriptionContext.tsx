@@ -78,7 +78,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [dailyUsage, setDailyUsage] = useState({ swipes: 0, messages: 0 });
   const [lastResetDate, setLastResetDate] = useState<string>('');
 
-  const currentTier = user?.subscriptionTier || 'Free';
+  const currentTier = (user?.subscriptionTier as SubscriptionTier) || 'Free';
   const limits = subscriptionLimits[currentTier];
 
   useEffect(() => {
