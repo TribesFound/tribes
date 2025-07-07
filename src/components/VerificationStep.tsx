@@ -54,12 +54,33 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
     
     try {
       const contact = contactMethod === 'email' ? email : phone;
+      
+      if (!contact) {
+        throw new Error('Please enter your contact information');
+      }
+      
+      if (contactMethod === 'phone') {
+        // Basic phone validation
+        const cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length < 10) {
+          throw new Error('Please enter a valid phone number');
+        }
+      }
+      
+      if (contactMethod === 'email') {
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          throw new Error('Please enter a valid email address');
+        }
+      }
+      
       await sendVerificationCode(contact, contactMethod);
       setStep('verify');
       console.log(`Verification code sent to ${contact} via ${contactMethod}`);
     } catch (error: any) {
-      setError('Failed to send verification code. Please check your connection and try again.');
       console.error('Verification send error:', error);
+      setError(error.message || 'Failed to send verification code. Please try again.');
     } finally {
       setIsVerifying(false);
     }
@@ -68,18 +89,18 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const handleVerifyCode = async () => {
     if (verificationCode.length === 6) {
       setIsVerifying(true);
+      setError('');
+      
       try {
         const isValid = await verifyCode(verificationCode);
         if (isValid) {
           setIsCodeVerified(true);
-          setError('');
           console.log('✅ Verification successful - auto-redirecting...');
-        } else {
-          setError('Invalid verification code. Please try again.');
         }
       } catch (error: any) {
-        setError('Verification failed. Please try again.');
         console.error('Code verification error:', error);
+        setError(error.message || 'Invalid verification code. Please try again.');
+        setVerificationCode(''); // Clear the code so user can try again
       } finally {
         setIsVerifying(false);
       }
@@ -143,14 +164,6 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
     }
   };
 
-  // If user is already authenticated, skip verification
-  useEffect(() => {
-    if (user && user.isVerified) {
-      console.log('User already verified, skipping verification steps');
-      // Could redirect to profile setup or dashboard
-    }
-  }, [user]);
-
   return (
     <div className="min-h-screen cave-gradient flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -171,7 +184,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
             <CardTitle className="text-2xl cave-font text-amber-900">
               {step === 'method' && 'Choose Verification Method'}
               {step === 'contact' && 'Contact Information'}
-              {step === 'verify' && 'Verify Your Account'}
+              {step === 'verify' && 'Enter Verification Code'}
               {step === 'age' && 'Age Verification'}
               {step === 'location' && 'Location Access'}
             </CardTitle>
@@ -242,6 +255,9 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                       placeholder="+1 (555) 000-0000"
                       required
                     />
+                    <p className="text-xs text-amber-600">
+                      Enter your phone number with country code (e.g., +1 for US)
+                    </p>
                   </div>
                 )}
 
@@ -285,7 +301,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     value={verificationCode}
                     onChange={(value) => {
                       setVerificationCode(value);
-                      if (value.length === 6 && !isCodeVerified) {
+                      if (value.length === 6 && !isCodeVerified && !isVerifying) {
                         setTimeout(() => handleVerifyCode(), 500);
                       }
                     }}
@@ -311,11 +327,11 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     </Button>
                     
                     <Button
-                      onClick={() => setStep('age')}
+                      onClick={() => setStep('contact')}
                       variant="outline"
                       className="w-full cave-button-outline"
                     >
-                      Continue Manually
+                      Change Contact Method
                     </Button>
                   </>
                 )}

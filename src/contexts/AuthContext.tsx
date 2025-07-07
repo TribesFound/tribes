@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
@@ -144,9 +143,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error: authError } = await supabase.auth.signUp({
         email: data.email,
-        password: data.password || crypto.randomUUID().slice(0, 12), // Generate secure temporary password
+        password: data.password || crypto.randomUUID().slice(0, 12),
         options: {
-          emailRedirectTo: `${window.location.origin}/auth`,
           data: {
             name: data.name,
             date_of_birth: data.dateOfBirth,
@@ -190,29 +188,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { error } = await supabase.auth.signInWithOtp({
           email: contact,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth`
+            shouldCreateUser: true
           }
         });
         
         if (error) throw error;
         
-        // Store pending verification info
         setPendingVerification({ contact, method, code: 'pending' });
         console.log(`Verification code sent to ${contact} via email`);
       } else {
+        // Format phone number for international format
+        const formattedPhone = contact.startsWith('+') ? contact : `+1${contact.replace(/\D/g, '')}`;
+        
         const { error } = await supabase.auth.signInWithOtp({
-          phone: contact,
+          phone: formattedPhone,
+          options: {
+            shouldCreateUser: true
+          }
         });
         
         if (error) throw error;
         
-        // Store pending verification info
-        setPendingVerification({ contact, method, code: 'pending' });
-        console.log(`Verification code sent to ${contact} via SMS`);
+        setPendingVerification({ contact: formattedPhone, method, code: 'pending' });
+        console.log(`Verification code sent to ${formattedPhone} via SMS`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send verification code:', error);
-      throw error;
+      throw new Error(`Failed to send verification code: ${error.message}`);
     }
   };
 
@@ -244,9 +246,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       setPendingVerification(null);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Code verification failed:', error);
-      throw error;
+      throw new Error(`Verification failed: ${error.message}`);
     }
   };
 

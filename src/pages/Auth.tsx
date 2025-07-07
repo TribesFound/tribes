@@ -5,17 +5,22 @@ import VerificationStep from '@/components/VerificationStep';
 import ProfileSetup from '@/components/ProfileSetup';
 import AccountTypeSelection from '@/components/AccountTypeSelection';
 import ProfessionalSetup from '@/components/ProfessionalSetup';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSupabaseOperations } from '@/hooks/useSupabaseOperations';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 const Auth = () => {
   const navigate = useNavigate();
   const { signUp, user } = useAuth();
   const { updateUserProfile, updateUserPreferences } = useSupabaseOperations();
-  const [currentStep, setCurrentStep] = useState<'verification' | 'account-type' | 'profile' | 'professional' | 'complete'>('verification');
+  const [currentStep, setCurrentStep] = useState<'auth-method' | 'verification' | 'account-type' | 'profile' | 'professional' | 'complete'>('auth-method');
   const [verificationData, setVerificationData] = useState<any>(null);
   const [profileData, setProfileData] = useState<any>(null);
   const [accountType, setAccountType] = useState<'personal' | 'professional' | null>(null);
+  const [error, setError] = useState('');
 
   const handleVerificationComplete = async (data: any) => {
     console.log('Verification completed with data:', data);
@@ -33,9 +38,9 @@ const Auth = () => {
       
       setVerificationData(data);
       setCurrentStep('account-type');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create user account:', error);
-      // Handle error appropriately
+      setError(error.message || 'Failed to create user account');
     }
   };
 
@@ -79,11 +84,11 @@ const Auth = () => {
         accountType 
       });
       
-      // Navigate to main app
-      navigate('/discover');
-    } catch (error) {
+      // Navigate to passcode setup
+      navigate('/passcode-setup');
+    } catch (error: any) {
       console.error('Failed to complete profile setup:', error);
-      // Handle error appropriately
+      setError(error.message || 'Failed to complete profile setup');
     }
   };
 
@@ -95,26 +100,102 @@ const Auth = () => {
         profilePhoto: data.profilePhoto,
         dateOfBirth: verificationData?.dateOfBirth,
         location: data.businessLocation || verificationData?.location,
-        subscriptionTier: 'Free', // Professionals might want to upgrade
+        subscriptionTier: 'Free',
         accountType: 'professional',
         isVerified: true
       });
 
       setProfileData(data);
-      // For professional accounts, redirect to subscription page
-      navigate('/subscription');
-    } catch (error) {
+      // For professional accounts, redirect to passcode setup first
+      navigate('/passcode-setup');
+    } catch (error: any) {
       console.error('Failed to complete professional setup:', error);
-      // Handle error appropriately
+      setError(error.message || 'Failed to complete professional setup');
     }
+  };
+
+  const handleGoogleSuccess = () => {
+    // Google auth will redirect automatically, but we can navigate to passcode setup
+    navigate('/passcode-setup');
+  };
+
+  const handleGoogleError = (errorMessage: string) => {
+    setError(errorMessage);
   };
 
   // If user is already authenticated, redirect to appropriate page
   React.useEffect(() => {
     if (user && user.isVerified) {
-      navigate('/discover');
+      navigate('/passcode-setup');
     }
   }, [user, navigate]);
+
+  if (currentStep === 'auth-method') {
+    return (
+      <div className="min-h-screen cave-gradient flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center text-amber-900 mb-8">
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
+                alt="Tribes Hand Logo" 
+                className="w-16 h-16"
+              />
+            </div>
+            <h1 className="text-4xl font-bold cave-font mb-2">Welcome to Tribes</h1>
+            <p className="text-lg opacity-90 cave-text">Choose how you'd like to join</p>
+          </div>
+
+          <Card className="cave-card">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl cave-font text-amber-900">
+                Get Started
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {error && (
+                <div className="text-red-600 bg-red-50 p-3 rounded-lg text-sm text-center">
+                  {error}
+                </div>
+              )}
+
+              <GoogleSignInButton
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+              />
+
+              <div className="relative">
+                <Separator className="my-4" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="bg-white px-2 text-sm text-amber-700">Or continue with</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={() => setCurrentStep('verification')}
+                className="w-full cave-button"
+              >
+                Phone or Email Verification
+              </Button>
+
+              <div className="text-center pt-4">
+                <p className="text-sm text-amber-700 mb-2">
+                  Already have an account?
+                </p>
+                <Button
+                  onClick={() => navigate('/login')}
+                  variant="ghost"
+                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                >
+                  Sign In
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   if (currentStep === 'verification') {
     return <VerificationStep onComplete={handleVerificationComplete} />;

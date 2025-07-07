@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Phone } from 'lucide-react';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
+import { Separator } from '@/components/ui/separator';
 
 const SignUpMethod = () => {
   const navigate = useNavigate();
@@ -14,6 +16,14 @@ const SignUpMethod = () => {
 
   const handlePhoneSignup = () => {
     navigate('/auth');
+  };
+
+  const handleGoogleSuccess = () => {
+    navigate('/passcode-setup');
+  };
+
+  const handleGoogleError = (error: string) => {
+    console.error('Google auth error:', error);
   };
 
   return (
@@ -36,6 +46,18 @@ const SignUpMethod = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <GoogleSignInButton
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+
+            <div className="relative">
+              <Separator className="my-4" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="bg-white px-2 text-sm text-amber-700">Or continue with</span>
+              </div>
+            </div>
+
             <Button
               onClick={handleEmailSignup}
               className="w-full cave-button h-16 flex items-center justify-center space-x-3"
