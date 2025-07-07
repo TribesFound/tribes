@@ -5,12 +5,10 @@ import VerificationStep from '@/components/VerificationStep';
 import ProfileSetup from '@/components/ProfileSetup';
 import AccountTypeSelection from '@/components/AccountTypeSelection';
 import ProfessionalSetup from '@/components/ProfessionalSetup';
-import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSupabaseOperations } from '@/hooks/useSupabaseOperations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -114,15 +112,6 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSuccess = () => {
-    // Google auth will redirect automatically, but we can navigate to passcode setup
-    navigate('/passcode-setup');
-  };
-
-  const handleGoogleError = (errorMessage: string) => {
-    setError(errorMessage);
-  };
-
   // If user is already authenticated, redirect to appropriate page
   React.useEffect(() => {
     if (user && user.isVerified) {
@@ -158,18 +147,6 @@ const Auth = () => {
                   {error}
                 </div>
               )}
-
-              <GoogleSignInButton
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-              />
-
-              <div className="relative">
-                <Separator className="my-4" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="bg-white px-2 text-sm text-amber-700">Or continue with</span>
-                </div>
-              </div>
 
               <Button
                 onClick={() => setCurrentStep('verification')}

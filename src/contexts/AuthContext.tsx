@@ -164,24 +164,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendVerificationCode = async (contact: string, method: 'email' | 'phone') => {
     try {
       if (method === 'email') {
-        // Use signInWithOtp for email OTP (not magic link)
+        // Force OTP for email - no magic link
         const { error } = await supabase.auth.signInWithOtp({
           email: contact,
           options: {
-            shouldCreateUser: true,
-            data: {
-              // Add any additional user metadata here if needed
-            }
+            shouldCreateUser: true
           }
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Email OTP error:', error);
+          throw error;
+        }
         
         setPendingVerification({ contact, method, code: 'pending' });
-        console.log(`OTP code sent to ${contact} via email`);
+        console.log(`Email OTP code sent to ${contact}`);
       } else {
         // Format phone number for international format
-        const formattedPhone = contact.startsWith('+') ? contact : `+1${contact.replace(/\D/g, '')}`;
+        let formattedPhone = contact;
+        
+        // Remove all non-digit characters first
+        const cleanPhone = contact.replace(/\D/g, '');
+        
+        // If it doesn't start with +, add country code
+        if (!contact.startsWith('+')) {
+          // Default to +1 for North America, but this should be configurable
+          formattedPhone = `+1${cleanPhone}`;
+        } else {
+          formattedPhone = `+${cleanPhone}`;
+        }
+        
+        console.log(`Sending SMS OTP to formatted number: ${formattedPhone}`);
         
         const { error } = await supabase.auth.signInWithOtp({
           phone: formattedPhone,
@@ -190,10 +203,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Phone OTP error:', error);
+          throw error;
+        }
         
         setPendingVerification({ contact: formattedPhone, method, code: 'pending' });
-        console.log(`OTP code sent to ${formattedPhone} via SMS`);
+        console.log(`SMS OTP code sent to ${formattedPhone}`);
       }
     } catch (error: any) {
       console.error('Failed to send verification code:', error);
@@ -225,9 +241,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const { error } = await supabase.auth.verifyOtp(verifyParams);
       
-      if (error) throw error;
+      if (error) {
+        console.error('OTP verification error:', error);
+        throw error;
+      }
       
       setPendingVerification(null);
+      console.log('OTP verification successful');
       return true;
     } catch (error: any) {
       console.error('Code verification failed:', error);
