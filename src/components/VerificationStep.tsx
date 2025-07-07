@@ -343,19 +343,19 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                 <div className="text-center">
                   <Calendar className="w-12 h-12 mx-auto mb-4 text-orange-600" />
                   <p className="text-sm cave-text mb-4">
-                    You must be 18 or older to use Tribes
+                    Please confirm your date of birth for age verification
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth" className="cave-text">Date of Birth</Label>
+                  <Label htmlFor="dob" className="cave-text">Date of Birth</Label>
                   <Input
-                    id="dateOfBirth"
+                    id="dob"
                     type="date"
                     value={dateOfBirth}
                     onChange={(e) => setDateOfBirth(e.target.value)}
                     className="cave-input"
-                    max={new Date().toISOString().split('T')[0]}
+                    required
                   />
                 </div>
 
@@ -373,47 +373,40 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
               <>
                 <div className="text-center">
                   <MapPin className="w-12 h-12 mx-auto mb-4 text-orange-600" />
-                  <p className="text-sm cave-text mb-4">
-                    We need your location to show you nearby tribe members. Your precise location is kept secure and private.
-                  </p>
-                </div>
-
-                {!isLocationGranted ? (
-                  <Button
-                    onClick={requestLocation}
-                    className="w-full cave-button"
-                  >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Allow Secure Location Access
-                  </Button>
-                ) : (
-                  <div className="text-center">
-                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
-                    <p className="text-sm cave-text mb-2">
-                      Location verified: {location?.city}, {location?.country}
-                    </p>
-                    {isRedirecting ? (
-                      <div className="space-y-3">
-                        <p className="text-xs text-amber-600">
-                          Redirecting automatically in 2 seconds...
-                        </p>
+                  {!isLocationGranted ? (
+                    <>
+                      <p className="text-sm cave-text mb-4">
+                        We need your location to connect you with nearby tribe members
+                      </p>
+                      <Button
+                        onClick={requestLocation}
+                        className="cave-button"
+                      >
+                        Grant Location Access
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-center space-x-2 text-green-600 mb-4">
+                        <CheckCircle className="w-5 h-5" />
+                        <span className="text-sm">Location granted!</span>
+                      </div>
+                      <p className="text-sm cave-text mb-4">
+                        Location: {location?.city}, {location?.country}
+                      </p>
+                      {isRedirecting ? (
+                        <p className="text-sm text-orange-600">Redirecting...</p>
+                      ) : (
                         <Button
                           onClick={handleManualContinue}
-                          className="w-full cave-button"
+                          className="cave-button"
                         >
-                          Continue Now
+                          Continue
                         </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        onClick={handleManualContinue}
-                        className="w-full cave-button"
-                      >
-                        Continue
-                      </Button>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </>
+                  )}
+                </div>
               </>
             )}
           </CardContent>

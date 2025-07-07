@@ -9,22 +9,33 @@ import { testProfiles } from '@/utils/testProfiles';
 import SwipeableCard from '@/components/SwipeableCard';
 import MatchPopup from '@/components/MatchPopup';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import TestRunner from '@/components/TestRunner';
 
 const Discover = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isLoading } = useAuth();
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [userBonds, setUserBonds] = useState<string[]>([]);
   const [matchPopup, setMatchPopup] = useState({
     isOpen: false,
     matchedProfile: null as any
   });
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   useEffect(() => {
     // Load user's bonds from localStorage
     const bonds = JSON.parse(localStorage.getItem('user_bonds') || '[]');
     setUserBonds(bonds);
   }, []);
+
+  // Show diagnostics if user is not authenticated or if there are issues
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setShowDiagnostics(true);
+    }
+  }, [user, isLoading]);
 
   const currentProfile = testProfiles[currentProfileIndex];
   
@@ -80,6 +91,53 @@ const Discover = () => {
     setMatchPopup({ isOpen: false, matchedProfile: null });
   };
 
+  // Show diagnostics overlay if needed
+  if (showDiagnostics) {
+    return (
+      <div className="min-h-screen cave-gradient p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold cave-font text-white mb-4">
+              🔧 System Diagnostics
+            </h1>
+            <p className="text-white/80">
+              Running comprehensive system checks...
+            </p>
+          </div>
+          
+          <TestRunner />
+          
+          <div className="text-center mt-8">
+            <Button
+              onClick={() => navigate('/auth')}
+              className="cave-button mr-4"
+            >
+              Go to Authentication
+            </Button>
+            <Button
+              onClick={() => setShowDiagnostics(false)}
+              variant="outline"
+              className="cave-button-outline"
+            >
+              Hide Diagnostics
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen cave-gradient flex items-center justify-center">
+        <div className="text-center text-white">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading your tribes...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!transformedProfile) {
     return (
       <div className="min-h-screen cave-gradient flex items-center justify-center p-4">
@@ -108,7 +166,7 @@ const Discover = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">
             <img 
-              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4f83f2f45f4f.png" 
+              src="/lovable-uploads/0628da7e-200a-4f94-a6fb-4c83f2f45f4f.png" 
               alt="Tribes Hand Logo" 
               className="w-10 h-10"
             />
@@ -132,6 +190,16 @@ const Discover = () => {
             </Button>
           </div>
         </div>
+
+        {/* User Info Display */}
+        {user && (
+          <div className="mb-4 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+            <p className="text-white text-sm">
+              Welcome, {user.name} • {user.subscriptionTier} Tier
+              {user.isVerified && ' • ✓ Verified'}
+            </p>
+          </div>
+        )}
 
         {/* Swipeable Profile Card */}
         <div className="relative mb-8">
@@ -164,6 +232,18 @@ const Discover = () => {
           <Badge className="cave-badge">
             {currentProfileIndex + 1} of {testProfiles.length}
           </Badge>
+        </div>
+
+        {/* Debug Controls */}
+        <div className="text-center mt-4">
+          <Button
+            onClick={() => setShowDiagnostics(true)}
+            variant="ghost"
+            size="sm"
+            className="text-white/70 hover:text-white"
+          >
+            Show Diagnostics
+          </Button>
         </div>
       </div>
 

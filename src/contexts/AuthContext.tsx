@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
@@ -5,31 +6,31 @@ import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 export interface User {
   id: string;
   email?: string;
-  phone?: string;
-  name: string;
-  dateOfBirth: string;
-  profilePhoto: string;
-  location: {
+  name?: string;
+  profilePhoto?: string;
+  dateOfBirth?: string;
+  location?: {
     lat: number;
     lng: number;
     city: string;
     country: string;
   };
-  subscriptionTier: 'Free' | 'Bloodline' | 'Oracle' | 'Inner Circle' | 'Trade Guild' | 'Trade Council';
-  accountType: 'individual' | 'professional';
+  subscriptionTier: string;
+  accountType: string;
   isVerified: boolean;
-  createdAt: string;
 }
 
-export interface AuthContextType {
+interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  session: Session | null;
   signUp: (data: any) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   sendVerificationCode: (contact: string, method: 'email' | 'phone') => Promise<void>;
   verifyCode: (code: string) => Promise<boolean>;
+  pendingVerification: {contact: string, method: 'email' | 'phone', code: string} | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,102 +42,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [pendingVerification, setPendingVerification] = useState<{contact: string, method: 'email' | 'phone', code: string} | null>(null);
 
   useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        
-        if (session?.user) {
-          // Defer profile fetch to avoid auth callback issues
-          setTimeout(async () => {
-            try {
-              const { data: profile, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-              
-              if (error) {
-                console.error('Error fetching profile:', error);
-                // Create a basic user object from auth data
-                setUser({
-                  id: session.user.id,
-                  email: session.user.email,
-                  phone: session.user.phone,
-                  name: session.user.user_metadata?.name || 'User',
-                  dateOfBirth: '',
-                  profilePhoto: '',
-                  location: { lat: 0, lng: 0, city: '', country: '' },
-                  subscriptionTier: 'Free',
-                  accountType: 'individual',
-                  isVerified: false,
-                  createdAt: session.user.created_at
-                });
-              } else if (profile) {
-                // Safely parse location with fallback
-                let location = { lat: 0, lng: 0, city: '', country: '' };
-                if (profile.location && typeof profile.location === 'object' && profile.location !== null) {
-                  const loc = profile.location as any;
-                  if (loc.lat && loc.lng && loc.city && loc.country) {
-                    location = {
-                      lat: Number(loc.lat),
-                      lng: Number(loc.lng),
-                      city: String(loc.city),
-                      country: String(loc.country)
-                    };
-                  }
-                }
-
-                // Safely parse subscription tier with fallback
-                const validTiers: User['subscriptionTier'][] = ['Free', 'Bloodline', 'Oracle', 'Inner Circle', 'Trade Guild', 'Trade Council'];
-                const subscriptionTier = validTiers.includes(profile.subscription_tier as any) 
-                  ? profile.subscription_tier as User['subscriptionTier']
-                  : 'Free';
-
-                // Safely parse account type with fallback
-                const validAccountTypes: User['accountType'][] = ['individual', 'professional'];
-                const accountType = validAccountTypes.includes(profile.account_type as any)
-                  ? profile.account_type as User['accountType']
-                  : 'individual';
-
-                setUser({
-                  id: profile.id,
-                  email: session.user.email,
-                  phone: session.user.phone,
-                  name: profile.name || 'User',
-                  dateOfBirth: profile.date_of_birth || '',
-                  profilePhoto: profile.profile_photo || '',
-                  location,
-                  subscriptionTier,
-                  accountType,
-                  isVerified: Boolean(profile.is_verified),
-                  createdAt: profile.created_at
-                });
-              }
-            } catch (error) {
-              console.error('Error in profile fetch:', error);
-            }
-          }, 0);
-        } else {
-          setUser(null);
-        }
-        
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        loadUserProfile(session.user);
+      } else {
         setIsLoading(false);
       }
-    );
+    });
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setSession(session);
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      setSession(session);
+      
+      if (session?.user) {
+        await loadUserProfile(session.user);
       } else {
+        setUser(null);
         setIsLoading(false);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const loadUserProfile = async (supabaseUser: SupabaseUser) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading profile:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      const userData: User = {
+        id: supabaseUser.id,
+        email: supabaseUser.email,
+        name: profile?.name || supabaseUser.user_metadata?.name || 'User',
+        profilePhoto: profile?.profile_photo,
+        dateOfBirth: profile?.date_of_birth,
+        location: profile?.location,
+        subscriptionTier: profile?.subscription_tier || 'Free',
+        accountType: profile?.account_type || 'individual',
+        isVerified: profile?.is_verified || false
+      };
+
+      setUser(userData);
+    } catch (error) {
+      console.error('Failed to load user profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const signUp = async (data: any) => {
     setIsLoading(true);
@@ -253,6 +219,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    setIsLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -263,28 +230,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Sign out failed:', error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const updateProfile = async (data: Partial<User>) => {
+    if (!user) throw new Error('No user logged in');
+    
     try {
-      if (user && session) {
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            name: data.name,
-            profile_photo: data.profilePhoto,
-            location: data.location,
-            subscription_tier: data.subscriptionTier,
-            account_type: data.accountType,
-            is_verified: data.isVerified
-          })
-          .eq('id', user.id);
-
-        if (error) throw error;
-        
-        setUser({ ...user, ...data });
-      }
+      const updatedUser = { ...user, ...data };
+      setUser(updatedUser);
     } catch (error) {
       console.error('Profile update failed:', error);
       throw error;
@@ -294,12 +250,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     isLoading,
+    session,
     signUp,
     signIn,
     signOut,
     updateProfile,
     sendVerificationCode,
-    verifyCode
+    verifyCode,
+    pendingVerification
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
