@@ -164,17 +164,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendVerificationCode = async (contact: string, method: 'email' | 'phone') => {
     try {
       if (method === 'email') {
+        // Use signInWithOtp for email OTP (not magic link)
         const { error } = await supabase.auth.signInWithOtp({
           email: contact,
           options: {
-            shouldCreateUser: true
+            shouldCreateUser: true,
+            data: {
+              // Add any additional user metadata here if needed
+            }
           }
         });
         
         if (error) throw error;
         
         setPendingVerification({ contact, method, code: 'pending' });
-        console.log(`Verification code sent to ${contact} via email`);
+        console.log(`OTP code sent to ${contact} via email`);
       } else {
         // Format phone number for international format
         const formattedPhone = contact.startsWith('+') ? contact : `+1${contact.replace(/\D/g, '')}`;
@@ -189,7 +193,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) throw error;
         
         setPendingVerification({ contact: formattedPhone, method, code: 'pending' });
-        console.log(`Verification code sent to ${formattedPhone} via SMS`);
+        console.log(`OTP code sent to ${formattedPhone} via SMS`);
       }
     } catch (error: any) {
       console.error('Failed to send verification code:', error);

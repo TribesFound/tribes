@@ -23,11 +23,19 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth`
+          redirectTo: `${window.location.origin}/auth`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
 
       if (error) {
+        // Handle specific Google auth errors
+        if (error.message.includes('provider is not enabled') || error.message.includes('Unsupported')) {
+          throw new Error('Google authentication is not properly configured. Please check your Supabase settings.');
+        }
         throw error;
       }
 
