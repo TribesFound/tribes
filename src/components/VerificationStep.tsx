@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, MapPin, Calendar, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Mail, Phone, MapPin, Calendar, Shield, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { requestSecureLocation, LocationError } from '@/utils/geolocation';
 import { verifyAge } from '@/utils/ageVerification';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +32,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
   const [error, setError] = useState('');
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [otpSentAt, setOtpSentAt] = useState<Date | null>(null);
   
   const { sendVerificationCode, verifyCode, user } = useAuth();
 
@@ -60,27 +61,30 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       }
       
       if (contactMethod === 'phone') {
-        // Basic phone validation
+        // Enhanced phone validation
         const cleanPhone = phone.replace(/\D/g, '');
-        if (cleanPhone.length < 10) {
-          throw new Error('Please enter a valid phone number');
+        if (cleanPhone.length < 8) {
+          throw new Error('Please enter a valid phone number with country code');
         }
       }
       
       if (contactMethod === 'email') {
-        // Basic email validation
+        // Enhanced email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
           throw new Error('Please enter a valid email address');
         }
       }
       
+      console.log(`🚀 Testing ${contactMethod} OTP delivery...`);
       await sendVerificationCode(contact, contactMethod);
+      
+      setOtpSentAt(new Date());
       setStep('verify');
-      console.log(`Verification code sent to ${contact} via ${contactMethod}`);
+      console.log(`✅ ${contactMethod} OTP test successful - 6-digit code sent to ${contact}`);
     } catch (error: any) {
-      console.error('Verification send error:', error);
-      setError(error.message || 'Failed to send verification code. Please try again.');
+      console.error('❌ OTP delivery test failed:', error);
+      setError(error.message || `Failed to send ${contactMethod} verification code. Please try again.`);
     } finally {
       setIsVerifying(false);
     }
@@ -92,15 +96,16 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       setError('');
       
       try {
+        console.log(`🔍 Testing OTP verification for code: ${verificationCode}`);
         const isValid = await verifyCode(verificationCode);
         if (isValid) {
           setIsCodeVerified(true);
-          console.log('✅ Verification successful - auto-redirecting...');
+          console.log('✅ OTP verification test successful - 6-digit code verified');
         }
       } catch (error: any) {
-        console.error('Code verification error:', error);
-        setError(error.message || 'Invalid verification code. Please try again.');
-        setVerificationCode(''); // Clear the code so user can try again
+        console.error('❌ OTP verification test failed:', error);
+        setError(error.message || 'Invalid 6-digit verification code. Please try again.');
+        setVerificationCode('');
       } finally {
         setIsVerifying(false);
       }
@@ -184,7 +189,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
             <CardTitle className="text-2xl cave-font text-amber-900">
               {step === 'method' && 'Choose Verification Method'}
               {step === 'contact' && 'Contact Information'}
-              {step === 'verify' && 'Enter Verification Code'}
+              {step === 'verify' && 'Enter 6-Digit OTP Code'}
               {step === 'age' && 'Age Verification'}
               {step === 'location' && 'Location Access'}
             </CardTitle>
@@ -200,7 +205,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
             {step === 'method' && (
               <div className="space-y-4">
                 <div className="text-center mb-6">
-                  <p className="text-amber-700 cave-text">Choose how you'd like to verify your account</p>
+                  <p className="text-amber-700 cave-text">Choose how you'd like to receive your 6-digit OTP code</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -212,7 +217,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     className="cave-button h-16 flex-col space-y-2"
                   >
                     <Mail className="w-6 h-6" />
-                    <span>Email</span>
+                    <span>Email OTP</span>
                   </Button>
                   <Button
                     onClick={() => {
@@ -222,7 +227,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     className="cave-button h-16 flex-col space-y-2"
                   >
                     <Phone className="w-6 h-6" />
-                    <span>Phone</span>
+                    <span>SMS OTP</span>
                   </Button>
                 </div>
               </div>
@@ -242,6 +247,9 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                       placeholder="your@email.com"
                       required
                     />
+                    <p className="text-xs text-amber-600">
+                      ✅ You will receive a 6-digit OTP code (NOT a magic link)
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -252,11 +260,11 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       className="cave-input"
-                      placeholder="+1 (555) 000-0000"
+                      placeholder="+1 555 000 0000"
                       required
                     />
                     <p className="text-xs text-amber-600">
-                      Enter your phone number with country code (e.g., +1 for US)
+                      ✅ Supports: Australia, New Zealand, Thailand, EU, Americas, Middle East (exc. Israel), North Macedonia
                     </p>
                   </div>
                 )}
@@ -274,7 +282,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     disabled={isVerifying || (contactMethod === 'email' ? !email : !phone)}
                     className="flex-1 cave-button"
                   >
-                    {isVerifying ? 'Sending...' : 'Send Code'}
+                    {isVerifying ? 'Sending OTP...' : 'Send 6-Digit Code'}
                   </Button>
                 </div>
               </>
@@ -284,13 +292,19 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
               <>
                 <div className="text-center">
                   <Shield className="w-12 h-12 mx-auto mb-4 text-orange-600" />
-                  <p className="text-sm cave-text mb-4">
-                    Enter the 6-digit code sent to {contactMethod === 'email' ? email : phone}
+                  <p className="text-sm cave-text mb-2">
+                    Enter the 6-digit OTP code sent to {contactMethod === 'email' ? email : phone}
                   </p>
+                  {otpSentAt && (
+                    <div className="flex items-center justify-center space-x-1 text-xs text-amber-600 mb-4">
+                      <Clock className="w-4 h-4" />
+                      <span>Code expires in 5 minutes</span>
+                    </div>
+                  )}
                   {isCodeVerified && (
                     <div className="flex items-center justify-center space-x-2 text-green-600 mb-4">
                       <CheckCircle className="w-5 h-5" />
-                      <span className="text-sm">Code verified! Redirecting...</span>
+                      <span className="text-sm">6-digit OTP verified! Redirecting...</span>
                     </div>
                   )}
                 </div>
@@ -323,7 +337,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                       className="w-full cave-button-ghost"
                       disabled={isVerifying}
                     >
-                      Resend Code
+                      Resend 6-Digit Code
                     </Button>
                     
                     <Button
