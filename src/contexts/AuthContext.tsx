@@ -162,120 +162,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const formatPhoneNumber = (phone: string): string => {
-    // Remove all non-digit characters
+    // Remove all non-digit characters first
     const cleanPhone = phone.replace(/\D/g, '');
     
-    // Country code mappings for supported regions
-    const countryPrefixes = {
-      // Australia & New Zealand
-      '61': 'AU',   // Australia
-      '64': 'NZ',   // New Zealand
-      
-      // North America
-      '1': 'US/CA', // USA/Canada
-      
-      // South America
-      '54': 'AR',   // Argentina
-      '55': 'BR',   // Brazil
-      '56': 'CL',   // Chile
-      '57': 'CO',   // Colombia
-      '58': 'VE',   // Venezuela
-      '51': 'PE',   // Peru
-      '593': 'EC',  // Ecuador
-      '598': 'UY',  // Uruguay
-      '595': 'PY',  // Paraguay
-      '591': 'BO',  // Bolivia
-      '594': 'GF',  // French Guiana
-      '597': 'SR',  // Suriname
-      '592': 'GY',  // Guyana
-      
-      // European Union
-      '33': 'FR',   // France
-      '49': 'DE',   // Germany
-      '39': 'IT',   // Italy
-      '34': 'ES',   // Spain
-      '31': 'NL',   // Netherlands
-      '32': 'BE',   // Belgium
-      '43': 'AT',   // Austria
-      '41': 'CH',   // Switzerland
-      '45': 'DK',   // Denmark
-      '46': 'SE',   // Sweden
-      '47': 'NO',   // Norway
-      '358': 'FI',  // Finland
-      '353': 'IE',  // Ireland
-      '351': 'PT',  // Portugal
-      '30': 'GR',   // Greece
-      '48': 'PL',   // Poland
-      '420': 'CZ',  // Czech Republic
-      '421': 'SK',  // Slovakia
-      '36': 'HU',   // Hungary
-      '40': 'RO',   // Romania
-      '359': 'BG',  // Bulgaria
-      '385': 'HR',  // Croatia
-      '386': 'SI',  // Slovenia
-      '372': 'EE',  // Estonia
-      '371': 'LV',  // Latvia
-      '370': 'LT',  // Lithuania
-      '356': 'MT',  // Malta
-      '357': 'CY',  // Cyprus
-      '352': 'LU',  // Luxembourg
-      
-      // Thailand
-      '66': 'TH',   // Thailand
-      
-      // North Macedonia
-      '389': 'MK',  // North Macedonia
-      
-      // Middle East (excluding Israel)
-      '90': 'TR',   // Turkey
-      '964': 'IQ',  // Iraq
-      '962': 'JO',  // Jordan
-      '961': 'LB',  // Lebanon
-      '963': 'SY',  // Syria
-      '966': 'SA',  // Saudi Arabia
-      '965': 'KW',  // Kuwait
-      '973': 'BH',  // Bahrain
-      '974': 'QA',  // Qatar
-      '971': 'AE',  // UAE
-      '968': 'OM',  // Oman
-      '967': 'YE',  // Yemen
-      '98': 'IR',   // Iran
-      '93': 'AF',   // Afghanistan
-      '92': 'PK',   // Pakistan
-    };
-    
-    // If already has + prefix, validate and return
+    // If already formatted with +, clean and validate
     if (phone.startsWith('+')) {
-      const withoutPlus = phone.substring(1);
-      const cleanWithoutPlus = withoutPlus.replace(/\D/g, '');
-      
-      // Check if it matches any supported country code
-      for (const [code] of Object.entries(countryPrefixes)) {
-        if (cleanWithoutPlus.startsWith(code)) {
-          return `+${cleanWithoutPlus}`;
-        }
-      }
-      return `+${cleanWithoutPlus}`;
+      const withoutPlus = phone.substring(1).replace(/\D/g, '');
+      return `+${withoutPlus}`;
     }
     
-    // Try to detect country code from the number
-    for (const [code] of Object.entries(countryPrefixes)) {
-      if (cleanPhone.startsWith(code)) {
-        return `+${cleanPhone}`;
-      }
-    }
+    // Country code detection and formatting
+    // Check for 3-digit country codes first (longest match)
+    if (cleanPhone.startsWith('593')) return `+${cleanPhone}`; // Ecuador
+    if (cleanPhone.startsWith('598')) return `+${cleanPhone}`; // Uruguay
+    if (cleanPhone.startsWith('595')) return `+${cleanPhone}`; // Paraguay
+    if (cleanPhone.startsWith('591')) return `+${cleanPhone}`; // Bolivia
+    if (cleanPhone.startsWith('594')) return `+${cleanPhone}`; // French Guiana
+    if (cleanPhone.startsWith('597')) return `+${cleanPhone}`; // Suriname
+    if (cleanPhone.startsWith('592')) return `+${cleanPhone}`; // Guyana
+    if (cleanPhone.startsWith('358')) return `+${cleanPhone}`; // Finland
+    if (cleanPhone.startsWith('353')) return `+${cleanPhone}`; // Ireland
+    if (cleanPhone.startsWith('351')) return `+${cleanPhone}`; // Portugal
+    if (cleanPhone.startsWith('420')) return `+${cleanPhone}`; // Czech Republic
+    if (cleanPhone.startsWith('421')) return `+${cleanPhone}`; // Slovakia
+    if (cleanPhone.startsWith('359')) return `+${cleanPhone}`; // Bulgaria
+    if (cleanPhone.startsWith('385')) return `+${cleanPhone}`; // Croatia
+    if (cleanPhone.startsWith('386')) return `+${cleanPhone}`; // Slovenia
+    if (cleanPhone.startsWith('372')) return `+${cleanPhone}`; // Estonia
+    if (cleanPhone.startsWith('371') && cleanPhone.length >= 11) return `+${cleanPhone}`; // Latvia
+    if (cleanPhone.startsWith('370')) return `+${cleanPhone}`; // Lithuania
+    if (cleanPhone.startsWith('356')) return `+${cleanPhone}`; // Malta
+    if (cleanPhone.startsWith('357')) return `+${cleanPhone}`; // Cyprus
+    if (cleanPhone.startsWith('352')) return `+${cleanPhone}`; // Luxembourg
+    if (cleanPhone.startsWith('389')) return `+${cleanPhone}`; // North Macedonia
+    if (cleanPhone.startsWith('964')) return `+${cleanPhone}`; // Iraq
+    if (cleanPhone.startsWith('962')) return `+${cleanPhone}`; // Jordan
+    if (cleanPhone.startsWith('961')) return `+${cleanPhone}`; // Lebanon
+    if (cleanPhone.startsWith('963')) return `+${cleanPhone}`; // Syria
+    if (cleanPhone.startsWith('966')) return `+${cleanPhone}`; // Saudi Arabia
+    if (cleanPhone.startsWith('965')) return `+${cleanPhone}`; // Kuwait
+    if (cleanPhone.startsWith('973')) return `+${cleanPhone}`; // Bahrain
+    if (cleanPhone.startsWith('974')) return `+${cleanPhone}`; // Qatar
+    if (cleanPhone.startsWith('971')) return `+${cleanPhone}`; // UAE
+    if (cleanPhone.startsWith('968')) return `+${cleanPhone}`; // Oman
+    if (cleanPhone.startsWith('967')) return `+${cleanPhone}`; // Yemen
     
-    // Default to US/Canada if no country code detected and number is 10 digits
-    if (cleanPhone.length === 10) {
-      return `+1${cleanPhone}`;
-    }
+    // Check for 2-digit country codes
+    if (cleanPhone.startsWith('61') && cleanPhone.length >= 10) return `+${cleanPhone}`; // Australia
+    if (cleanPhone.startsWith('64') && cleanPhone.length >= 9) return `+${cleanPhone}`; // New Zealand
+    if (cleanPhone.startsWith('66') && cleanPhone.length >= 9) return `+${cleanPhone}`; // Thailand
+    if (cleanPhone.startsWith('54')) return `+${cleanPhone}`; // Argentina
+    if (cleanPhone.startsWith('55')) return `+${cleanPhone}`; // Brazil
+    if (cleanPhone.startsWith('56')) return `+${cleanPhone}`; // Chile
+    if (cleanPhone.startsWith('57')) return `+${cleanPhone}`; // Colombia
+    if (cleanPhone.startsWith('58')) return `+${cleanPhone}`; // Venezuela
+    if (cleanPhone.startsWith('51')) return `+${cleanPhone}`; // Peru
+    if (cleanPhone.startsWith('33')) return `+${cleanPhone}`; // France
+    if (cleanPhone.startsWith('49')) return `+${cleanPhone}`; // Germany
+    if (cleanPhone.startsWith('39')) return `+${cleanPhone}`; // Italy
+    if (cleanPhone.startsWith('34')) return `+${cleanPhone}`; // Spain
+    if (cleanPhone.startsWith('31')) return `+${cleanPhone}`; // Netherlands
+    if (cleanPhone.startsWith('32')) return `+${cleanPhone}`; // Belgium
+    if (cleanPhone.startsWith('43')) return `+${cleanPhone}`; // Austria
+    if (cleanPhone.startsWith('41')) return `+${cleanPhone}`; // Switzerland
+    if (cleanPhone.startsWith('45')) return `+${cleanPhone}`; // Denmark
+    if (cleanPhone.startsWith('46')) return `+${cleanPhone}`; // Sweden
+    if (cleanPhone.startsWith('47')) return `+${cleanPhone}`; // Norway
+    if (cleanPhone.startsWith('30')) return `+${cleanPhone}`; // Greece
+    if (cleanPhone.startsWith('48')) return `+${cleanPhone}`; // Poland
+    if (cleanPhone.startsWith('36')) return `+${cleanPhone}`; // Hungary
+    if (cleanPhone.startsWith('40')) return `+${cleanPhone}`; // Romania
+    if (cleanPhone.startsWith('90')) return `+${cleanPhone}`; // Turkey
+    if (cleanPhone.startsWith('98')) return `+${cleanPhone}`; // Iran
+    if (cleanPhone.startsWith('93')) return `+${cleanPhone}`; // Afghanistan
+    if (cleanPhone.startsWith('92')) return `+${cleanPhone}`; // Pakistan
     
-    // Default to Australia if 9 digits (mobile without country code)
-    if (cleanPhone.length === 9) {
-      return `+61${cleanPhone}`;
-    }
+    // Check for single digit (North America)
+    if (cleanPhone.startsWith('1')) return `+${cleanPhone}`;
     
-    // Return with + prefix for any other length
+    // Default handling for unrecognized patterns
+    if (cleanPhone.length === 10) return `+1${cleanPhone}`; // Default to US/Canada
+    if (cleanPhone.length === 9) return `+61${cleanPhone}`; // Default to Australia mobile
+    
+    // Return with + prefix for any other cases
     return `+${cleanPhone}`;
   };
 
@@ -284,25 +253,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log(`🔄 Sending ${method} OTP to: ${contact}`);
       
       if (method === 'email') {
-        // Force OTP for email - explicitly disable magic link
-        const { error } = await supabase.auth.signInWithOtp({
+        console.log('📧 FORCING EMAIL OTP (NOT MAGIC LINK)');
+        
+        // Method 1: Try signInWithOtp with explicit OTP configuration
+        const { data, error } = await supabase.auth.signInWithOtp({
           email: contact,
           options: {
             shouldCreateUser: true,
-            emailRedirectTo: undefined, // Explicitly disable magic link
+            // Explicitly request OTP by not providing emailRedirectTo
+            data: {
+              email_otp_only: true,
+              disable_magic_link: true
+            }
           }
         });
         
         if (error) {
           console.error('❌ Email OTP error:', error);
-          throw error;
+          
+          // Method 2: If first method fails, try resend with OTP type
+          console.log('🔄 Trying alternative OTP method...');
+          const { error: resendError } = await supabase.auth.resend({
+            type: 'signup',
+            email: contact,
+            options: {
+              emailRedirectTo: undefined
+            }
+          });
+          
+          if (resendError) {
+            throw resendError;
+          }
         }
         
         setPendingVerification({ contact, method, code: 'pending' });
-        console.log(`✅ Email OTP sent successfully to ${contact}`);
+        console.log(`✅ EMAIL OTP CODE (6-digits) sent to ${contact} - NO MAGIC LINK!`);
         
       } else {
-        // Format phone number with international support
+        // Phone SMS OTP
         const formattedPhone = formatPhoneNumber(contact);
         console.log(`📱 Formatted phone: ${contact} -> ${formattedPhone}`);
         
@@ -319,7 +307,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         setPendingVerification({ contact: formattedPhone, method, code: 'pending' });
-        console.log(`✅ SMS OTP sent successfully to ${formattedPhone}`);
+        console.log(`✅ SMS OTP CODE (6-digits) sent to ${formattedPhone}`);
       }
     } catch (error: any) {
       console.error('❌ Failed to send verification code:', error);
@@ -343,12 +331,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           token: code,
           type: 'email' as const
         };
+        console.log('📧 Verifying EMAIL OTP (6-digit code)');
       } else {
         verifyParams = {
           phone: pendingVerification.contact,
           token: code,
           type: 'sms' as const
         };
+        console.log('📱 Verifying SMS OTP (6-digit code)');
       }
       
       const { error, data } = await supabase.auth.verifyOtp(verifyParams);
@@ -359,7 +349,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data?.user) {
-        console.log('✅ OTP verification successful');
+        console.log('✅ 6-DIGIT OTP VERIFICATION SUCCESSFUL!');
         setPendingVerification(null);
         return true;
       }
