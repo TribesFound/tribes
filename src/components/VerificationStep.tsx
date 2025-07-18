@@ -265,7 +265,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     />
                     <p className="text-xs text-amber-600">
                       ✅ Supports: Australia, New Zealand, Thailand, EU, Americas, Middle East (exc. Israel), North Macedonia
-                    Send 6-Digit Code
+                    </p>
                   </div>
                 )}
 
@@ -399,7 +399,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                         Grant Location Access
                       </Button>
                     </>
-                        {isVerifying ? 'Sending 6-digit code...' : 'Enter the 6-digit code'}
+                  ) : (
                     <>
                       <div className="flex items-center justify-center space-x-2 text-green-600 mb-4">
                         <CheckCircle className="w-5 h-5" />
