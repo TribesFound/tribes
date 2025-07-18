@@ -253,41 +253,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log(`🔄 Sending ${method} OTP to: ${contact}`);
       
       if (method === 'email') {
-        console.log('📧 FORCING EMAIL OTP (NOT MAGIC LINK)');
+        console.log('📧 Sending EMAIL OTP (6-digit code)');
         
-        // Method 1: Try signInWithOtp with explicit OTP configuration
+        // Use signInWithOtp for email with OTP-only configuration
         const { data, error } = await supabase.auth.signInWithOtp({
           email: contact,
           options: {
             shouldCreateUser: true,
-            // Explicitly request OTP by not providing emailRedirectTo
+            // Force OTP by explicitly setting emailRedirectTo to undefined
+            emailRedirectTo: undefined,
             data: {
-              email_otp_only: true,
-              disable_magic_link: true
+              verification_type: 'email_otp'
             }
           }
         });
         
         if (error) {
           console.error('❌ Email OTP error:', error);
-          
-          // Method 2: If first method fails, try resend with OTP type
-          console.log('🔄 Trying alternative OTP method...');
-          const { error: resendError } = await supabase.auth.resend({
-            type: 'signup',
-            email: contact,
-            options: {
-              emailRedirectTo: undefined
-            }
-          });
-          
-          if (resendError) {
-            throw resendError;
-          }
+          throw error;
         }
         
         setPendingVerification({ contact, method, code: 'pending' });
-        console.log(`✅ EMAIL OTP CODE (6-digits) sent to ${contact} - NO MAGIC LINK!`);
+        console.log(`✅ EMAIL OTP (6-digit code) sent to ${contact}`);
         
       } else {
         // Phone SMS OTP
@@ -297,7 +284,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { error } = await supabase.auth.signInWithOtp({
           phone: formattedPhone,
           options: {
-            shouldCreateUser: true
+            shouldCreateUser: true,
           }
         });
         
@@ -307,7 +294,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         setPendingVerification({ contact: formattedPhone, method, code: 'pending' });
-        console.log(`✅ SMS OTP CODE (6-digits) sent to ${formattedPhone}`);
+        console.log(`✅ SMS OTP (6-digit code) sent to ${formattedPhone}`);
       }
     } catch (error: any) {
       console.error('❌ Failed to send verification code:', error);
@@ -323,7 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log(`🔍 Verifying ${pendingVerification.method} OTP: ${code}`);
       
-      let verifyParams: any;
+      let verifyParams;
       
       if (pendingVerification.method === 'email') {
         verifyParams = {
@@ -331,7 +318,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           token: code,
           type: 'email' as const
         };
-        console.log('📧 Verifying EMAIL OTP (6-digit code)');
+        console.log('📧 Verifying EMAIL OTP');
       } else {
         verifyParams = {
           phone: pendingVerification.contact,
@@ -339,6 +326,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           type: 'sms' as const
         };
         console.log('📱 Verifying SMS OTP (6-digit code)');
+        console.log('📱 Verifying SMS OTP');
       }
       
       const { error, data } = await supabase.auth.verifyOtp(verifyParams);
@@ -349,7 +337,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data?.user) {
-        console.log('✅ 6-DIGIT OTP VERIFICATION SUCCESSFUL!');
+        console.log('✅ OTP VERIFICATION SUCCESSFUL!');
         setPendingVerification(null);
         return true;
       }

@@ -41,13 +41,13 @@ const Auth = () => {
             className="w-16 h-16 mx-auto mb-4"
           />
           <h1 className="text-4xl font-bold cave-font mb-2">Join Tribes</h1>
-          <p className="text-lg opacity-90">Authenticate with OTP codes</p>
+          <p className="text-lg opacity-90">Authenticate with 6-digit OTP codes</p>
         </div>
 
         <Tabs defaultValue="auth" className="w-full max-w-4xl mx-auto">
           <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="auth">Authentication</TabsTrigger>
-            <TabsTrigger value="test">OTP Tester</TabsTrigger>
+            <TabsTrigger value="test">Test OTP System</TabsTrigger>
           </TabsList>
 
           <TabsContent value="auth">

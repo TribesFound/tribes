@@ -59,6 +59,23 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (Authentication & Database)
+- 6-digit OTP Authentication (Email & SMS)
+
+## Authentication System
+
+This app uses a secure 6-digit OTP authentication system:
+
+- **Email OTP**: Users receive a 6-digit code via email
+- **SMS OTP**: Users receive a 6-digit code via SMS (Twilio integration)
+- **No Magic Links**: Only OTP codes are used for verification
+- **Secure Verification**: Uses Supabase auth.signInWithOtp() and auth.verifyOtp()
+
+### Supabase Configuration Required
+
+1. **Email Templates**: Update email templates to use `{{ .Token }}` instead of `{{ .ConfirmationURL }}`
+2. **Phone Provider**: Enable Twilio as SMS provider in Supabase Authentication settings
+3. **OTP Settings**: Ensure OTP is enabled for both email and phone authentication
 
 ## How can I deploy this project?
 

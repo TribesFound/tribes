@@ -20,17 +20,17 @@ const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     setIsLoading(true);
     
     try {
-      // Google auth is disabled - show error message
-      throw new Error('Google authentication is currently disabled. Please use email or phone verification.');
+      // Google auth is disabled - redirect to OTP authentication
+      throw new Error('Please use email or phone OTP verification instead.');
     } catch (error: any) {
-      console.error('Google sign in disabled:', error);
-      onError?.(error.message || 'Google sign in is not available');
+      console.error('Google sign in not available:', error);
+      onError?.(error.message || 'Use OTP authentication instead');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Return null to hide the component completely
+  // Component is hidden - OTP authentication is preferred
   return null;
 };
 

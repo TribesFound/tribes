@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,14 +26,14 @@ const OTPTester = () => {
     }
 
     setIsLoading(true);
-    addResult(`Testing EMAIL OTP for: ${email}`, 'info');
+    addResult(`Sending EMAIL OTP to: ${email}`, 'info');
     
     try {
       await sendVerificationCode(email, 'email');
-      addResult('EMAIL OTP test PASSED - 6-digit code should be sent (NOT magic link)', 'success');
+      addResult('EMAIL OTP SENT - 6-digit code delivered', 'success');
       addResult('Check your email for a 6-digit OTP code', 'info');
     } catch (error: any) {
-      addResult(`EMAIL OTP test FAILED: ${error.message}`, 'error');
+      addResult(`EMAIL OTP FAILED: ${error.message}`, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -47,14 +46,14 @@ const OTPTester = () => {
     }
 
     setIsLoading(true);
-    addResult(`Testing PHONE OTP for: ${phone}`, 'info');
+    addResult(`Sending PHONE OTP to: ${phone}`, 'info');
     
     try {
       await sendVerificationCode(phone, 'phone');
-      addResult('PHONE OTP test PASSED - 6-digit SMS code should be sent', 'success');
+      addResult('PHONE OTP SENT - 6-digit SMS code delivered', 'success');
       addResult('Check your phone for a 6-digit SMS code', 'info');
     } catch (error: any) {
-      addResult(`PHONE OTP test FAILED: ${error.message}`, 'error');
+      addResult(`PHONE OTP FAILED: ${error.message}`, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +110,7 @@ const OTPTester = () => {
               disabled={isLoading}
               className="w-full"
             >
-              Test Phone OTP (6-digits)
+              Test Phone OTP (SMS)
             </Button>
           </div>
         </div>
@@ -140,9 +139,9 @@ const OTPTester = () => {
         <div className="bg-blue-50 p-4 rounded-lg">
           <h4 className="font-medium text-blue-900 mb-2">Expected Results:</h4>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>✅ Email: You should receive a 6-digit OTP code (NOT a magic link)</li>
+            <li>✅ Email: You should receive a 6-digit OTP code in your email</li>
             <li>✅ Phone: You should receive a 6-digit SMS code</li>
-            <li>❌ If you receive a magic link for email, the configuration needs adjustment</li>
+            <li>⚠️ Make sure email templates use {{ .Token }} instead of {{ .ConfirmationURL }}</li>
           </ul>
         </div>
       </CardContent>

@@ -42,7 +42,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       const timer = setTimeout(() => {
         setStep('age');
         setError('');
-        console.log('✅ Verification successful - proceeding to age verification');
+        console.log('✅ Verification complete - proceeding to age verification');
       }, 1000);
       
       return () => clearTimeout(timer);
@@ -61,7 +61,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       }
       
       if (contactMethod === 'phone') {
-        // Enhanced phone validation
+        // Phone validation
         const cleanPhone = phone.replace(/\D/g, '');
         if (cleanPhone.length < 8) {
           throw new Error('Please enter a valid phone number with country code');
@@ -69,21 +69,21 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       }
       
       if (contactMethod === 'email') {
-        // Enhanced email validation
+        // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
           throw new Error('Please enter a valid email address');
         }
       }
       
-      console.log(`🚀 Testing ${contactMethod} OTP delivery...`);
+      console.log(`🚀 Sending ${contactMethod} OTP...`);
       await sendVerificationCode(contact, contactMethod);
       
       setOtpSentAt(new Date());
       setStep('verify');
-      console.log(`✅ ${contactMethod} OTP test successful - 6-digit code sent to ${contact}`);
+      console.log(`✅ ${contactMethod} OTP sent to ${contact}`);
     } catch (error: any) {
-      console.error('❌ OTP delivery test failed:', error);
+      console.error('❌ OTP delivery failed:', error);
       setError(error.message || `Failed to send ${contactMethod} verification code. Please try again.`);
     } finally {
       setIsVerifying(false);
@@ -96,14 +96,14 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
       setError('');
       
       try {
-        console.log(`🔍 Testing OTP verification for code: ${verificationCode}`);
+        console.log(`🔍 Verifying OTP code: ${verificationCode}`);
         const isValid = await verifyCode(verificationCode);
         if (isValid) {
           setIsCodeVerified(true);
-          console.log('✅ OTP verification test successful - 6-digit code verified');
+          console.log('✅ OTP verification successful');
         }
       } catch (error: any) {
-        console.error('❌ OTP verification test failed:', error);
+        console.error('❌ OTP verification failed:', error);
         setError(error.message || 'Invalid 6-digit verification code. Please try again.');
         setVerificationCode('');
       } finally {
@@ -265,7 +265,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     />
                     <p className="text-xs text-amber-600">
                       ✅ Supports: Australia, New Zealand, Thailand, EU, Americas, Middle East (exc. Israel), North Macedonia
-                    </p>
+                    Send 6-Digit Code
                   </div>
                 )}
 
@@ -399,7 +399,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                         Grant Location Access
                       </Button>
                     </>
-                  ) : (
+                        {isVerifying ? 'Sending 6-digit code...' : 'Enter the 6-digit code'}
                     <>
                       <div className="flex items-center justify-center space-x-2 text-green-600 mb-4">
                         <CheckCircle className="w-5 h-5" />
