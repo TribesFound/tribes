@@ -25,6 +25,8 @@ import PasswordChange from "./pages/PasswordChange";
 import Subscription from "./pages/Subscription";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import PrivacySettings from "./pages/PrivacySettings";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import SubscriptionCancel from "./pages/SubscriptionCancel";
 import Discover from "./pages/Discover";
 import Events from "./pages/Events";
 import EventSetup from "./pages/EventSetup";
@@ -63,6 +65,8 @@ const App = () => (
                   <Route path="/edit-profile" element={<EditProfile />} />
                   <Route path="/password-change" element={<PasswordChange />} />
                   <Route path="/subscription" element={<Subscription />} />
+                  <Route path="/subscription/success" element={<SubscriptionSuccess />} />
+                  <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
                   <Route path="/business-dashboard" element={<BusinessDashboard />} />
                   <Route path="/privacy-settings" element={<PrivacySettings />} />
                   <Route path="/discover" element={<Discover />} />

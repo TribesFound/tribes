@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Settings as SettingsIcon, Crown, Bell, Shield, Instagram, Phone, LogOut } from 'lucide-react';
+import SubscriptionManager from '@/components/SubscriptionManager';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -73,37 +74,7 @@ const Settings = () => {
           </Card>
 
           {/* Subscription */}
-          <Card className="tribal-card">
-            <CardHeader>
-              <CardTitle className="text-lg tribal-font text-amber-900 flex items-center justify-between">
-                <div className="flex items-center">
-                  <Crown className="w-5 h-5 mr-2" />
-                  Subscription
-                </div>
-                <Badge className={userSubscription.tier === 'Free' ? 'tribal-badge-outline' : 'tribal-badge'}>
-                  {userSubscription.tier}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {userSubscription.canUpgrade && (
-                <Button 
-                  onClick={() => navigate('/subscription')}
-                  className="w-full tribal-button"
-                >
-                  Upgrade to Premium
-                </Button>
-              )}
-              {userSubscription.tier !== 'Free' && (
-                <div className="text-sm text-amber-700 mt-2">
-                  <p>Next billing: January 20, 2024</p>
-                  <Button variant="ghost" className="text-red-600 hover:text-red-700 p-0">
-                    Cancel Subscription
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <SubscriptionManager />
 
           {/* Connected Accounts */}
           {userSubscription.tier !== 'Free' && (

@@ -61,6 +61,7 @@ This project is built with:
 - Tailwind CSS
 - Supabase (Authentication & Database)
 - 6-digit OTP Authentication (Email & SMS)
+- Stripe (Payment Processing)
 
 ## Authentication System
 
@@ -76,6 +77,36 @@ This app uses a secure 6-digit OTP authentication system:
 1. **Email Templates**: Update email templates to use `{{ .Token }}` instead of `{{ .ConfirmationURL }}`
 2. **Phone Provider**: Enable Twilio as SMS provider in Supabase Authentication settings
 3. **OTP Settings**: Ensure OTP is enabled for both email and phone authentication
+
+## Stripe Integration
+
+This app includes a complete Stripe payment system for subscription management:
+
+- **Subscription Plans**: Multiple tiers (Bloodline, Oracle, Inner Circle, Trade Guild, Trade Council)
+- **Secure Checkout**: Stripe Checkout integration with session management
+- **Subscription Management**: Customer portal for billing management
+- **Webhook Support**: Ready for Stripe webhook integration
+
+### Stripe Configuration Required
+
+1. **Environment Variables**: Add your Stripe keys to `.env`:
+   ```
+   VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key
+   ```
+
+2. **Price IDs**: Update `src/utils/stripeConfig.ts` with your actual Stripe Price IDs
+
+3. **Webhook Endpoints**: Configure webhooks in Stripe Dashboard for:
+   - `subscription.created`
+   - `subscription.updated` 
+   - `subscription.deleted`
+   - `payment.succeeded`
+   - `payment.failed`
+
+4. **Backend API**: Set up backend endpoints for:
+   - `/api/create-checkout-session`
+   - `/api/create-portal-session`
+   - `/api/webhooks/stripe/*`
 
 ## How can I deploy this project?
 

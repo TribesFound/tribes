@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import VerificationStep from '@/components/VerificationStep';
 import OTPTester from '@/components/OTPTester';
+import StripeTestCard from '@/components/StripeTestCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -45,9 +46,10 @@ const Auth = () => {
         </div>
 
         <Tabs defaultValue="auth" className="w-full max-w-4xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="auth">Authentication</TabsTrigger>
             <TabsTrigger value="test">Test OTP System</TabsTrigger>
+            <TabsTrigger value="stripe">Test Stripe</TabsTrigger>
           </TabsList>
 
           <TabsContent value="auth">
@@ -56,6 +58,10 @@ const Auth = () => {
 
           <TabsContent value="test">
             <OTPTester />
+          </TabsContent>
+
+          <TabsContent value="stripe">
+            <StripeTestCard />
           </TabsContent>
         </Tabs>
       </div>
