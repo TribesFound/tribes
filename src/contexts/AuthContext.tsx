@@ -165,87 +165,121 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Remove all non-digit characters first
     const cleanPhone = phone.replace(/\D/g, '');
     
+    // Remove leading '0' if present and phone doesn't start with '+' (national prefix removal)
+    let processedPhone = cleanPhone;
+    if (!phone.startsWith('+') && cleanPhone.startsWith('0') && !cleanPhone.startsWith('00')) {
+      processedPhone = cleanPhone.substring(1);
+    }
+    
     // If already formatted with +, clean and validate
     if (phone.startsWith('+')) {
       const withoutPlus = phone.substring(1).replace(/\D/g, '');
       return `+${withoutPlus}`;
     }
     
+    // Ensure minimum length for valid phone numbers
+    if (processedPhone.length < 7) {
+      throw new Error('Phone number too short');
+    }
+    
+    // Ensure maximum length for valid phone numbers (E.164 allows max 15 digits)
+    if (processedPhone.length > 15) {
+      throw new Error('Phone number too long');
+    }
+    
     // Country code detection and formatting
     // Check for 3-digit country codes first (longest match)
-    if (cleanPhone.startsWith('593')) return `+${cleanPhone}`; // Ecuador
-    if (cleanPhone.startsWith('598')) return `+${cleanPhone}`; // Uruguay
-    if (cleanPhone.startsWith('595')) return `+${cleanPhone}`; // Paraguay
-    if (cleanPhone.startsWith('591')) return `+${cleanPhone}`; // Bolivia
-    if (cleanPhone.startsWith('594')) return `+${cleanPhone}`; // French Guiana
-    if (cleanPhone.startsWith('597')) return `+${cleanPhone}`; // Suriname
-    if (cleanPhone.startsWith('592')) return `+${cleanPhone}`; // Guyana
-    if (cleanPhone.startsWith('358')) return `+${cleanPhone}`; // Finland
-    if (cleanPhone.startsWith('353')) return `+${cleanPhone}`; // Ireland
-    if (cleanPhone.startsWith('351')) return `+${cleanPhone}`; // Portugal
-    if (cleanPhone.startsWith('420')) return `+${cleanPhone}`; // Czech Republic
-    if (cleanPhone.startsWith('421')) return `+${cleanPhone}`; // Slovakia
-    if (cleanPhone.startsWith('359')) return `+${cleanPhone}`; // Bulgaria
-    if (cleanPhone.startsWith('385')) return `+${cleanPhone}`; // Croatia
-    if (cleanPhone.startsWith('386')) return `+${cleanPhone}`; // Slovenia
-    if (cleanPhone.startsWith('372')) return `+${cleanPhone}`; // Estonia
-    if (cleanPhone.startsWith('371') && cleanPhone.length >= 11) return `+${cleanPhone}`; // Latvia
-    if (cleanPhone.startsWith('370')) return `+${cleanPhone}`; // Lithuania
-    if (cleanPhone.startsWith('356')) return `+${cleanPhone}`; // Malta
-    if (cleanPhone.startsWith('357')) return `+${cleanPhone}`; // Cyprus
-    if (cleanPhone.startsWith('352')) return `+${cleanPhone}`; // Luxembourg
-    if (cleanPhone.startsWith('389')) return `+${cleanPhone}`; // North Macedonia
-    if (cleanPhone.startsWith('964')) return `+${cleanPhone}`; // Iraq
-    if (cleanPhone.startsWith('962')) return `+${cleanPhone}`; // Jordan
-    if (cleanPhone.startsWith('961')) return `+${cleanPhone}`; // Lebanon
-    if (cleanPhone.startsWith('963')) return `+${cleanPhone}`; // Syria
-    if (cleanPhone.startsWith('966')) return `+${cleanPhone}`; // Saudi Arabia
-    if (cleanPhone.startsWith('965')) return `+${cleanPhone}`; // Kuwait
-    if (cleanPhone.startsWith('973')) return `+${cleanPhone}`; // Bahrain
-    if (cleanPhone.startsWith('974')) return `+${cleanPhone}`; // Qatar
-    if (cleanPhone.startsWith('971')) return `+${cleanPhone}`; // UAE
-    if (cleanPhone.startsWith('968')) return `+${cleanPhone}`; // Oman
-    if (cleanPhone.startsWith('967')) return `+${cleanPhone}`; // Yemen
+    if (processedPhone.startsWith('593')) return `+${processedPhone}`; // Ecuador
+    if (processedPhone.startsWith('598')) return `+${processedPhone}`; // Uruguay
+    if (processedPhone.startsWith('595')) return `+${processedPhone}`; // Paraguay
+    if (processedPhone.startsWith('591')) return `+${processedPhone}`; // Bolivia
+    if (processedPhone.startsWith('594')) return `+${processedPhone}`; // French Guiana
+    if (processedPhone.startsWith('597')) return `+${processedPhone}`; // Suriname
+    if (processedPhone.startsWith('592')) return `+${processedPhone}`; // Guyana
+    if (processedPhone.startsWith('358')) return `+${processedPhone}`; // Finland
+    if (processedPhone.startsWith('353')) return `+${processedPhone}`; // Ireland
+    if (processedPhone.startsWith('351')) return `+${processedPhone}`; // Portugal
+    if (processedPhone.startsWith('420')) return `+${processedPhone}`; // Czech Republic
+    if (processedPhone.startsWith('421')) return `+${processedPhone}`; // Slovakia
+    if (processedPhone.startsWith('359')) return `+${processedPhone}`; // Bulgaria
+    if (processedPhone.startsWith('385')) return `+${processedPhone}`; // Croatia
+    if (processedPhone.startsWith('386')) return `+${processedPhone}`; // Slovenia
+    if (processedPhone.startsWith('372')) return `+${processedPhone}`; // Estonia
+    if (processedPhone.startsWith('371') && processedPhone.length >= 11) return `+${processedPhone}`; // Latvia
+    if (processedPhone.startsWith('370')) return `+${processedPhone}`; // Lithuania
+    if (processedPhone.startsWith('356')) return `+${processedPhone}`; // Malta
+    if (processedPhone.startsWith('357')) return `+${processedPhone}`; // Cyprus
+    if (processedPhone.startsWith('352')) return `+${processedPhone}`; // Luxembourg
+    if (processedPhone.startsWith('389')) return `+${processedPhone}`; // North Macedonia
+    if (processedPhone.startsWith('964')) return `+${processedPhone}`; // Iraq
+    if (processedPhone.startsWith('962')) return `+${processedPhone}`; // Jordan
+    if (processedPhone.startsWith('961')) return `+${processedPhone}`; // Lebanon
+    if (processedPhone.startsWith('963')) return `+${processedPhone}`; // Syria
+    if (processedPhone.startsWith('966')) return `+${processedPhone}`; // Saudi Arabia
+    if (processedPhone.startsWith('965')) return `+${processedPhone}`; // Kuwait
+    if (processedPhone.startsWith('973')) return `+${processedPhone}`; // Bahrain
+    if (processedPhone.startsWith('974')) return `+${processedPhone}`; // Qatar
+    if (processedPhone.startsWith('971')) return `+${processedPhone}`; // UAE
+    if (processedPhone.startsWith('968')) return `+${processedPhone}`; // Oman
+    if (processedPhone.startsWith('967')) return `+${processedPhone}`; // Yemen
     
     // Check for 2-digit country codes
-    if (cleanPhone.startsWith('61') && cleanPhone.length >= 10) return `+${cleanPhone}`; // Australia
-    if (cleanPhone.startsWith('64') && cleanPhone.length >= 9) return `+${cleanPhone}`; // New Zealand
-    if (cleanPhone.startsWith('66') && cleanPhone.length >= 9) return `+${cleanPhone}`; // Thailand
-    if (cleanPhone.startsWith('54')) return `+${cleanPhone}`; // Argentina
-    if (cleanPhone.startsWith('55')) return `+${cleanPhone}`; // Brazil
-    if (cleanPhone.startsWith('56')) return `+${cleanPhone}`; // Chile
-    if (cleanPhone.startsWith('57')) return `+${cleanPhone}`; // Colombia
-    if (cleanPhone.startsWith('58')) return `+${cleanPhone}`; // Venezuela
-    if (cleanPhone.startsWith('51')) return `+${cleanPhone}`; // Peru
-    if (cleanPhone.startsWith('33')) return `+${cleanPhone}`; // France
-    if (cleanPhone.startsWith('49')) return `+${cleanPhone}`; // Germany
-    if (cleanPhone.startsWith('39')) return `+${cleanPhone}`; // Italy
-    if (cleanPhone.startsWith('34')) return `+${cleanPhone}`; // Spain
-    if (cleanPhone.startsWith('31')) return `+${cleanPhone}`; // Netherlands
-    if (cleanPhone.startsWith('32')) return `+${cleanPhone}`; // Belgium
-    if (cleanPhone.startsWith('43')) return `+${cleanPhone}`; // Austria
-    if (cleanPhone.startsWith('41')) return `+${cleanPhone}`; // Switzerland
-    if (cleanPhone.startsWith('45')) return `+${cleanPhone}`; // Denmark
-    if (cleanPhone.startsWith('46')) return `+${cleanPhone}`; // Sweden
-    if (cleanPhone.startsWith('47')) return `+${cleanPhone}`; // Norway
-    if (cleanPhone.startsWith('30')) return `+${cleanPhone}`; // Greece
-    if (cleanPhone.startsWith('48')) return `+${cleanPhone}`; // Poland
-    if (cleanPhone.startsWith('36')) return `+${cleanPhone}`; // Hungary
-    if (cleanPhone.startsWith('40')) return `+${cleanPhone}`; // Romania
-    if (cleanPhone.startsWith('90')) return `+${cleanPhone}`; // Turkey
-    if (cleanPhone.startsWith('98')) return `+${cleanPhone}`; // Iran
-    if (cleanPhone.startsWith('93')) return `+${cleanPhone}`; // Afghanistan
-    if (cleanPhone.startsWith('92')) return `+${cleanPhone}`; // Pakistan
+    if (processedPhone.startsWith('61') && processedPhone.length >= 10) return `+${processedPhone}`; // Australia
+    if (processedPhone.startsWith('64') && processedPhone.length >= 9) return `+${processedPhone}`; // New Zealand
+    if (processedPhone.startsWith('66') && processedPhone.length >= 9) return `+${processedPhone}`; // Thailand
+    if (processedPhone.startsWith('86') && processedPhone.length >= 11) return `+${processedPhone}`; // China
+    if (processedPhone.startsWith('81') && processedPhone.length >= 10) return `+${processedPhone}`; // Japan
+    if (processedPhone.startsWith('82') && processedPhone.length >= 10) return `+${processedPhone}`; // South Korea
+    if (processedPhone.startsWith('91') && processedPhone.length >= 10) return `+${processedPhone}`; // India
+    if (processedPhone.startsWith('44') && processedPhone.length >= 10) return `+${processedPhone}`; // UK
+    if (processedPhone.startsWith('52') && processedPhone.length >= 10) return `+${processedPhone}`; // Mexico
+    if (processedPhone.startsWith('54')) return `+${processedPhone}`; // Argentina
+    if (processedPhone.startsWith('55')) return `+${processedPhone}`; // Brazil
+    if (processedPhone.startsWith('56')) return `+${processedPhone}`; // Chile
+    if (processedPhone.startsWith('57')) return `+${processedPhone}`; // Colombia
+    if (processedPhone.startsWith('58')) return `+${processedPhone}`; // Venezuela
+    if (processedPhone.startsWith('51')) return `+${processedPhone}`; // Peru
+    if (processedPhone.startsWith('33')) return `+${processedPhone}`; // France
+    if (processedPhone.startsWith('49')) return `+${processedPhone}`; // Germany
+    if (processedPhone.startsWith('39')) return `+${processedPhone}`; // Italy
+    if (processedPhone.startsWith('34')) return `+${processedPhone}`; // Spain
+    if (processedPhone.startsWith('31')) return `+${processedPhone}`; // Netherlands
+    if (processedPhone.startsWith('32')) return `+${processedPhone}`; // Belgium
+    if (processedPhone.startsWith('43')) return `+${processedPhone}`; // Austria
+    if (processedPhone.startsWith('41')) return `+${processedPhone}`; // Switzerland
+    if (processedPhone.startsWith('45')) return `+${processedPhone}`; // Denmark
+    if (processedPhone.startsWith('46')) return `+${processedPhone}`; // Sweden
+    if (processedPhone.startsWith('47')) return `+${processedPhone}`; // Norway
+    if (processedPhone.startsWith('30')) return `+${processedPhone}`; // Greece
+    if (processedPhone.startsWith('48')) return `+${processedPhone}`; // Poland
+    if (processedPhone.startsWith('36')) return `+${processedPhone}`; // Hungary
+    if (processedPhone.startsWith('40')) return `+${processedPhone}`; // Romania
+    if (processedPhone.startsWith('90')) return `+${processedPhone}`; // Turkey
+    if (processedPhone.startsWith('98')) return `+${processedPhone}`; // Iran
+    if (processedPhone.startsWith('93')) return `+${processedPhone}`; // Afghanistan
+    if (processedPhone.startsWith('92')) return `+${processedPhone}`; // Pakistan
+    if (processedPhone.startsWith('94')) return `+${processedPhone}`; // Sri Lanka
+    if (processedPhone.startsWith('95')) return `+${processedPhone}`; // Myanmar
+    if (processedPhone.startsWith('60')) return `+${processedPhone}`; // Malaysia
+    if (processedPhone.startsWith('65')) return `+${processedPhone}`; // Singapore
+    if (processedPhone.startsWith('63')) return `+${processedPhone}`; // Philippines
+    if (processedPhone.startsWith('62')) return `+${processedPhone}`; // Indonesia
+    if (processedPhone.startsWith('84')) return `+${processedPhone}`; // Vietnam
+    if (processedPhone.startsWith('85')) return `+${processedPhone}`; // Cambodia/Hong Kong
+    if (processedPhone.startsWith('88')) return `+${processedPhone}`; // Bangladesh
+    if (processedPhone.startsWith('20')) return `+${processedPhone}`; // Egypt
+    if (processedPhone.startsWith('27')) return `+${processedPhone}`; // South Africa
+    if (processedPhone.startsWith('7') && processedPhone.length >= 10) return `+${processedPhone}`; // Russia/Kazakhstan
     
     // Check for single digit (North America)
-    if (cleanPhone.startsWith('1')) return `+${cleanPhone}`;
+    if (processedPhone.startsWith('1')) return `+${processedPhone}`;
     
     // Default handling for unrecognized patterns
-    if (cleanPhone.length === 10) return `+1${cleanPhone}`; // Default to US/Canada
-    if (cleanPhone.length === 9) return `+61${cleanPhone}`; // Default to Australia mobile
+    if (processedPhone.length === 10) return `+1${processedPhone}`; // Default to US/Canada
+    if (processedPhone.length === 9) return `+61${processedPhone}`; // Default to Australia mobile
     
     // Return with + prefix for any other cases
-    return `+${cleanPhone}`;
+    return `+${processedPhone}`;
   };
 
   const sendVerificationCode = async (contact: string, method: 'email' | 'phone') => {
