@@ -141,7 +141,7 @@ const OTPTester = () => {
           <ul className="text-sm text-blue-800 space-y-1">
             <li>✅ Email: You should receive a 6-digit OTP code in your email</li>
             <li>✅ Phone: You should receive a 6-digit SMS code</li>
-            <li>⚠️ Make sure email templates use {{ .Token }} instead of {{ .ConfirmationURL }}</li>
+            <li>⚠️ Make sure email templates use {"{{ .Token }}"} instead of {"{{ .ConfirmationURL }}"}</li>
           </ul>
         </div>
       </CardContent>
