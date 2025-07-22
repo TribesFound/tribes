@@ -165,16 +165,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Remove all non-digit characters first
     const cleanPhone = phone.replace(/\D/g, '');
     
-    // Remove leading '0' if present and phone doesn't start with '+' (national prefix removal)
+    // Handle different input formats
     let processedPhone = cleanPhone;
-    if (!phone.startsWith('+') && cleanPhone.startsWith('0') && !cleanPhone.startsWith('00')) {
-      processedPhone = cleanPhone.substring(1);
-    }
     
     // If already formatted with +, clean and validate
     if (phone.startsWith('+')) {
       const withoutPlus = phone.substring(1).replace(/\D/g, '');
       return `+${withoutPlus}`;
+    }
+    
+    // Remove leading '0' if present (national prefix removal)
+    if (processedPhone.startsWith('0') && !processedPhone.startsWith('00')) {
+      processedPhone = processedPhone.substring(1);
     }
     
     // Ensure minimum length for valid phone numbers
@@ -282,22 +284,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return `+${processedPhone}`;
   };
 
-  const sendVerificationCode = async (contact: string, method: 'email' | 'phone') => {
+  const sendVerificationCode = async (contact: string, method: 'email' | 'phone' | 'whatsapp') => {
     try {
-      console.log(`🔄 Sending ${method} OTP to: ${contact}`);
+      console.log(`🔄 Sending ${method.toUpperCase()} OTP to: ${contact}`);
       
       if (method === 'email') {
-        console.log('📧 Sending EMAIL OTP (6-digit code)');
+        console.log('📧 Sending EMAIL OTP (6-digit code) - NO MAGIC LINK');
         
-        // Use signInWithOtp for email with OTP-only configuration
+        // Email OTP with explicit 6-digit code configuration
         const { data, error } = await supabase.auth.signInWithOtp({
           email: contact,
           options: {
             shouldCreateUser: true,
-            // Force OTP by explicitly setting emailRedirectTo to undefined
-            emailRedirectTo: undefined,
+            // Disable magic links completely
+            emailRedirectTo: null,
             data: {
-              verification_type: 'email_otp'
+              verification_type: 'email_otp',
+              otp_type: 'email'
             }
           }
         });
@@ -310,7 +313,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setPendingVerification({ contact, method, code: 'pending' });
         console.log(`✅ EMAIL OTP (6-digit code) sent to ${contact}`);
         
-      } else {
+      } else if (method === 'phone') {
         // Phone SMS OTP
         const formattedPhone = formatPhoneNumber(contact);
         console.log(`📱 Formatted phone: ${contact} -> ${formattedPhone}`);
@@ -318,6 +321,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { error } = await supabase.auth.signInWithOtp({
           phone: formattedPhone,
           options: {
+            channel: 'sms',
             shouldCreateUser: true,
           }
         });
@@ -329,6 +333,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setPendingVerification({ contact: formattedPhone, method, code: 'pending' });
         console.log(`✅ SMS OTP (6-digit code) sent to ${formattedPhone}`);
+        
+      } else if (method === 'whatsapp') {
+        // WhatsApp OTP
+        const formattedPhone = formatPhoneNumber(contact);
+        console.log(`📱 Formatted WhatsApp: ${contact} -> ${formattedPhone}`);
+        
+        const { error } = await supabase.auth.signInWithOtp({
+          phone: formattedPhone,
+          options: {
+            channel: 'whatsapp',
+            shouldCreateUser: true,
+          }
+        });
+        
+        if (error) {
+          console.error('❌ WhatsApp OTP error:', error);
+          throw error;
+        }
+        
+        setPendingVerification({ contact: formattedPhone, method, code: 'pending' });
+        console.log(`✅ WhatsApp OTP (6-digit code) sent to ${formattedPhone}`);
       }
     } catch (error: any) {
       console.error('❌ Failed to send verification code:', error);
@@ -353,14 +378,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           type: 'email' as const
         };
         console.log('📧 Verifying EMAIL OTP');
-      } else {
+      } else if (pendingVerification.method === 'phone' || pendingVerification.method === 'whatsapp') {
         verifyParams = {
           phone: pendingVerification.contact,
           token: code,
           type: 'sms' as const
         };
-        console.log('📱 Verifying SMS OTP (6-digit code)');
-        console.log('📱 Verifying SMS OTP');
+        console.log(`📱 Verifying ${pendingVerification.method.toUpperCase()} OTP (6-digit code)`);
       }
       
       const { error, data } = await supabase.auth.verifyOtp(verifyParams);

@@ -48,7 +48,7 @@ const Auth = () => {
         <Tabs defaultValue="auth" className="w-full max-w-4xl mx-auto">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="auth">Authentication</TabsTrigger>
-            <TabsTrigger value="test">Test OTP System</TabsTrigger>
+            <TabsTrigger value="test">Test OTP (Email/SMS/WhatsApp)</TabsTrigger>
             <TabsTrigger value="stripe">Test Stripe</TabsTrigger>
           </TabsList>
 
