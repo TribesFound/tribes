@@ -250,6 +250,7 @@ const VerificationStep = ({ onComplete }: VerificationStepProps) => {
                     <div className="text-xs opacity-75">6-digit code via WhatsApp</div>
                   </div>
                 </Button>
+              </div>
             )}
 
             {step === 'contact' && (
