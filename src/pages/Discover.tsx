@@ -10,7 +10,6 @@ import SwipeableCard from '@/components/SwipeableCard';
 import MatchPopup from '@/components/MatchPopup';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import TestRunner from '@/components/TestRunner';
 
 const Discover = () => {
   const navigate = useNavigate();
@@ -22,20 +21,12 @@ const Discover = () => {
     isOpen: false,
     matchedProfile: null as any
   });
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   useEffect(() => {
     // Load user's bonds from localStorage
     const bonds = JSON.parse(localStorage.getItem('user_bonds') || '[]');
     setUserBonds(bonds);
   }, []);
-
-  // Show diagnostics if user is not authenticated or if there are issues
-  useEffect(() => {
-    if (!isLoading && !user) {
-      setShowDiagnostics(true);
-    }
-  }, [user, isLoading]);
 
   const currentProfile = testProfiles[currentProfileIndex];
   
@@ -90,42 +81,6 @@ const Discover = () => {
   const handleCloseMatchPopup = () => {
     setMatchPopup({ isOpen: false, matchedProfile: null });
   };
-
-  // Show diagnostics overlay if needed
-  if (showDiagnostics) {
-    return (
-      <div className="min-h-screen cave-gradient p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold cave-font text-white mb-4">
-              🔧 System Diagnostics
-            </h1>
-            <p className="text-white/80">
-              Running comprehensive system checks...
-            </p>
-          </div>
-          
-          <TestRunner />
-          
-          <div className="text-center mt-8">
-            <Button
-              onClick={() => navigate('/auth')}
-              className="cave-button mr-4"
-            >
-              Go to Authentication
-            </Button>
-            <Button
-              onClick={() => setShowDiagnostics(false)}
-              variant="outline"
-              className="cave-button-outline"
-            >
-              Hide Diagnostics
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (
@@ -232,18 +187,6 @@ const Discover = () => {
           <Badge className="cave-badge">
             {currentProfileIndex + 1} of {testProfiles.length}
           </Badge>
-        </div>
-
-        {/* Debug Controls */}
-        <div className="text-center mt-4">
-          <Button
-            onClick={() => setShowDiagnostics(true)}
-            variant="ghost"
-            size="sm"
-            className="text-white/70 hover:text-white"
-          >
-            Show Diagnostics
-          </Button>
         </div>
       </div>
 
