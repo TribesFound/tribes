@@ -58,3 +58,4 @@ export const redirectToCheckout = async (sessionId: string | null) => {
   if (error) {
     throw error;
   }
+}
