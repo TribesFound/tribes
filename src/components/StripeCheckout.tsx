@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Star, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { createCheckoutSession, redirectToCheckout, STRIPE_PRICES } from '@/lib/stripe';
+import { useStripe } from '@/hooks/useStripe';
+import { STRIPE_PRICES } from '@/lib/stripe';
 
 interface SubscriptionPlan {
   id: string;
@@ -24,6 +25,7 @@ interface SubscriptionPlan {
 const StripeCheckout: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { createSubscription, isLoading } = useStripe();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const subscriptionPlans: SubscriptionPlan[] = [
@@ -125,30 +127,13 @@ const StripeCheckout: React.FC = () => {
   ];
 
   const handleSubscribe = async (plan: SubscriptionPlan) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to subscribe to a plan",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setLoadingPlan(plan.id);
 
     try {
-      // Create checkout session
-      const sessionId = await createCheckoutSession(plan.priceId, user.id);
-      
-      // Redirect to Stripe Checkout
-      await redirectToCheckout(sessionId);
+      await createSubscription(plan.priceId);
     } catch (error: any) {
       console.error('Subscription error:', error);
-      toast({
-        title: "Subscription failed",
-        description: error.message || "Failed to start subscription process. Please try again.",
-        variant: "destructive"
-      });
+      // Error handling is done in useStripe hook
     } finally {
       setLoadingPlan(null);
     }
@@ -217,10 +202,10 @@ const StripeCheckout: React.FC = () => {
                 
                 <Button 
                   onClick={() => handleSubscribe(plan)}
-                  disabled={loadingPlan === plan.id || user?.subscriptionTier === plan.name}
+                  disabled={loadingPlan === plan.id || isLoading || user?.subscriptionTier === plan.name}
                   className="w-full cave-button"
                 >
-                  {loadingPlan === plan.id ? (
+                  {(loadingPlan === plan.id || isLoading) ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Processing...
@@ -274,10 +259,10 @@ const StripeCheckout: React.FC = () => {
                 
                 <Button 
                   onClick={() => handleSubscribe(plan)}
-                  disabled={loadingPlan === plan.id || user?.subscriptionTier === plan.name}
+                  disabled={loadingPlan === plan.id || isLoading || user?.subscriptionTier === plan.name}
                   className="w-full cave-button"
                 >
-                  {loadingPlan === plan.id ? (
+                  {(loadingPlan === plan.id || isLoading) ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Processing...

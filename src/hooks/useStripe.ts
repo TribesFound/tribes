@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+import { stripePromise, createCheckoutSession, redirectToCheckout } from '@/lib/stripe';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_key_here');
 
 export const useStripe = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,46 +18,26 @@ export const useStripe = () => {
       return;
     }
 
+    if (!user.email) {
+      toast({
+        title: "Email required",
+        description: "Please ensure your email is verified",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Create checkout session
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priceId,
-          userId: user.id,
-          userEmail: user.email,
-          successUrl: `${window.location.origin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/subscription/cancel`,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const { sessionId } = await response.json();
-
-      // Redirect to Stripe Checkout
-      const stripe = await stripePromise;
-      if (!stripe) {
-        throw new Error('Stripe failed to load');
-      }
-
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-      if (error) {
-        throw error;
-      }
+      const sessionId = await createCheckoutSession(priceId, user.id, user.email);
+      await redirectToCheckout(sessionId);
 
     } catch (error: any) {
       console.error('Subscription error:', error);
       toast({
         title: "Subscription failed",
-        description: error.message || "Failed to start subscription process",
+        description: error.message || "Failed to start subscription process. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -84,9 +62,11 @@ export const useStripe = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({
           userId: user.id,
+          userEmail: user.email,
           returnUrl: `${window.location.origin}/subscription`,
         }),
       });
@@ -115,4 +95,3 @@ export const useStripe = () => {
     createPortalSession,
     isLoading
   };
-};
